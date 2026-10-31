@@ -182,7 +182,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.9 (31/10/2026)';
+var APP_VER='1.10 (31/10/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -756,8 +756,9 @@ function pgHelp(){
   return sec('Ghi thu chi',['Tab <b>Nhập vào</b>: bấm <b>+</b> (thu) hoặc <b>−</b> (chi), bấm ô số tiền để mở bàn phím tính (có + − × ÷, nút 000), chọn danh mục, ghi chú nếu cần rồi bấm Lưu.','Đổi ngày bằng ô ngày; chọn ngày/tháng/năm trong hộp hiện ra.','Sửa hoặc xóa: tab <b>Lịch</b> → bấm vào khoản.'])
   +sec('Xem lại',['<b>Lịch</b>: ô ngày có + (có thu), − (có chi) và tổng tiền ngày đó.','<b>Báo cáo</b>: xem theo Tháng / Năm / Toàn kì; bấm một danh mục để xem các khoản. Nút 📷 xuất ảnh báo cáo.','<b>Ngân sách</b>: bấm vào mục để đặt hạn mức mỗi tháng.','<b>Khác → Danh mục thu chi</b>: thêm, sửa, xóa, sắp xếp danh mục.'])
   +sec('Tài sản (cuối tab Báo cáo)',['<b>Vàng</b>: chỉ là ô ghi chú.','<b>Chứng chỉ quỹ</b>: nhập mã, số lượng, giá mua, ngày mua. Bấm vào mã để xem lời/lỗ, thời gian giữ và nhật ký giao dịch.','Giá gần nhất tự lấy từ fmarket khi đã bật đồng bộ; chưa lấy được thì nhập giá tay khi sửa mã quỹ.'])
-  +sec('Dữ liệu và sao lưu (quan trọng)',['Dữ liệu nằm trong máy này. <b>Không xóa biểu tượng trên màn hình chính</b> vì sẽ mất dữ liệu chưa sao lưu.','<b>Khác → Sao lưu dữ liệu</b>: xuất file JSON lưu vào Tệp/iCloud. Nên sao lưu ít nhất mỗi tuần; chọn Tự động để app nhắc.','Nhập file sao lưu sẽ gộp vào dữ liệu hiện có, không xóa gì.','Đổi sang máy mới: nhập file JSON, hoặc bật đồng bộ Google Sheets.'])
-  +sec('Đồng bộ iPhone và iPad',['<b>Khác → Đồng bộ Google Sheets</b>: nhập địa chỉ Apps Script và mã bí mật giống nhau trên cả hai máy.','Góc trên phải báo tình trạng: ☁ Đã lưu, ⏳ Chờ gửi, ⚠ lỗi. Mất mạng thì app tự gửi lại khi có mạng.','Cập nhật Code.gs bằng <b>Phiên bản mới</b>, không chọn Triển khai mới.']);
+  +sec('Sao lưu JSON là gì? (quan trọng)',['Là một file lưu <b>toàn bộ dữ liệu bạn đã nhập</b>: các khoản thu chi, danh mục, ngân sách, ghi chú vàng, mã chứng chỉ quỹ và nhật ký giao dịch.','Không gồm cài đặt tên app, tên máy, địa chỉ và mã bí mật đồng bộ, giá quỹ tự lấy (app lấy lại khi cần).','Dữ liệu nằm trong máy này. Mất máy, xóa Safari hoặc <b>xóa biểu tượng trên màn hình chính</b> là mất dữ liệu nếu chưa sao lưu.','<b>Khác → Sao lưu dữ liệu</b>: xuất file lưu vào Tệp/iCloud hoặc gửi cho chính mình. Nên làm ít nhất mỗi tuần; chọn Tự động để app nhắc.','Nhập file vào lại sẽ <b>gộp</b> với dữ liệu hiện có, không xóa gì. Đổi sang máy mới thì nhập file này.'])
+  +sec('Đồng bộ Google Sheets là gì?',['Là tự động gửi dữ liệu (cùng loại như file JSON) lên một bảng Google Sheets của bạn, và nhận lại thay đổi từ máy kia. Dùng để <b>iPhone và iPad luôn giống nhau</b>, không cần xuất nhập file.','Đồng thời bảng Sheets là nơi lưu dự phòng thứ hai: có các tab dễ đọc (Thu chi, Danh mục, Tài sản…) và bản sao lưu mỗi ngày giữ 30 ngày.','Cách bật: <b>Khác → Đồng bộ Google Sheets</b>, nhập địa chỉ Apps Script và mã bí mật, hai máy dùng giống nhau.','Góc trên phải báo tình trạng: ☁ Đã lưu, ⏳ Chờ gửi, ⚠ lỗi. Mất mạng thì app tự gửi lại khi có mạng.','Đồng bộ cũng là cách để app tự lấy giá chứng chỉ quỹ. Cập nhật Code.gs bằng <b>Phiên bản mới</b>, không chọn Triển khai mới.'])
+  +sec('Sao lưu JSON và đồng bộ khác nhau thế nào?',['<b>Đồng bộ</b>: tự động, giữ hai máy khớp nhau, nhưng xóa nhầm ở máy này sẽ lan sang máy kia.','<b>File JSON</b>: bạn tự giữ, lùi lại được về một ngày cũ. Nên dùng cả hai.']);
 }
 function checkAuto(){
   var m=L.auto;if(m!=='day'&&m!=='week')return;

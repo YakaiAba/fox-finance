@@ -124,7 +124,7 @@ textarea.nt{display:block;width:100%;resize:vertical;line-height:1.35}
 .warn{background:#fdecea;color:var(--chi);border-radius:10px;padding:10px;margin-bottom:12px;font-size:14px}
 .ok{background:#e8f5e9;color:var(--thu);border-radius:10px;padding:10px;margin-bottom:12px;font-size:14px}
 .mut{color:var(--mut);font-size:13px}
-.empty{text-align:center;color:var(--mut);padding:24px 0}
+.empty{text-align:center;color:var(--mut);padding:8px 0;font-size:13px}
 .inp{width:100%;border:1px solid #cfd3da;border-radius:10px;padding:10px;background:#fff}
 label.l{display:block;font-weight:600;margin:12px 0 4px;font-size:14px}
 .chips{display:flex;gap:6px;margin:8px 0}
@@ -187,7 +187,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.21 (31/10/2026)';
+var APP_VER='1.22 (31/10/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -340,7 +340,7 @@ function formHTML(st,edit,form){
   var cs=catsOf(st.type);
   if(!cs.find(function(c){return c.id===st.cat}))st.cat=cs[0]?cs[0].id:null;
   var chi=st.type==='chi';
-  var h='<div class="tg"><button data-f="type" data-v="thu" class="thu'+(chi?'':' on')+'" aria-label="Tiền thu">+</button><button data-f="type" data-v="chi" class="chi'+(chi?' on':'')+'" aria-label="Tiền chi">−</button></div>';
+  var h='<div class="seg"><button data-f="type" data-v="thu" class="thu'+(chi?'':' on')+'">Thu nhập</button><button data-f="type" data-v="chi" class="chi'+(chi?' on':'')+'">Chi tiêu</button></div>';
   h+='<div class="row"><b>Ngày</b><button class="arr" data-f="dm">‹</button><button class="fld" data-f="date">'+dlabel(st.date)+'</button><button class="arr" data-f="dp">›</button></div>';
   h+='<div class="row"><b>'+(chi?'Tiền chi':'Tiền thu')+'</b><button class="fld big" data-f="amt">'+exprText(st.expr)+'</button><span>đ</span></div>';
   h+='<div class="row"><b>Ghi chú</b><input class="nt" data-f="note" maxlength="60" placeholder="Chưa nhập vào" autocomplete="off" value="'+esc(st.note||'')+'"></div>';
@@ -460,8 +460,8 @@ function niceStep(v){var p=Math.pow(10,Math.floor(Math.log10(v))),f=v/p;return (
 function lineChart(pts,color,title){
   var W=358,H=200,pl=40,pr=10,pt=22,pb=26;
   var max=Math.max.apply(null,pts.map(function(p){return p.y}));
-  if(max<=0)return '<div class="empty">Chưa có dữ liệu để vẽ biểu đồ</div>';
-  if(pts.length<2)return '<div class="empty">Cần ít nhất 2 mốc thời gian để vẽ đường</div>';
+  if(max<=0)return '<div class="empty">Chưa có dữ liệu</div>';
+  if(pts.length<2)return '<div class="empty">Cần ít nhất 2 mốc thời gian</div>';
   var step=niceStep(max/4),top=step*Math.ceil(max/step),unit=top>=1e6?1e6:1e3,uname=unit===1e6?'triệu đồng':'nghìn đồng';
   function X(i){return pl+(W-pl-pr)*i/(pts.length-1)}
   function Y(v){return H-pb-(H-pt-pb)*v/top}
@@ -601,7 +601,7 @@ function assetsHTML(){
     if(val>0)h+='<div class="fr" style="'+GS+';cursor:default"><span><b>Tổng</b></span><span><b>'+fmt(val)+'đ</b></span><span></span><span></span></div>';
     if(np)h+='<div class="mut" style="margin-top:4px">'+np+' mã chưa có giá, không tính</div>';
     if(cost>0){var tp=val-cost,to=V.rep.openTotal;h+='<button class="fr'+(to?' on':'')+'" data-a="totaltoggle" style="grid-template-columns:auto 1fr;font-size:14px"><span>Tổng lời/lỗ<i class="ar">'+(to?'▴':'▾')+'</i></span><span style="text-align:right">'+plHTML(tp,(val/cost-1)*100)+'</span></button>'+(to?'<div class="fd">'+tl+'</div>':'')}
-  }else h+='<div class="empty" style="padding:14px 0">Chưa có mã quỹ nào</div>';
+  }else h+='<div class="empty">Chưa có mã quỹ nào</div>';
   h+='<div class="fbar"><button class="ghost" data-a="fundadd">+ Thêm mã quỹ</button>'+(fs.length?'<button class="ghost" data-a="navnow">'+(NAV.busy?'Đang lấy giá…':'↻ Cập nhật giá')+'</button>':'')+'</div>';
   if(fs.length){
     var st=L.navErr?'<span class="chi nerr">'+esc(L.navErr)+'</span>':(L.navOk?'Giá cập nhật lúc '+hhmm(L.navOk)+' '+dshort(ds(new Date(L.navOk).getFullYear(),new Date(L.navOk).getMonth()+1,new Date(L.navOk).getDate())):(S.url?'Chưa lấy giá':'Bật đồng bộ Google Sheets để tự lấy giá, hoặc nhập giá tay khi sửa mã quỹ'));
@@ -796,7 +796,7 @@ function pgBackup(){
 }
 function pgHelp(){
   function sec(t,l){return '<div class="card"><div class="ct">'+t+'</div>'+l.map(function(x){return '<div style="margin:5px 0">• '+x+'</div>'}).join('')+'</div>'}
-  return sec('Ghi thu chi',['Tab <b>Nhập vào</b>: bấm <b>+</b> (thu) hoặc <b>−</b> (chi), bấm ô số tiền để mở bàn phím tính (có + − × ÷, nút 000), chọn danh mục, ghi chú nếu cần rồi bấm Lưu.','Đổi ngày bằng ô ngày; chọn ngày/tháng/năm trong hộp hiện ra.','Sửa hoặc xóa: tab <b>Lịch</b> → bấm vào khoản.'])
+  return sec('Ghi thu chi',['Tab <b>Nhập vào</b>: bấm <b>Thu nhập</b> hoặc <b>Chi tiêu</b>, bấm ô số tiền để mở bàn phím tính (có + − × ÷, nút 000), chọn danh mục, ghi chú nếu cần rồi bấm Lưu.','Đổi ngày bằng ô ngày; chọn ngày/tháng/năm trong hộp hiện ra.','Sửa hoặc xóa: tab <b>Lịch</b> → bấm vào khoản.'])
   +sec('Xem lại',['<b>Lịch</b>: ô ngày có + (có thu), − (có chi) và tổng tiền ngày đó.','<b>Báo cáo</b>: xem theo Tháng / Năm / Toàn kì; bấm một danh mục để xem các khoản. Nút 📷 xuất ảnh báo cáo.','<b>Ngân sách</b>: bấm vào mục để đặt hạn mức mỗi tháng.','<b>Khác → Danh mục thu chi</b>: thêm, sửa, xóa, sắp xếp danh mục.'])
   +sec('Tài sản (cuối tab Báo cáo)',['<b>Vàng</b>: chỉ là ô ghi chú.','<b>Chứng chỉ quỹ</b>: nhập mã, số lượng, giá mua, ngày mua. Bấm vào mã để xem lời/lỗ, thời gian giữ và nhật ký giao dịch.','Giá gần nhất tự lấy từ fmarket khi đã bật đồng bộ; chưa lấy được thì nhập giá tay khi sửa mã quỹ.'])
   +sec('Sao lưu JSON là gì? (quan trọng)',['Là một file lưu <b>toàn bộ dữ liệu bạn đã nhập</b>: các khoản thu chi, danh mục, ngân sách, ghi chú vàng, mã chứng chỉ quỹ và nhật ký giao dịch.','Không gồm cài đặt tên app, tên máy, địa chỉ và mã bí mật đồng bộ, giá quỹ tự lấy (app lấy lại khi cần).','Dữ liệu nằm trong máy này. Mất máy, xóa Safari hoặc <b>xóa biểu tượng trên màn hình chính</b> là mất dữ liệu nếu chưa sao lưu.','<b>Khác → Sao lưu dữ liệu</b>: xuất file lưu vào Tệp/iCloud hoặc gửi cho chính mình. Nên làm ít nhất mỗi tuần; chọn Tự động để app nhắc.','Nhập file vào lại sẽ <b>gộp</b> với dữ liệu hiện có, không xóa gì. Đổi sang máy mới thì nhập file này.'])

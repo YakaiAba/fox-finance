@@ -201,7 +201,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.30 (31/10/2026)';
+var APP_VER='1.32 (31/10/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -433,7 +433,7 @@ function navHTML(label,sub,pa,na,pick){
 function monthSub(y,m){return '(01/'+pad(m)+' – '+dim(y,m)+'/'+pad(m)+')'}
 
 /* Lịch */
-/* Đếm ngược */
+/* Nhắc nhở */
 function jdFromDate(dd,mm,yy){var a=Math.floor((14-mm)/12),y=yy+4800-a,m=mm+12*a-3;return dd+Math.floor((153*m+2)/5)+365*y+Math.floor(y/4)-Math.floor(y/100)+Math.floor(y/400)-32045}
 function jdToDate(jd){var a=jd+32044,b=Math.floor((4*a+3)/146097),c=a-Math.floor(b*146097/4),d=Math.floor((4*c+3)/1461),e=c-Math.floor(1461*d/4),m=Math.floor((5*e+2)/153);return [e-Math.floor((153*m+2)/5)+1,m+3-12*Math.floor(m/10),b*100+d-4800+Math.floor(m/10)]}
 function newMoon(k){
@@ -482,11 +482,15 @@ function remInfo(sd){
   var d=Math.round((tb-cand)/864e5);
   return {days:days,txt:m+' tháng'+(d?' '+d+' ngày':''),sub:days+' ngày'};
 }
+function repKind(c){var r=c.rep;return r===1||r==='y'?'y':(r==='m'||r==='w'?r:'')}
+var REPN={w:'tuần',m:'tháng',y:'năm'};
 function cdDate(c){
-  if(!c.rep)return c.date;
+  var k=repKind(c);if(!k)return c.date;
   var t=today();if(c.date>=t)return c.date;
-  var a=parse(c.date),b=parse(t),y=b.y,d=ds(y,a.m,Math.min(a.d,dim(y,a.m)));
-  if(d<t){y++;d=ds(y,a.m,Math.min(a.d,dim(y,a.m)))}
+  var a=parse(c.date),b=parse(t),d,y,m;
+  if(k==='w'){var n=Math.round((new Date(b.y,b.m-1,b.d)-new Date(a.y,a.m-1,a.d))/864e5);return addDays(c.date,Math.ceil(n/7)*7)}
+  if(k==='m'){y=b.y;m=b.m;d=ds(y,m,Math.min(a.d,dim(y,m)));if(d<t){m++;if(m>12){m=1;y++}d=ds(y,m,Math.min(a.d,dim(y,m)))}return d}
+  y=b.y;d=ds(y,a.m,Math.min(a.d,dim(y,a.m)));if(d<t){y++;d=ds(y,a.m,Math.min(a.d,dim(y,a.m)))}
   return d;
 }
 function cds(){
@@ -496,10 +500,10 @@ function cds(){
   return up.concat(ps);
 }
 function cdHTML(){
-  var list=cds(),h='<div class="card" style="margin-top:12px"><div class="ct">Danh sách đếm ngược</div>';
+  var list=cds(),h='<div class="card" style="margin-top:12px"><div class="ct">Danh sách nhắc nhở</div>';
   if(list.length)h+=list.map(function(c){
     var cd=cdDate(c),r=remInfo(cd);
-    return '<button class="cdr'+(r.cls==='past'?' past':'')+'" data-a="cdedit" data-id="'+c.id+'"><span class="nm">'+esc(c.name)+(c.rep?' <i class="ar" title="Lặp lại hằng năm">🔁</i>':'')+'<small>'+dlabel(cd)+'</small></span><span class="rm'+(r.cls==='now'?' thu':'')+'">'+(r.cls?'':'<small>Còn lại</small>')+r.txt+(r.sub?'<small>('+r.sub+')</small>':'')+'</span></button>';
+    return '<button class="cdr'+(r.cls==='past'?' past':'')+'" data-a="cdedit" data-id="'+c.id+'"><span class="nm">'+esc(c.name)+(repKind(c)?' <i class="ar">🔁</i>':'')+'<small>'+dlabel(cd)+(repKind(c)?' · Nhắc lại mỗi '+REPN[repKind(c)]:'')+'</small></span><span class="rm'+(r.cls==='now'?' thu':'')+'">'+(r.cls?'':'<small>Còn lại</small>')+r.txt+(r.sub?'<small>('+r.sub+')</small>':'')+'</span></button>';
   }).join('');
   else h+='<div class="empty">Chưa có ngày nào</div>';
   return h+'<div class="fbar"><button class="ghost" data-a="cdsug">+ Ngày lễ gợi ý</button><button class="ghost" data-a="cdadd">+ Tạo thủ công</button></div></div>';
@@ -531,7 +535,7 @@ function calHTML(){
 
 /* Báo cáo */
 function inP(e){var r=V.rep;if(r.mode==='all')return true;if(r.mode==='y')return e.date.slice(0,4)===String(r.y);return e.date.slice(0,7)===r.y+'-'+pad(r.m)}
-function periodLabel(){var r=V.rep;if(r.mode==='m')return [pad(r.m)+'/'+r.y,monthSub(r.y,r.m)];if(r.mode==='y')return ['Năm '+r.y,''];return ['Toàn kì','']}
+function periodLabel(){var r=V.rep;if(r.mode==='m')return [pad(r.m)+'/'+r.y,monthSub(r.y,r.m)];if(r.mode==='y')return ['Năm '+r.y,''];return ['Tất cả','']}
 function series(type){
   var r=V.rep,es=E().filter(function(e){return e.type===type&&inP(e)}),pts=[],i;
   if(r.mode==='m'){for(i=1;i<=dim(r.y,r.m);i++)pts.push({x:String(i),y:0});es.forEach(function(e){pts[parse(e.date).d-1].y+=e.amount});return {pts:pts,by:'ngày'}}
@@ -577,7 +581,7 @@ function donut(g){
 }
 function repHTML(){
   var r=V.rep,lb=periodLabel();
-  var h='<div style="display:flex;gap:8px;align-items:flex-start"><div class="seg" style="flex:1;margin:0 0 12px;max-width:none"><button data-a="repmode" data-v="m" class="'+(r.mode==='m'?'on':'')+'">Tháng</button><button data-a="repmode" data-v="y" class="'+(r.mode==='y'?'on':'')+'">Năm</button><button data-a="repmode" data-v="all" class="'+(r.mode==='all'?'on':'')+'">Toàn kì</button></div><button class="arr" data-a="repimg" aria-label="Xuất ảnh báo cáo" style="font-size:22px">📷</button></div>';
+  var h='<div style="display:flex;gap:8px;align-items:flex-start"><div class="seg" style="flex:1;margin:0 0 12px;max-width:none"><button data-a="repmode" data-v="m" class="'+(r.mode==='m'?'on':'')+'">Tháng</button><button data-a="repmode" data-v="y" class="'+(r.mode==='y'?'on':'')+'">Năm</button><button data-a="repmode" data-v="all" class="'+(r.mode==='all'?'on':'')+'">Tất cả</button></div><button class="arr" data-a="repimg" aria-label="Xuất ảnh báo cáo" style="font-size:22px">📷</button></div>';
   if(r.mode!=='all')h+=navHTML(lb[0],lb[1],'repprev','repnext');
   var ch=groups('chi').total,th=groups('thu').total;
   h+='<div class="sum"><div>Thu nhập<b class="thu">+'+money(th)+'</b></div><div>Chi tiêu<b class="chi">-'+money(ch)+'</b></div><div>Thu chi<b>'+(th-ch>=0?'+':'-')+money(Math.abs(th-ch))+'</b></div></div>';
@@ -753,7 +757,7 @@ function refreshAssets(){
   el.innerHTML=assetsHTML();
 }
 var NAV={busy:false};
-var DEFAULT_PRICE_URL='';
+var DEFAULT_PRICE_URL='https://script.google.com/macros/s/AKfycbxSazXJQDlCi5Ed54bmyDSpIkdHs7STCyIgWUOq_-C9T-TXC4upMuRW3_Ximydat61R/exec';
 function priceUrl(){return DEFAULT_PRICE_URL}
 function priceReqUrl(codes){var u=priceUrl();return u+(u.indexOf('?')<0?'?':'&')+'codes='+encodeURIComponent(codes.join(','))}
 function autoNav(){
@@ -839,7 +843,7 @@ function moreHTML(){
 }
 
 /* ---------- trang riêng ---------- */
-var PTITLE={edit:'Chỉnh sửa',cats:'Danh mục thu chi',basic:'Cài đặt cơ bản',sync:'Đồng bộ Google Sheets',balance:'Báo cáo thay đổi số dư',search:'Tìm kiếm giao dịch',backup:'Sao lưu dữ liệu',about:'Thông tin ứng dụng',catlist:'Chi tiết danh mục',fund:'Mã quỹ',watch:'Chờ đợi giá',cd:'Đếm ngược',cdsug:'Ngày lễ gợi ý',help:'Hướng dẫn sử dụng'};
+var PTITLE={edit:'Chỉnh sửa',cats:'Danh mục thu chi',basic:'Cài đặt cơ bản',sync:'Đồng bộ Google Sheets',balance:'Báo cáo thay đổi số dư',search:'Tìm kiếm giao dịch',backup:'Sao lưu dữ liệu',about:'Thông tin ứng dụng',catlist:'Chi tiết danh mục',fund:'Mã quỹ',watch:'Chờ đợi giá',cd:'Nhắc nhở',cdsug:'Ngày lễ gợi ý',help:'Hướng dẫn sử dụng'};
 function openPage(name,arg){
   if(name==='edit'){
     var e=D.entries.find(function(x){return x.id===arg});if(!e)return;
@@ -851,7 +855,7 @@ function openPage(name,arg){
   }
   if(name==='cd'){
     var co=arg&&D.assets.find(function(x){return x.id===arg});
-    cdSt=co?{id:co.id,name:co.name,date:co.date,rep:co.rep?1:0}:{id:null,name:'',date:today(),rep:0};
+    cdSt=co?{id:co.id,name:co.name,date:co.date,rep:repKind(co)}:{id:null,name:'',date:today(),rep:''};
   }
   if(name==='cdsug')cdY=new Date().getFullYear();
   if(name==='watch'){
@@ -874,7 +878,7 @@ function closePage(){
 var SETP={basic:1,sync:1,cats:1,catlist:0,backup:1};
 function renderPage(){
   var p=pages[pages.length-1];if(!p)return;
-  $('#ptt').textContent=p.name==='catlist'?cat(p.arg).name:p.name==='fund'?(fundSt.id?'Sửa mã quỹ':'Thêm mã quỹ'):p.name==='watch'?(watchSt.id?'Sửa mã chờ giá':'Thêm mã chờ giá'):p.name==='cd'?(cdSt.id?'Sửa đếm ngược':'Thêm đếm ngược'):PTITLE[p.name];
+  $('#ptt').textContent=p.name==='catlist'?cat(p.arg).name:p.name==='fund'?(fundSt.id?'Sửa mã quỹ':'Thêm mã quỹ'):p.name==='watch'?(watchSt.id?'Sửa mã chờ giá':'Thêm mã chờ giá'):p.name==='cd'?(cdSt.id?'Sửa nhắc nhở':'Thêm nhắc nhở'):PTITLE[p.name];
   $('#pexit').textContent=SETP[p.name]?'Lưu lại & Thoát':'Thoát';
   var b=$('#pbody'),top=b.scrollTop;
   var fn={edit:pgEdit,cats:pgCats,basic:pgBasic,sync:pgSync,balance:pgBalance,search:pgSearch,backup:pgBackup,about:pgAbout,catlist:pgCatList,fund:pgFund,watch:pgWatch,cd:pgCd,cdsug:pgCdSug,help:pgHelp}[p.name];
@@ -953,9 +957,9 @@ function pgBackup(){
 function pgHelp(){
   function sec(t,l){return '<div class="card"><div class="ct">'+t+'</div>'+l.map(function(x){return '<div style="margin:5px 0">• '+x+'</div>'}).join('')+'</div>'}
   return sec('Ghi thu chi',['Tab <b>Nhập vào</b>: bấm <b>Thu nhập</b> hoặc <b>Chi tiêu</b>, bấm ô số tiền để mở bàn phím tính (có + − × ÷, nút 000), chọn danh mục, ghi chú nếu cần rồi bấm Lưu.','Đổi ngày bằng ô ngày; chọn ngày/tháng/năm trong hộp hiện ra.','Sửa hoặc xóa: tab <b>Lịch</b> → bấm vào khoản.'])
-  +sec('Xem lại',['<b>Lịch</b>: ô ngày có + (có thu), − (có chi) và tổng tiền ngày đó.','<b>Danh sách đếm ngược</b> (dưới lịch): bấm <b>+ Ngày lễ gợi ý</b> để thêm các ngày lễ còn lại trong năm (âm lịch tự quy đổi), hoặc <b>+ Tạo thủ công</b> cho sinh nhật, kỷ niệm… (bật <b>Lặp lại hằng năm</b> thì app tự tính lần kế tiếp) “Còn lại” hiện số ngày, từ 1 tháng trở lên hiện dạng tháng + ngày. Bấm vào dòng để sửa hoặc xóa.','<b>Báo cáo</b>: xem theo Tháng / Năm / Toàn kì; bấm một danh mục để xem các khoản. Nút 📷 xuất ảnh báo cáo.','<b>Ngân sách</b>: bấm vào mục để đặt hạn mức mỗi tháng.','<b>Khác → Danh mục thu chi</b>: thêm, sửa, xóa, sắp xếp danh mục.'])
+  +sec('Xem lại',['<b>Lịch</b>: ô ngày có + (có thu), − (có chi) và tổng tiền ngày đó.','<b>Danh sách nhắc nhở</b> (dưới lịch): bấm <b>+ Ngày lễ gợi ý</b> để thêm các ngày lễ còn lại trong năm (âm lịch tự quy đổi), hoặc <b>+ Tạo thủ công</b> cho sinh nhật, kỷ niệm… (chọn <b>Nhắc lại</b> mỗi tuần, tháng hoặc năm thì app tự tính lần kế tiếp) “Còn lại” hiện số ngày, từ 1 tháng trở lên hiện dạng tháng + ngày. Bấm vào dòng để sửa hoặc xóa.','<b>Báo cáo</b>: xem theo Tháng / Năm / Tất cả; bấm một danh mục để xem các khoản. Nút 📷 xuất ảnh báo cáo.','<b>Ngân sách</b>: bấm vào mục để đặt hạn mức mỗi tháng.','<b>Khác → Danh mục thu chi</b>: thêm, sửa, xóa, sắp xếp danh mục.'])
   +sec('Tài sản (cuối tab Báo cáo)',['<b>Vàng</b>: chỉ là ô ghi chú.','<b>Chứng chỉ quỹ</b>: nhập mã, số lượng, giá mua, ngày mua. Bấm vào mã để xem lời/lỗ, thời gian giữ và nhật ký giao dịch.','<b>Chờ đợi giá</b> (dưới dòng giá cập nhật): thêm mã quỹ bạn quan tâm, nhập giá đối chiếu và kỳ vọng (giảm hoặc tăng, tính bằng đ hoặc %). Cột Hiện tại cho biết giá gần nhất và tỉ lệ % so với giá đối chiếu (âm hiện đỏ). Bấm vào dòng để xem thêm <b>Còn lại</b>: giá gần nhất còn cách điểm kỳ vọng bao nhiêu; 🔔 hiện khi đã chạm điểm kỳ vọng, và app hiện hộp nhắc khi bạn mở app (mỗi mã một lần mỗi ngày). iOS không cho web báo ngầm khi app đóng.','Giá gần nhất tự lấy từ fmarket (khi mở app hoặc bấm ↻ Cập nhật giá); chưa lấy được thì nhập giá tay khi sửa mã quỹ.'])
-  +sec('Sao lưu JSON là gì? (quan trọng)',['Là một file lưu <b>toàn bộ dữ liệu bạn đã nhập</b>: các khoản thu chi, danh mục, ngân sách, ghi chú vàng, mã chứng chỉ quỹ, nhật ký giao dịch danh sách chờ đợi giá và danh sách đếm ngược.','Không gồm cài đặt tên app, tên máy, địa chỉ và mã bí mật đồng bộ, giá quỹ tự lấy (app lấy lại khi cần).','Dữ liệu nằm trong máy này. Mất máy, xóa Safari hoặc <b>xóa biểu tượng trên màn hình chính</b> là mất dữ liệu nếu chưa sao lưu.','<b>Khác → Sao lưu dữ liệu</b>: xuất file lưu vào Tệp/iCloud hoặc gửi cho chính mình. Nên làm ít nhất mỗi tuần; chọn Tự động để app nhắc.','Nhập file vào lại sẽ <b>gộp</b> với dữ liệu hiện có, không xóa gì. Đổi sang máy mới thì nhập file này.'])
+  +sec('Sao lưu JSON là gì? (quan trọng)',['Là một file lưu <b>toàn bộ dữ liệu bạn đã nhập</b>: các khoản thu chi, danh mục, ngân sách, ghi chú vàng, mã chứng chỉ quỹ, nhật ký giao dịch danh sách chờ đợi giá và danh sách nhắc nhở.','Không gồm cài đặt tên app, tên máy, địa chỉ và mã bí mật đồng bộ, giá quỹ tự lấy (app lấy lại khi cần).','Dữ liệu nằm trong máy này. Mất máy, xóa Safari hoặc <b>xóa biểu tượng trên màn hình chính</b> là mất dữ liệu nếu chưa sao lưu.','<b>Khác → Sao lưu dữ liệu</b>: xuất file lưu vào Tệp/iCloud hoặc gửi cho chính mình. Nên làm ít nhất mỗi tuần; chọn Tự động để app nhắc.','Nhập file vào lại sẽ <b>gộp</b> với dữ liệu hiện có, không xóa gì. Đổi sang máy mới thì nhập file này.'])
   +sec('Đồng bộ Google Sheets là gì?',['Là tự động gửi dữ liệu (cùng loại như file JSON) lên một bảng Google Sheets của bạn, và nhận lại thay đổi từ máy kia. Dùng để <b>iPhone và iPad luôn giống nhau</b>, không cần xuất nhập file.','Đồng thời bảng Sheets là nơi lưu dự phòng thứ hai: có các tab dễ đọc (Thu chi, Danh mục, Tài sản…) và bản sao lưu mỗi ngày giữ 30 ngày.','Cách bật: <b>Khác → Đồng bộ Google Sheets</b>, nhập địa chỉ Apps Script và mã bí mật, hai máy dùng giống nhau.','Góc trên phải báo tình trạng: ☁ Đã lưu, ⏳ Chờ gửi, ⚠ lỗi. Mất mạng thì app tự gửi lại khi có mạng.','Đồng bộ cũng là cách để app tự lấy giá chứng chỉ quỹ. Cập nhật Code.gs bằng <b>Phiên bản mới</b>, không chọn Triển khai mới.'])
   +sec('Sao lưu JSON và đồng bộ khác nhau thế nào?',['<b>Đồng bộ</b>: tự động, giữ hai máy khớp nhau, nhưng xóa nhầm ở máy này sẽ lan sang máy kia.','<b>File JSON</b>: bạn tự giữ, lùi lại được về một ngày cũ. Nên dùng cả hai.']);
 }
@@ -988,7 +992,7 @@ function pgCd(){
   var s=cdSt,r=remInfo(cdDate({date:s.date,rep:s.rep}));
   return '<div class="card"><label class="l" style="margin-top:0" for="cn">Tên sự kiện</label><input class="inp" id="cn" maxlength="60" autocomplete="off" placeholder="Ví dụ: Sinh nhật người yêu" value="'+esc(s.name)+'">'
    +'<label class="l">Ngày</label><button class="fld" data-a="cddate" style="width:100%;padding:11px">'+dlabel(s.date)+' ▾</button>'
-   +'<button class="fld" data-a="cdrep" style="width:100%;padding:11px;margin-top:10px;text-align:left">'+(s.rep?'☑':'☐')+' Lặp lại hằng năm (sinh nhật, kỷ niệm…)</button>'
+   +'<label class="l">Nhắc lại</label><div class="seg" style="max-width:none;margin:0 0 4px">'+[['','Không'],['w','Mỗi tuần'],['m','Mỗi tháng'],['y','Mỗi năm']].map(function(x){return '<button class="'+((s.rep||'')===x[0]?'on':'')+'" data-a="cdrepk" data-r="'+x[0]+'">'+x[1]+'</button>'}).join('')+'</div>'
    +'<div class="wh" style="margin-top:8px;font-size:14px">Còn lại: <b>'+r.txt+'</b>'+(r.sub?' <span class="mut">('+r.sub+')</span>':'')+'</div></div>'
    +'<button class="primary" data-a="cdsave">Lưu</button>'+(s.id?'<button class="ghost red" data-a="cddel">Xóa mục này</button>':'');
 }
@@ -1197,19 +1201,19 @@ var ACT={
   cdedit:function(t){openPage('cd',t.dataset.id)},
   cdsug:function(){openPage('cdsug',null)},
   cdyear:function(t){cdY=+t.dataset.y;renderPage()},
-  cdrep:function(){cdSt.rep=cdSt.rep?0:1;renderPage()},
+  cdrepk:function(t){cdSt.rep=t.dataset.r;renderPage()},
   cddate:function(){pickDate(cdSt.date,function(v){cdSt.date=v;renderPage()})},
   cdsave:function(){
     var s=cdSt,nm=s.name.trim();
     if(!nm){toast('Nhập tên sự kiện');return}
     var c=s.id&&D.assets.find(function(x){return x.id===s.id});
-    if(c){c.name=nm;c.date=s.date;c.rep=s.rep?1:0;touch(c)}
-    else{c={id:'c'+uid(),kind:'cd',name:nm,date:s.date,rep:s.rep?1:0};touch(c);D.assets.push(c)}
+    if(c){c.name=nm;c.date=s.date;c.rep=s.rep||'';touch(c)}
+    else{c={id:'c'+uid(),kind:'cd',name:nm,date:s.date,rep:s.rep||''};touch(c);D.assets.push(c)}
     popPage();toast('Đã lưu: '+nm);changed();
   },
   cddel:function(){
     var c=D.assets.find(function(x){return x.id===cdSt.id});if(!c)return;
-    confirmBox('Xóa đếm ngược?','<b>'+esc(c.name)+'</b> · '+dshort(c.date),'Xóa',true).then(function(ok){
+    confirmBox('Xóa nhắc nhở?','<b>'+esc(c.name)+'</b> · '+dshort(c.date),'Xóa',true).then(function(ok){
       if(!ok)return;c.deleted=true;touch(c);popPage();toast('Đã xóa');changed();
     });
   },

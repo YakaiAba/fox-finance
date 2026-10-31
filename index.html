@@ -182,7 +182,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.8 (31/10/2026)';
+var APP_VER='1.9 (31/10/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -515,7 +515,7 @@ function liveFmt(raw,ev){
   if(it==='insertFromPaste'){var v=parseNum(raw);raw=v?String(v).replace('.',','):''}
   ci=raw.indexOf(',');
   if(ci>=0){ip=raw.slice(0,ci);dp=raw.slice(ci+1).replace(/\D/g,'')}
-  else if(data==='.'){var li=raw.lastIndexOf('.');ip=raw.slice(0,li);dp=raw.slice(li+1).replace(/\D/g,'')}
+  else if(raw.indexOf('.')>=0&&(data==='.'||(!(it&&it.indexOf('delete')===0)&&raw.length-raw.lastIndexOf('.')-1<3))){var li=raw.lastIndexOf('.');ip=raw.slice(0,li);dp=raw.slice(li+1).replace(/\D/g,'')}
   else ip=raw;
   ip=ip.replace(/\D/g,'').replace(/^0+(?=\d)/,'').slice(0,13).replace(/\B(?=(\d{3})+(?!\d))/g,'.');
   if(dp!==null){if(!ip)ip='0';return ip+','+dp.slice(0,2)}
@@ -551,7 +551,7 @@ function assetsHTML(){
         h+='<div class="fd"><div><b>'+esc(f.code)+'</b> chứng chỉ quỹ'+ty+'.'+(n&&n.name?'<br><span class="mut">'+esc(n.name)+'</span>':'')+'</div>'
           +'<div>Ngày mua: <b>'+dmy(f.date)+'</b></div><div>Thời gian giữ: <b>'+holdStr(f.date)+'</b></div>'
           +'<div>Lời/lỗ hiện tại: '+(p?plHTML(pl,(p/f.buy-1)*100):'<span class="mut">chưa có giá gần nhất</span>')+'</div>'
-          +(n&&n.date?'<div class="mut">Giá ngày '+dmy(n.date)+(f.man?'':'')+'</div>':(!n&&f.man?'<div class="mut">Giá nhập tay</div>':''))
+          +(p&&(f.buy/p>20||p/f.buy>20)?'<div class="chi nerr">⚠ Giá mua và giá gần nhất chênh quá lớn: có thể nhập sai dấu thập phân. Bấm Sửa để kiểm tra.</div>':'')+(n&&n.date?'<div class="mut">Giá ngày '+dmy(n.date)+(f.man?'':'')+'</div>':(!n&&f.man?'<div class="mut">Giá nhập tay</div>':''))
           +'<div style="margin-top:8px">Nhật ký giao dịch:</div><textarea class="nt" rows="4" data-g="log" data-id="'+f.id+'" placeholder="Ghi lại các lần mua, bán…" autocomplete="off" style="background:#fff">'+esc(f.log||'')+'</textarea>'
           +'<div class="bt2"><button data-a="fundedit" data-id="'+f.id+'">Sửa</button><button class="red" data-a="funddel" data-id="'+f.id+'">Xóa</button></div></div>';
       }

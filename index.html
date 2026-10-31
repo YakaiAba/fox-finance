@@ -84,6 +84,7 @@ h3,h4{margin:12px 0 8px;font-size:15px;color:var(--navy)}
 .fr.on{border-bottom-color:transparent}
 .fd{background:var(--tint);border-radius:10px;padding:10px;margin:0 0 8px;font-size:14px}
 .fd>div{margin:4px 0}
+.nerr{overflow-wrap:anywhere;font-size:13px}
 .fd .bt2{display:flex;gap:8px;margin-top:10px}
 .fd .bt2 button{flex:1;padding:9px;border-radius:999px;background:#fff;border:1px solid var(--line);font-weight:600}
 .fd .bt2 .red{color:var(--chi);border-color:#e8b4b4}
@@ -180,7 +181,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.6 (31/10/2026)';
+var APP_VER='1.7 (31/10/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -507,6 +508,18 @@ function fmtN(n,dec){
   n=Math.round(n*Math.pow(10,dec))/Math.pow(10,dec);var neg=n<0,a=Math.abs(n).toFixed(dec).split('.');
   return (neg?'-':'')+a[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.')+(a[1]?','+a[1]:'');
 }
+function liveFmt(raw,ev){
+  raw=String(raw).replace(/[^\d.,]/g,'');
+  var it=ev&&ev.inputType,data=ev&&ev.data,ip,dp=null,ci=raw.indexOf(',');
+  if(it==='insertFromPaste'){var v=parseNum(raw);raw=v?String(v).replace('.',','):''}
+  ci=raw.indexOf(',');
+  if(ci>=0){ip=raw.slice(0,ci);dp=raw.slice(ci+1).replace(/\D/g,'')}
+  else if(data==='.'){var li=raw.lastIndexOf('.');ip=raw.slice(0,li);dp=raw.slice(li+1).replace(/\D/g,'')}
+  else ip=raw;
+  ip=ip.replace(/\D/g,'').replace(/^0+(?=\d)/,'').slice(0,13).replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  if(dp!==null){if(!ip)ip='0';return ip+','+dp.slice(0,2)}
+  return ip;
+}
 function fmtQ(n){return fmtN(n,2).replace(/,?0+$/,'')}
 function numStr(n){return String(n).replace('.',',')}
 function dmy(s){var p=parse(s);return pad(p.d)+'-'+pad(p.m)+'-'+p.y}
@@ -545,7 +558,7 @@ function assetsHTML(){
   }else h+='<div class="empty" style="padding:14px 0">Chưa có mã quỹ nào</div>';
   h+='<button class="ghost" data-a="fundadd">+ Thêm mã quỹ</button>';
   if(fs.length){
-    var st=L.navErr?'<span class="chi">'+esc(L.navErr)+'</span>':(L.navOk?'Giá cập nhật lúc '+hhmm(L.navOk)+' '+dshort(ds(new Date(L.navOk).getFullYear(),new Date(L.navOk).getMonth()+1,new Date(L.navOk).getDate())):(S.url?'Chưa lấy giá':'Bật đồng bộ Google Sheets để tự lấy giá, hoặc nhập giá tay khi sửa mã quỹ'));
+    var st=L.navErr?'<span class="chi nerr">'+esc(L.navErr)+'</span>':(L.navOk?'Giá cập nhật lúc '+hhmm(L.navOk)+' '+dshort(ds(new Date(L.navOk).getFullYear(),new Date(L.navOk).getMonth()+1,new Date(L.navOk).getDate())):(S.url?'Chưa lấy giá':'Bật đồng bộ Google Sheets để tự lấy giá, hoặc nhập giá tay khi sửa mã quỹ'));
     h+='<div class="mut" style="margin-top:10px;text-align:center">'+st+'</div><button class="ghost" data-a="navnow">'+(NAV.busy?'Đang lấy giá…':'↻ Cập nhật giá')+'</button>';
   }
   if(S.url&&S.sv===1)h+='<div class="mut" style="margin-top:8px;text-align:center">Code.gs chưa cập nhật: Tài sản chỉ lưu trên máy này.</div>';
@@ -570,8 +583,9 @@ function fetchNav(manual){
     else if(!j.navs)L.navErr='Cần cập nhật Code.gs lên bản mới để lấy giá';
     else{
       L.nav=L.nav||{};var bad=[];
-      codes.forEach(function(c){if(j.navs[c]&&j.navs[c].nav>0)L.nav[c]=Object.assign({at:Date.now()},j.navs[c]);else bad.push(c+(j.errs&&j.errs[c]?' ('+j.errs[c]+')':''))});
-      L.navErr=bad.length?'Không lấy được giá: '+bad.join(', '):'';
+      var perm=false;
+      codes.forEach(function(c){if(j.navs[c]&&j.navs[c].nav>0)L.nav[c]=Object.assign({at:Date.now()},j.navs[c]);else{var e=j.errs&&j.errs[c]||'';if(/external_request|quyền|permission/i.test(e))perm=true;bad.push(c+(e&&!perm?' ('+e+')':''))}});
+      L.navErr=perm?'Apps Script chưa được cấp quyền gọi ra ngoài. Mở Apps Script, chạy hàm capQuyen và bấm Cho phép, rồi Triển khai > Phiên bản mới.':(bad.length?'Không lấy được giá: '+bad.join(', '):'');
       if(bad.length<codes.length)L.navOk=Date.now();
     }
   })
@@ -620,7 +634,7 @@ function openPage(name,arg){
   }
   if(name==='fund'){
     var fo=arg&&D.assets.find(function(x){return x.id===arg});
-    fundSt=fo?{id:fo.id,code:fo.code,qty:numStr(fo.qty),buy:numStr(fo.buy),man:fo.man?numStr(fo.man):'',date:fo.date}:{id:null,code:'',qty:'',buy:'',man:'',date:today()};
+    fundSt=fo?{id:fo.id,code:fo.code,qty:liveFmt(numStr(fo.qty)),buy:liveFmt(numStr(fo.buy)),man:fo.man?liveFmt(numStr(fo.man)):'',date:fo.date}:{id:null,code:'',qty:'',buy:'',man:'',date:today()};
   }
   pages.push({name:name,arg:arg,pg:0,q:'',ft:'all'});
   $('#page').classList.add('show');renderPage();$('#pbody').scrollTop=0;
@@ -737,7 +751,8 @@ function pgAbout(){
 }
 function bindPageInputs(p){
   if(p.name==='fund'){
-    [['fc','code'],['fq','qty'],['fb','buy'],['fm','man']].forEach(function(x){$('#'+x[0]).oninput=function(){fundSt[x[1]]=this.value}});
+    $('#fc').oninput=function(){fundSt.code=this.value};
+    [['fq','qty'],['fb','buy'],['fm','man']].forEach(function(x){var el=$('#'+x[0]);el.oninput=function(ev){el.value=liveFmt(el.value,ev);fundSt[x[1]]=el.value}});
   }else if(p.name==='basic'){
     $('#bt').oninput=function(){L.title=this.value.trim()||'Quản lý tài chính';saveL();$('#ttl').textContent=L.title;document.title=L.title};
     $('#bd').oninput=function(){L.dev=this.value.trim();saveL()};

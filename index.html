@@ -89,6 +89,7 @@ h3,h4{margin:12px 0 8px;font-size:15px;color:var(--navy)}
 .stb{padding:6px 14px;border-radius:999px;background:var(--tint);color:var(--navy);font-weight:600;font-size:13px}.stb.on{background:var(--navy);color:#fff}
 .fd .tr{display:flex;justify-content:space-between;gap:8px;margin:6px 0;font-size:14px}
 .nerr{overflow-wrap:anywhere;font-size:13px}
+.fbar{display:flex;justify-content:space-between;gap:8px;margin-top:10px}.fbar .ghost{width:auto;margin:0;padding:9px 14px;font-size:14px;white-space:nowrap}
 .fd .bt2{display:flex;gap:8px;margin-top:10px}
 .fd .bt2 button{flex:1;padding:9px;border-radius:999px;background:#fff;border:1px solid var(--line);font-weight:600}
 .fd .bt2 .red{color:var(--chi);border-color:#e8b4b4}
@@ -186,7 +187,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.20 (31/10/2026)';
+var APP_VER='1.21 (31/10/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -601,10 +602,10 @@ function assetsHTML(){
     if(np)h+='<div class="mut" style="margin-top:4px">'+np+' mã chưa có giá, không tính</div>';
     if(cost>0){var tp=val-cost,to=V.rep.openTotal;h+='<button class="fr'+(to?' on':'')+'" data-a="totaltoggle" style="grid-template-columns:auto 1fr;font-size:14px"><span>Tổng lời/lỗ<i class="ar">'+(to?'▴':'▾')+'</i></span><span style="text-align:right">'+plHTML(tp,(val/cost-1)*100)+'</span></button>'+(to?'<div class="fd">'+tl+'</div>':'')}
   }else h+='<div class="empty" style="padding:14px 0">Chưa có mã quỹ nào</div>';
-  h+='<button class="ghost" data-a="fundadd">+ Thêm mã quỹ</button>';
+  h+='<div class="fbar"><button class="ghost" data-a="fundadd">+ Thêm mã quỹ</button>'+(fs.length?'<button class="ghost" data-a="navnow">'+(NAV.busy?'Đang lấy giá…':'↻ Cập nhật giá')+'</button>':'')+'</div>';
   if(fs.length){
     var st=L.navErr?'<span class="chi nerr">'+esc(L.navErr)+'</span>':(L.navOk?'Giá cập nhật lúc '+hhmm(L.navOk)+' '+dshort(ds(new Date(L.navOk).getFullYear(),new Date(L.navOk).getMonth()+1,new Date(L.navOk).getDate())):(S.url?'Chưa lấy giá':'Bật đồng bộ Google Sheets để tự lấy giá, hoặc nhập giá tay khi sửa mã quỹ'));
-    h+='<div class="mut" style="margin-top:10px;text-align:center">'+st+'</div><button class="ghost" data-a="navnow">'+(NAV.busy?'Đang lấy giá…':'↻ Cập nhật giá')+'</button>';
+    h+='<div class="mut" style="margin-top:10px;text-align:center">'+st+'</div>';
   }
   if(S.url&&S.sv===1)h+='<div class="mut" style="margin-top:8px;text-align:center">Code.gs chưa cập nhật: Tài sản chỉ lưu trên máy này.</div>';
   return h+'</div>';

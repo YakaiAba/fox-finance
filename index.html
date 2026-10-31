@@ -62,6 +62,8 @@ h3,h4{margin:12px 0 8px;font-size:15px;color:var(--navy)}
 .cb.on{border:2px solid var(--navy);background:var(--tint)}
 .cb small{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .primary{display:block;width:100%;background:var(--navy);color:#fff;font-weight:700;border-radius:999px;padding:14px;margin-top:14px;font-size:17px}
+.ch{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0 8px}.ch h4{margin:0}
+.primary.sm{display:block;width:auto;margin:0;padding:8px 16px;font-size:15px}
 .primary.chi{background:var(--chi);color:#fff} .primary.thu{background:var(--thu);color:#fff}
 .ghost{display:block;width:100%;border:1px solid var(--line);background:#fff;border-radius:999px;padding:11px;margin-top:10px;font-weight:600}
 .ghost.red{color:var(--chi);border-color:#e8b4b4}
@@ -178,7 +180,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.5 (31/10/2026)';
+var APP_VER='1.6 (31/10/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -333,10 +335,9 @@ function formHTML(st,edit,form){
   h+='<div class="row"><b>Ngày</b><button class="arr" data-f="dm">‹</button><button class="fld" data-f="date">'+dlabel(st.date)+'</button><button class="arr" data-f="dp">›</button></div>';
   h+='<div class="row"><b>'+(chi?'Tiền chi':'Tiền thu')+'</b><button class="fld big" data-f="amt">'+exprText(st.expr)+'</button><span>đ</span></div>';
   h+='<div class="row"><b>Ghi chú</b><input class="nt" data-f="note" maxlength="60" placeholder="Chưa nhập vào" autocomplete="off" value="'+esc(st.note||'')+'"></div>';
-  h+='<h4>Danh mục</h4><div class="grid">';
+  h+='<div class="ch"><h4>Danh mục</h4><button class="primary sm '+st.type+'" data-f="ok">'+(edit?(chi?'Chỉnh sửa khoản chi':'Chỉnh sửa khoản thu'):(chi?'Nhập khoản chi':'Nhập khoản thu'))+'</button></div><div class="grid">';
   cs.forEach(function(c){h+='<button class="cb'+(c.id===st.cat?' on':'')+'" data-f="cat" data-v="'+c.id+'"><span class="e">'+c.icon+'</span><small>'+esc(c.name)+'</small></button>'});
   h+='<button class="cb" data-a="pg" data-p="cats" data-arg="'+st.type+'"><span class="e">＋</span><small>Chỉnh sửa ›</small></button></div>';
-  h+='<button class="primary '+st.type+'" data-f="ok">'+(edit?(chi?'Chỉnh sửa khoản chi':'Chỉnh sửa khoản thu'):(chi?'Nhập khoản chi':'Nhập khoản thu'))+'</button>';
   return h;
 }
 function stOf(form){return form==='edit'?editSt:V.nhap}
@@ -633,9 +634,11 @@ function closePage(){
   popPage();
   render();
 }
+var SETP={basic:1,sync:1,cats:1,catlist:0,backup:1};
 function renderPage(){
   var p=pages[pages.length-1];if(!p)return;
   $('#ptt').textContent=p.name==='catlist'?cat(p.arg).name:p.name==='fund'?(fundSt.id?'Sửa mã quỹ':'Thêm mã quỹ'):PTITLE[p.name];
+  $('#pexit').textContent=SETP[p.name]?'Lưu lại & Thoát':'Thoát';
   var b=$('#pbody'),top=b.scrollTop;
   var fn={edit:pgEdit,cats:pgCats,basic:pgBasic,sync:pgSync,balance:pgBalance,search:pgSearch,backup:pgBackup,about:pgAbout,catlist:pgCatList,fund:pgFund,help:pgHelp}[p.name];
   b.innerHTML=fn(p);

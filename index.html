@@ -153,7 +153,8 @@ body.kp .pb,body.kp main{padding-bottom:330px}
 .dlg .bt button{flex:1;padding:11px;border-radius:12px;background:#e9ebf0;font-weight:700}
 .dlg .bt button.pr{background:var(--navy);color:#fff}.dlg .bt button.dg{background:var(--chi);color:#fff}
 .dlg select{padding:10px;border:1px solid #cfd3da;border-radius:10px;background:#fff;flex:1;min-width:0}
-.emo{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:6px}
+.emo{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:6px;max-height:42vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.emo .eg{grid-column:1/-1;font-size:12px;color:var(--mut);font-weight:600;margin-top:6px}
 .emo button{font-size:22px;padding:6px 0;border-radius:10px;border:1px solid var(--line)}
 .emo button.on{border:2px solid var(--navy);background:var(--tint)}
 #toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:rgba(20,20,30,.92);color:#fff;padding:10px 16px;border-radius:12px;z-index:60;font-size:14px;display:none;max-width:86%;text-align:center}
@@ -181,12 +182,14 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.12 (31/10/2026)';
+var APP_VER='1.13 (31/10/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
 var PAL=['#EE8833','#2e9e4f','#2b4fa8','#d6457e','#e6b800','#2fa98c','#c9453f','#2096d4','#8a5a44','#6b6b7b','#7e57c2','#00897b'];
-var EMOJI=['🍽️','🛒','🧴','👕','💄','🥂','💊','📝','🚰','💡','🚆','🚗','⛽','📱','🏠','🎬','🎮','🐶','👶','🎁','💰','🐷','💵','📈','🤲','✈️','☕','🍜','🍺','💇','🏥','📚','🧾','🔧'];
+var EMOJI_G=[["Ăn uống", ["🍽️", "🍜", "🍲", "🍚", "🍞", "🥖", "🍳", "🥗", "🍕", "🍔", "🌭", "🍟", "🍗", "🥩", "🐟", "🍤", "🍱", "🍣", "🍦", "🍰", "🍩", "🍪", "🍫", "🍎", "🍌", "🍇", "🍉", "🥤", "🧋", "☕", "🍵", "🥛", "🍺", "🍷", "🥂", "🍸"]], ["Mua sắm", ["🛒", "🛍️", "👕", "👖", "👗", "👟", "👜", "🧢", "👓", "💄", "💅", "🧴", "🧼", "🧻", "🪥", "🪒", "💍", "⌚", "🎒", "🧸"]], ["Nhà cửa", ["🏠", "🏢", "🛋️", "🛏️", "🚰", "🚿", "💡", "🔌", "🔥", "🧹", "🧺", "🔧", "🔨", "🪴", "🔑", "📦", "🧯", "🪑"]], ["Đi lại", ["🚆", "🚌", "🚇", "🚕", "🚗", "🏍️", "🛵", "🚲", "⛽", "🅿️", "🛣️", "✈️", "🚢", "🚄", "🧳", "🏨", "🗺️"]], ["Sức khỏe", ["💊", "💉", "🩺", "🏥", "🦷", "👓", "🧘", "🏋️", "🏃", "⚽", "🏸", "🏊", "💇", "💆"]], ["Học tập, công việc", ["📝", "📚", "📖", "🎓", "✏️", "🖊️", "💻", "🖥️", "📱", "📞", "📠", "🧾", "📎", "📅", "💼", "🏫"]], ["Giải trí", ["🎬", "🎮", "🎧", "🎵", "🎤", "🎸", "🎨", "📷", "🎁", "🎂", "🎉", "🎈", "🎟️", "🎰", "🎲", "⛱️", "🏖️", "⛰️", "🎣"]], ["Gia đình, thú cưng", ["👶", "👧", "👦", "👨", "👩", "👴", "👵", "👪", "🐶", "🐱", "🐟", "🐦", "🍼", "🧷", "🤲", "🙏", "❤️"]], ["Tiền bạc", ["💰", "💵", "💴", "💳", "🏦", "🪙", "🐷", "📈", "📉", "🧮", "🧾", "💹", "🤝", "🏆", "🥇", "💎", "🎰", "🏠"]], ["Khác", ["🌐", "⭐", "🔔", "⚠️", "❓", "📌", "🔒", "✂️", "🧰", "📮", "🧧", "🕯️", "🌸", "🌳", "☂️", "🐗"]]];
+(function(){var seen={};EMOJI_G.forEach(function(g){g[1]=g[1].filter(function(e){if(seen[e])return false;seen[e]=1;return true})})})();
+var EMOJI=[].concat.apply([],EMOJI_G.map(function(g){return g[1]}));
 var DEF_CHI=[['Ăn uống','🍽️'],['Chi tiêu hàng ngày','🧴'],['Quần áo','👕'],['Mỹ phẩm','💄'],['Phí giao lưu','🥂'],['Y tế','💊'],['Giáo dục','📝'],['Tiền điện','🚰'],['Đi lại','🚆'],['Phí liên lạc','📱'],['Tiền nhà','🏠']];
 var DEF_THU=[['Tiền lương','💰'],['Tiền phụ cấp','🐷'],['Tiền thưởng','🎁'],['Thu nhập phụ','💵'],['Đầu tư','📈'],['Thu nhập tạm thời','🤲']];
 
@@ -971,7 +974,7 @@ function moveCat(id,dir){
 }
 function catDialog(c){
   var type=c?c.type:(pages[pages.length-1].arg||'chi'),icon=c?c.icon:EMOJI[0];
-  dlg('<h2>'+(c?'Sửa danh mục':'Thêm danh mục')+'</h2><input class="inp" id="cn" maxlength="24" placeholder="Tên danh mục" value="'+esc(c?c.name:'')+'"><div class="mut" style="margin-top:10px">Biểu tượng</div><div class="emo">'+EMOJI.map(function(e){return '<button data-e="'+e+'" class="'+(e===icon?'on':'')+'">'+e+'</button>'}).join('')+'</div>',
+  dlg('<h2>'+(c?'Sửa danh mục':'Thêm danh mục')+'</h2><input class="inp" id="cn" maxlength="24" placeholder="Tên danh mục" value="'+esc(c?c.name:'')+'"><div class="mut" style="margin-top:10px">Biểu tượng</div><div class="emo">'+EMOJI_G.map(function(g){return '<div class="eg">'+g[0]+'</div>'+g[1].map(function(e){return '<button data-e="'+e+'" class="'+(e===icon?'on':'')+'">'+e+'</button>'}).join('')}).join('')+'</div>',
     [{t:'Bỏ qua'},{t:'Lưu',c:'pr',f:function(){
       var name=$('#cn').value.trim();if(!name){toast('Nhập tên danh mục');return false}
       var dup=D.cats.find(function(x){return x.type===type&&!x.deleted&&x.id!==(c&&c.id)&&norm(x.name)===norm(name)});

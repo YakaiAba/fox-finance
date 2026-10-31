@@ -182,7 +182,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.13 (31/10/2026)';
+var APP_VER='1.14 (31/10/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -690,7 +690,7 @@ function pgEdit(p){
 }
 function pgFund(){
   var s=fundSt;
-  return '<div class="card"><label class="l" style="margin-top:0" for="fc">Mã quỹ</label><input class="inp" id="fc" maxlength="12" autocapitalize="characters" autocomplete="off" placeholder="Ví dụ: DCBF" value="'+esc(s.code)+'">'
+  return '<div class="card"><label class="l" style="margin-top:0" for="fc">Mã quỹ</label><input class="inp" id="fc" maxlength="16" autocapitalize="characters" autocomplete="off" placeholder="Ví dụ: DCBF" value="'+esc(s.code)+'">'
    +'<label class="l" for="fq">Số lượng chứng chỉ quỹ</label><input class="inp" id="fq" inputmode="decimal" autocomplete="off" placeholder="12.900" value="'+esc(s.qty)+'">'
    +'<label class="l" for="fb">Giá mua (đ / chứng chỉ)</label><input class="inp" id="fb" inputmode="decimal" autocomplete="off" placeholder="28.990,47" value="'+esc(s.buy)+'">'
    +'<label class="l">Ngày mua</label><button class="fld" data-a="fdate" style="width:100%;padding:11px">'+dlabel(s.date)+' ▾</button>'
@@ -935,7 +935,7 @@ var ACT={
   fdate:function(){pickDate(fundSt.date,function(v){fundSt.date=v;renderPage()})},
   fundsave:function(){
     var s=fundSt,code=s.code.trim().toUpperCase(),q=parseNum(s.qty),b=parseNum(s.buy),m=parseNum(s.man);
-    if(!/^[A-Z0-9]{2,12}$/.test(code)){toast('Nhập mã quỹ (chữ và số, 2–12 ký tự)');return}
+    if(!/^[A-Z0-9._-]{2,16}$/.test(code)){toast('Mã quỹ chỉ gồm chữ, số và dấu - . _ (2–16 ký tự)');return}
     if(!q){toast('Nhập số lượng lớn hơn 0');return}
     if(!b){toast('Nhập giá mua lớn hơn 0');return}
     var f=s.id&&D.assets.find(function(x){return x.id===s.id});

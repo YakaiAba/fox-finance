@@ -194,7 +194,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.23 (31/10/2026)';
+var APP_VER='1.24 (31/10/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -548,11 +548,14 @@ function holdStr(s){
 function holdShort(s){var a=parse(s),b=parse(today()),m=(b.y-a.y)*12+(b.m-a.m),d=b.d-a.d;if(d<0)m--;if(m>=1)return m+' tháng';var t=Math.round((new Date(b.y,b.m-1,b.d)-new Date(a.y,a.m-1,a.d))/864e5);return Math.max(t,0)+' ngày'}
 function funds(){return D.assets.filter(function(a){return a.kind==='fund'&&!a.deleted}).sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:(a.id<b.id?-1:1)})}
 function watches(){return D.assets.filter(function(a){return a.kind==='watch'&&!a.deleted}).sort(function(a,b){var c=a.code.localeCompare(b.code,'vi');return c||(a.id<b.id?-1:1)})}
-function wTarget(w,dir){
-  var v=dir==='up'?w.upV:w.dnV,u=dir==='up'?w.upU:w.dnU;
-  if(!(v>0))return 0;
-  if(u==='p')return w.ref*(1+(dir==='up'?1:-1)*v/100);
-  return v;
+function wExp(w){
+  var d=w.dir,v=w.val,u=w.unit;
+  if(!d){d=w.upV>0?'up':'dn';v=d==='up'?w.upV:w.dnV;u=d==='up'?w.upU:w.dnU}
+  return {dir:d,v:v||0,u:u||'d'};
+}
+function wTarget(w){
+  var e=wExp(w);if(!(e.v>0))return 0;
+  return e.u==='p'?w.ref*(1+(e.dir==='up'?1:-1)*e.v/100):e.v;
 }
 function wPct(w,t){return (t/w.ref-1)*100}
 function pctS(p){return (p>=0?'+':'')+fmtN(p,2)+'%'}
@@ -631,20 +634,19 @@ function watchHTML(ws){
   var GS='grid-template-columns:minmax(0,1fr) minmax(0,1.25fr) minmax(0,1.25fr) minmax(0,1.25fr);gap:6px;font-size:13px';
   var h='<div class="wsec"><div class="ct">Chờ đợi giá</div>';
   if(ws.length){
-    h+='<div class="fh" style="'+GS+'"><span>Mã</span><span>Đối chiếu</span><span>Đợi giảm</span><span>Đợi tăng</span></div>';
+    h+='<div class="fh" style="'+GS+'"><span>Mã</span><span>Đối chiếu</span><span>Kỳ vọng</span><span>Khoảng cách</span></div>';
     ws.forEach(function(w){
-      var open=V.rep.openW===w.id,p=priceOf(w),td=wTarget(w,'dn'),tu=wTarget(w,'up'),n=navOf(w);
-      var hit=p&&((td&&p<=td)||(tu&&p>=tu));
-      function cell(t,cls){return t?'<span>'+fmtQ(t)+'<small class="'+cls+'">'+pctS(wPct(w,t))+'</small></span>':'<span class="mut">—</span>'}
-      h+='<button class="fr'+(open?' on':'')+'" style="'+GS+'" data-a="watchtoggle" data-id="'+w.id+'"><span>'+(hit?'🔔 ':'')+esc(w.code)+'<i class="ar">'+(open?'▴':'▾')+'</i></span><span>'+fmtQ(w.ref)+'</span>'+cell(td,'chi')+cell(tu,'thu')+'</button>';
+      var open=V.rep.openW===w.id,e=wExp(w),t=wTarget(w),p=priceOf(w),n=navOf(w),cls=e.dir==='up'?'thu':'chi';
+      var hit=!!(p&&t&&(e.dir==='up'?p>=t:p<=t)),d=p&&t?t-p:null,dp=d===null?0:d/w.ref*100;
+      var dtxt=d===null?'<span class="mut">—</span>':'<span>'+(d>0?'+':'')+fmtQ(d)+'<small class="'+(hit?'thu':'')+'">'+pctS(dp)+'</small></span>';
+      h+='<button class="fr'+(open?' on':'')+'" style="'+GS+'" data-a="watchtoggle" data-id="'+w.id+'"><span>'+(hit?'🔔 ':'')+esc(w.code)+'<i class="ar">'+(open?'▴':'▾')+'</i></span><span>'+fmtQ(w.ref)+'</span>'
+        +(t?'<span>'+fmtQ(t)+'<small class="'+cls+'">'+pctS(wPct(w,t))+'</small></span>':'<span class="mut">—</span>')+dtxt+'</button>';
       if(open){
         h+='<div class="fd"><div><b>'+esc(w.code)+'</b>'+(n&&n.name?'<br><span class="mut">'+esc(n.name)+'</span>':'')+'</div>'
           +'<div>Giá đối chiếu: <b>'+fmtQ(w.ref)+'</b></div>'
-          +'<div>Giá đợi giảm: '+(td?'<b>'+fmtQ(td)+'</b> <span class="chi">('+pctS(wPct(w,td))+')</span>'+(w.dnU==='p'?' <span class="mut">nhập '+fmtQ(w.dnV)+'%</span>':''):'<span class="mut">không đặt</span>')+'</div>'
-          +'<div>Giá đợi tăng: '+(tu?'<b>'+fmtQ(tu)+'</b> <span class="thu">('+pctS(wPct(w,tu))+')</span>'+(w.upU==='p'?' <span class="mut">nhập '+fmtQ(w.upV)+'%</span>':''):'<span class="mut">không đặt</span>')+'</div>'
+          +'<div>Kỳ vọng: <b class="'+cls+'">'+(e.dir==='up'?'tăng':'giảm')+' '+fmtQ(e.v)+(e.u==='p'?'%':'đ')+'</b>'+(t?' → điểm <b>'+fmtQ(t)+'</b> <span class="'+cls+'">('+pctS(wPct(w,t))+')</span>':'')+'</div>'
           +'<div>Giá gần nhất: '+(p?'<b>'+fmtQ(p)+'</b>'+(n&&n.date?' <span class="mut">(ngày '+dmy(n.date)+')</span>':''):'<span class="mut">chưa có</span>')+'</div>'
-          +(p&&td?'<div>Đến vùng giảm: '+(p<=td?'<b class="thu">✓ đã chạm</b>':'cần giảm thêm <b>'+fmtN((1-td/p)*100,2)+'%</b>')+'</div>':'')
-          +(p&&tu?'<div>Đến vùng tăng: '+(p>=tu?'<b class="thu">✓ đã chạm</b>':'cần tăng thêm <b>'+fmtN((tu/p-1)*100,2)+'%</b>')+'</div>':'')
+          +(d!==null?'<div>Khoảng cách: <b>'+(d>0?'+':'')+fmtQ(d)+'đ ('+pctS(dp)+')</b>'+(hit?' <b class="thu">✓ đã chạm điểm kỳ vọng</b>':'')+'<br><span class="mut">Tính từ giá gần nhất đến điểm kỳ vọng, % tính trên giá đối chiếu.</span></div>':'')
           +(p&&(w.ref/p>20||p/w.ref>20)?'<div class="chi nerr">⚠ Giá đối chiếu và giá gần nhất chênh quá lớn: có thể nhập sai dấu thập phân. Bấm Sửa để kiểm tra.</div>':'')
           +'<div class="bt2"><button data-a="watchedit" data-id="'+w.id+'">Sửa</button><button class="red" data-a="watchdel" data-id="'+w.id+'">Xóa</button></div></div>';
       }
@@ -747,7 +749,8 @@ function openPage(name,arg){
   }
   if(name==='watch'){
     var wo=arg&&D.assets.find(function(x){return x.id===arg});
-    watchSt=wo?{id:wo.id,code:wo.code,ref:liveFmt(numStr(wo.ref)),upV:wo.upV?liveFmt(numStr(wo.upV)):'',upU:wo.upU||'d',dnV:wo.dnV?liveFmt(numStr(wo.dnV)):'',dnU:wo.dnU||'d'}:{id:null,code:'',ref:'',upV:'',upU:'d',dnV:'',dnU:'d'};
+    var we=wo&&wExp(wo);
+    watchSt=wo?{id:wo.id,code:wo.code,ref:liveFmt(numStr(wo.ref)),dir:we.dir,val:we.v?liveFmt(numStr(we.v)):'',unit:we.u}:{id:null,code:'',ref:'',dir:'dn',val:'',unit:'d'};
   }
   pages.push({name:name,arg:arg,pg:0,q:'',ft:'all'});
   $('#page').classList.add('show');renderPage();$('#pbody').scrollTop=0;
@@ -844,7 +847,7 @@ function pgHelp(){
   function sec(t,l){return '<div class="card"><div class="ct">'+t+'</div>'+l.map(function(x){return '<div style="margin:5px 0">• '+x+'</div>'}).join('')+'</div>'}
   return sec('Ghi thu chi',['Tab <b>Nhập vào</b>: bấm <b>Thu nhập</b> hoặc <b>Chi tiêu</b>, bấm ô số tiền để mở bàn phím tính (có + − × ÷, nút 000), chọn danh mục, ghi chú nếu cần rồi bấm Lưu.','Đổi ngày bằng ô ngày; chọn ngày/tháng/năm trong hộp hiện ra.','Sửa hoặc xóa: tab <b>Lịch</b> → bấm vào khoản.'])
   +sec('Xem lại',['<b>Lịch</b>: ô ngày có + (có thu), − (có chi) và tổng tiền ngày đó.','<b>Báo cáo</b>: xem theo Tháng / Năm / Toàn kì; bấm một danh mục để xem các khoản. Nút 📷 xuất ảnh báo cáo.','<b>Ngân sách</b>: bấm vào mục để đặt hạn mức mỗi tháng.','<b>Khác → Danh mục thu chi</b>: thêm, sửa, xóa, sắp xếp danh mục.'])
-  +sec('Tài sản (cuối tab Báo cáo)',['<b>Vàng</b>: chỉ là ô ghi chú.','<b>Chứng chỉ quỹ</b>: nhập mã, số lượng, giá mua, ngày mua. Bấm vào mã để xem lời/lỗ, thời gian giữ và nhật ký giao dịch.','<b>Chờ đợi giá</b> (dưới dòng giá cập nhật): thêm mã quỹ bạn quan tâm, nhập giá đối chiếu, giá đợi tăng và/hoặc giảm (chọn đ hoặc %). Cột % cho biết khoảng cách so với giá đối chiếu; 🔔 hiện khi giá gần nhất đã chạm vùng giá.','Giá gần nhất tự lấy từ fmarket khi đã bật đồng bộ; chưa lấy được thì nhập giá tay khi sửa mã quỹ.'])
+  +sec('Tài sản (cuối tab Báo cáo)',['<b>Vàng</b>: chỉ là ô ghi chú.','<b>Chứng chỉ quỹ</b>: nhập mã, số lượng, giá mua, ngày mua. Bấm vào mã để xem lời/lỗ, thời gian giữ và nhật ký giao dịch.','<b>Chờ đợi giá</b> (dưới dòng giá cập nhật): thêm mã quỹ bạn quan tâm, nhập giá đối chiếu và kỳ vọng (giảm hoặc tăng, tính bằng đ hoặc %). Cột Khoảng cách cho biết giá gần nhất còn cách điểm kỳ vọng bao nhiêu (đ và %, tính trên giá đối chiếu); 🔔 hiện khi đã chạm điểm kỳ vọng.','Giá gần nhất tự lấy từ fmarket khi đã bật đồng bộ; chưa lấy được thì nhập giá tay khi sửa mã quỹ.'])
   +sec('Sao lưu JSON là gì? (quan trọng)',['Là một file lưu <b>toàn bộ dữ liệu bạn đã nhập</b>: các khoản thu chi, danh mục, ngân sách, ghi chú vàng, mã chứng chỉ quỹ, nhật ký giao dịch và danh sách chờ đợi giá.','Không gồm cài đặt tên app, tên máy, địa chỉ và mã bí mật đồng bộ, giá quỹ tự lấy (app lấy lại khi cần).','Dữ liệu nằm trong máy này. Mất máy, xóa Safari hoặc <b>xóa biểu tượng trên màn hình chính</b> là mất dữ liệu nếu chưa sao lưu.','<b>Khác → Sao lưu dữ liệu</b>: xuất file lưu vào Tệp/iCloud hoặc gửi cho chính mình. Nên làm ít nhất mỗi tuần; chọn Tự động để app nhắc.','Nhập file vào lại sẽ <b>gộp</b> với dữ liệu hiện có, không xóa gì. Đổi sang máy mới thì nhập file này.'])
   +sec('Đồng bộ Google Sheets là gì?',['Là tự động gửi dữ liệu (cùng loại như file JSON) lên một bảng Google Sheets của bạn, và nhận lại thay đổi từ máy kia. Dùng để <b>iPhone và iPad luôn giống nhau</b>, không cần xuất nhập file.','Đồng thời bảng Sheets là nơi lưu dự phòng thứ hai: có các tab dễ đọc (Thu chi, Danh mục, Tài sản…) và bản sao lưu mỗi ngày giữ 30 ngày.','Cách bật: <b>Khác → Đồng bộ Google Sheets</b>, nhập địa chỉ Apps Script và mã bí mật, hai máy dùng giống nhau.','Góc trên phải báo tình trạng: ☁ Đã lưu, ⏳ Chờ gửi, ⚠ lỗi. Mất mạng thì app tự gửi lại khi có mạng.','Đồng bộ cũng là cách để app tự lấy giá chứng chỉ quỹ. Cập nhật Code.gs bằng <b>Phiên bản mới</b>, không chọn Triển khai mới.'])
   +sec('Sao lưu JSON và đồng bộ khác nhau thế nào?',['<b>Đồng bộ</b>: tự động, giữ hai máy khớp nhau, nhưng xóa nhầm ở máy này sẽ lan sang máy kia.','<b>File JSON</b>: bạn tự giữ, lùi lại được về một ngày cũ. Nên dùng cả hai.']);
@@ -859,20 +862,19 @@ function checkAuto(){
   L.askedAt=Date.now();saveL();
   dlg('<h2>Đến hạn sao lưu</h2><div>'+(m==='day'?'Hôm nay chưa sao lưu.':'Tuần này chưa sao lưu.')+' Bấm "Sao lưu ngay" để xuất file JSON.</div>',[{t:'Để sau'},{t:'Sao lưu ngay',c:'pr',f:function(){exportBackup()}}]);
 }
-function wPrev(dir){
-  var s=watchSt,ref=parseNum(s.ref),v=parseNum(dir==='up'?s.upV:s.dnV),u=dir==='up'?s.upU:s.dnU;
+function wPrev(){
+  var s=watchSt,ref=parseNum(s.ref),v=parseNum(s.val);
   if(!ref||!v)return '';
-  var t=u==='p'?ref*(1+(dir==='up'?1:-1)*v/100):v;
-  return 'Giá đợi '+fmtQ(t)+'đ · '+pctS((t/ref-1)*100)+' so với giá đối chiếu';
+  var t=s.unit==='p'?ref*(1+(s.dir==='up'?1:-1)*v/100):v;
+  return 'Điểm kỳ vọng '+fmtQ(t)+'đ · '+pctS((t/ref-1)*100)+' so với giá đối chiếu';
 }
-function wUnit(k,u){return '<div class="uni"><button class="'+(u==='d'?'on':'')+'" data-a="wunit" data-w="'+k+'" data-u="d">đ</button><button class="'+(u==='p'?'on':'')+'" data-a="wunit" data-w="'+k+'" data-u="p">%</button></div>'}
 function pgWatch(){
   var s=watchSt,n=navOf({code:s.code.trim().toUpperCase()}),ph=n?fmtQ(n.nav):'30.857,18';
   return '<div class="card"><label class="l" style="margin-top:0" for="wc">Mã quỹ</label><input class="inp" id="wc" maxlength="16" autocapitalize="characters" autocomplete="off" placeholder="Ví dụ: DCBF" value="'+esc(s.code)+'">'
    +'<label class="l" for="wr">Giá đối chiếu (đ / chứng chỉ)</label><input class="inp" id="wr" inputmode="decimal" autocomplete="off" placeholder="'+ph+'" value="'+esc(s.ref)+'"><div class="wh">Nhập giá bất kỳ làm mốc, ví dụ giá bạn đang theo dõi.</div>'
-   +'<label class="l" for="wu">Giá đợi tăng (không bắt buộc)</label><div class="wrow"><input class="inp" id="wu" inputmode="decimal" autocomplete="off" placeholder="'+(s.upU==='p'?'5':ph)+'" value="'+esc(s.upV)+'">'+wUnit('up',s.upU)+'</div><div class="wh" id="wuh">'+wPrev('up')+'</div>'
-   +'<label class="l" for="wd">Giá đợi giảm (không bắt buộc)</label><div class="wrow"><input class="inp" id="wd" inputmode="decimal" autocomplete="off" placeholder="'+(s.dnU==='p'?'5':ph)+'" value="'+esc(s.dnV)+'">'+wUnit('dn',s.dnU)+'</div><div class="wh" id="wdh">'+wPrev('dn')+'</div>'
-   +'<div class="wh" style="margin-top:10px">Chọn <b>đ</b>: số nhập là mức giá cần chờ. Chọn <b>%</b>: số nhập là mức tăng/giảm so với giá đối chiếu. Cần nhập ít nhất một trong hai ô.</div></div>'
+   +'<label class="l">Kỳ vọng</label><div class="seg" style="max-width:none;margin:0 0 8px"><button class="chi'+(s.dir==='dn'?' on':'')+'" data-a="wdir" data-d="dn">Kỳ vọng giảm</button><button class="thu'+(s.dir==='up'?' on':'')+'" data-a="wdir" data-d="up">Kỳ vọng tăng</button></div>'
+   +'<div class="wrow"><input class="inp" id="wv" inputmode="decimal" autocomplete="off" placeholder="'+(s.unit==='p'?'50':ph)+'" value="'+esc(s.val)+'" aria-label="Giá trị kỳ vọng"><div class="uni"><button class="'+(s.unit==='d'?'on':'')+'" data-a="wunit" data-u="d">đ</button><button class="'+(s.unit==='p'?'on':'')+'" data-a="wunit" data-u="p">%</button></div></div><div class="wh" id="wh">'+wPrev()+'</div>'
+   +'<div class="wh" style="margin-top:10px">Chọn <b>đ</b>: số nhập là mức giá kỳ vọng. Chọn <b>%</b>: số nhập là mức tăng hoặc giảm so với giá đối chiếu.</div></div>'
    +'<button class="primary" data-a="watchsave">Lưu</button>';
 }
 function pgAbout(){
@@ -882,8 +884,7 @@ function pgAbout(){
 function bindPageInputs(p){
   if(p.name==='watch'){
     $('#wc').oninput=function(){watchSt.code=this.value};
-    function upd(){$('#wuh').textContent=wPrev('up');$('#wdh').textContent=wPrev('dn')}
-    [['wr','ref'],['wu','upV'],['wd','dnV']].forEach(function(x){var el=$('#'+x[0]);el.oninput=function(ev){el.value=liveFmt(el.value,ev);watchSt[x[1]]=el.value;upd()}});
+    [['wr','ref'],['wv','val']].forEach(function(x){var el=$('#'+x[0]);el.oninput=function(ev){el.value=liveFmt(el.value,ev);watchSt[x[1]]=el.value;$('#wh').textContent=wPrev()}});
   }else if(p.name==='fund'){
     $('#fc').oninput=function(){fundSt.code=this.value};
     [['fq','qty'],['fb','buy'],['fm','man']].forEach(function(x){var el=$('#'+x[0]);el.oninput=function(ev){el.value=liveFmt(el.value,ev);fundSt[x[1]]=el.value}});
@@ -1063,23 +1064,24 @@ var ACT={
   watchtoggle:function(t){V.rep.openW=V.rep.openW===t.dataset.id?null:t.dataset.id;refreshAssets()},
   watchadd:function(){openPage('watch',null)},
   watchedit:function(t){openPage('watch',t.dataset.id)},
-  wunit:function(t){watchSt[t.dataset.w==='up'?'upU':'dnU']=t.dataset.u;renderPage()},
+  wdir:function(t){watchSt.dir=t.dataset.d;renderPage()},
+  wunit:function(t){watchSt.unit=t.dataset.u;renderPage()},
   watchsave:function(){
-    var s=watchSt,code=s.code.trim().toUpperCase(),ref=parseNum(s.ref),uv=parseNum(s.upV),dv=parseNum(s.dnV);
+    var s=watchSt,code=s.code.trim().toUpperCase(),ref=parseNum(s.ref),v=parseNum(s.val);
     if(!/^[A-Z0-9._-]{2,16}$/.test(code)){toast('Mã quỹ chỉ gồm chữ, số và dấu - . _ (2–16 ký tự)');return}
     if(!ref){toast('Nhập giá đối chiếu lớn hơn 0');return}
-    if(!uv&&!dv){toast('Nhập giá đợi tăng hoặc giá đợi giảm');return}
-    var tu=uv?(s.upU==='p'?ref*(1+uv/100):uv):0,td=dv?(s.dnU==='p'?ref*(1-dv/100):dv):0;
-    if(uv&&tu<=ref){toast('Giá đợi tăng phải lớn hơn giá đối chiếu');return}
-    if(dv&&(td<=0||td>=ref)){toast('Giá đợi giảm phải nhỏ hơn giá đối chiếu và lớn hơn 0');return}
+    if(!v){toast('Nhập số liệu kỳ vọng lớn hơn 0');return}
+    var up=s.dir==='up',t=s.unit==='p'?ref*(1+(up?1:-1)*v/100):v;
+    if(up&&t<=ref){toast('Kỳ vọng tăng phải cao hơn giá đối chiếu');return}
+    if(!up&&(t<=0||t>=ref)){toast('Kỳ vọng giảm phải thấp hơn giá đối chiếu và lớn hơn 0');return}
     var p=priceOf({code:code}),warn=[];
     if(p&&(ref/p>20||p/ref>20))warn.push('Giá đối chiếu <b>'+fmtQ(ref)+'</b> chênh hơn 20 lần so với giá gần nhất <b>'+fmtQ(p)+'</b>.');
-    if(tu&&tu/ref>20)warn.push('Giá đợi tăng <b>'+fmtQ(tu)+'</b> gấp hơn 20 lần giá đối chiếu.');
-    if(td&&ref/td>20)warn.push('Giá đợi giảm <b>'+fmtQ(td)+'</b> thấp hơn giá đối chiếu hơn 20 lần.');
+    if(up&&t/ref>20)warn.push('Điểm kỳ vọng <b>'+fmtQ(t)+'</b> gấp hơn 20 lần giá đối chiếu.');
+    if(!up&&ref/t>20)warn.push('Điểm kỳ vọng <b>'+fmtQ(t)+'</b> thấp hơn giá đối chiếu hơn 20 lần.');
     function go(){
       var w=s.id&&D.assets.find(function(x){return x.id===s.id});
-      if(w){w.code=code;w.ref=ref;w.upV=uv;w.upU=s.upU;w.dnV=dv;w.dnU=s.dnU;touch(w)}
-      else{w={id:'w'+uid(),kind:'watch',code:code,ref:ref,upV:uv,upU:s.upU,dnV:dv,dnU:s.dnU};touch(w);D.assets.push(w)}
+      if(w){w.code=code;w.ref=ref;w.dir=s.dir;w.val=v;w.unit=s.unit;delete w.upV;delete w.upU;delete w.dnV;delete w.dnU;touch(w)}
+      else{w={id:'w'+uid(),kind:'watch',code:code,ref:ref,dir:s.dir,val:v,unit:s.unit};touch(w);D.assets.push(w)}
       V.rep.openW=w.id;
       if(!L.nav||!L.nav[code]){L.navAt=0;saveL()}
       popPage();toast('Đã lưu mã '+code+' vào Chờ đợi giá');changed();

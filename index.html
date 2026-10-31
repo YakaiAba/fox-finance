@@ -79,7 +79,7 @@ h3,h4{margin:12px 0 8px;font-size:15px;color:var(--navy)}
 .fr{padding:11px 0;border-bottom:1px solid var(--line);font-size:clamp(11.5px,3.4vw,13.5px);font-variant-numeric:tabular-nums}
 .fr>*{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fh>:first-child,.fr>:first-child{text-align:left}
-.fr>:first-child{white-space:normal;overflow-wrap:anywhere;line-height:1.15}
+.fr>:first-child{white-space:normal;overflow-wrap:normal;line-height:1.15}
 .ar{font-style:normal;font-size:10px;margin-left:4px;color:#6b7280}
 .fr>:first-child{font-weight:700;color:var(--navy)}
 .fr.on{border-bottom-color:transparent}
@@ -186,7 +186,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.19 (31/10/2026)';
+var APP_VER='1.20 (31/10/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -561,32 +561,27 @@ function statDonut(list,tot){
   });
   return '<svg viewBox="0 0 360 330" width="100%" style="display:block;max-width:380px;margin:0 auto" role="img" aria-label="Biểu đồ tròn giá trị chứng chỉ quỹ">'+s+t+'</svg>';
 }
-function fundStats(fs){
-  var m={},tot=0,np=0,order=[];
-  fs.forEach(function(f){var p=priceOf(f);if(!p){np++;return}if(!m[f.code]){m[f.code]={code:f.code,v:0,cost:0};order.push(f.code)}m[f.code].v+=f.qty*p;m[f.code].cost+=f.qty*f.buy;tot+=f.qty*p});
-  var list=order.map(function(c){return m[c]}).sort(function(a,b){return b.v-a.v});
-  if(!tot)return '<div class="fd">Chưa có giá để thống kê.</div>';
-  list.forEach(function(x,i){x.color=PAL[i%PAL.length]});
-  var h='<div class="fd" style="background:#fff;border:1px solid var(--line)">'+statDonut(list,tot)+'<div class="fh" style="grid-template-columns:minmax(0,.85fr) minmax(0,1.9fr) minmax(0,.85fr) minmax(0,1.05fr);gap:6px;font-size:13px;margin-top:8px"><span>Mã</span><span>Giá trị hiện tại</span><span>Tỷ trọng</span><span>Lời/lỗ</span></div>';
-  list.forEach(function(x){
-    var pc=(x.v/x.cost-1)*100;
-    h+='<div class="fr" style="grid-template-columns:minmax(0,.85fr) minmax(0,1.9fr) minmax(0,.85fr) minmax(0,1.05fr);gap:6px;font-size:13px;cursor:default"><span style="display:flex;align-items:center;gap:6px"><i style="width:10px;height:10px;border-radius:50%;background:'+x.color+';flex:none"></i>'+esc(x.code)+'</span><span>'+fmt(x.v)+'đ</span><span>'+fmtN(x.v/tot*100,1)+'%</span><span class="'+(pc>=0?'thu':'chi')+'">'+(pc>=0?'+':'')+fmtN(pc,2)+'%</span></div>';
-  });
-  h+='<div class="mut" style="margin-top:6px">Tổng: <b>'+fmt(tot)+'đ</b>'+(np?' · '+np+' mã chưa có giá, không tính':'')+'</div></div>';
-  return h;
+function fundInfo(fs){
+  var m={},tot=0,order=[];
+  fs.forEach(function(f){var p=priceOf(f);if(!p)return;if(!m[f.code]){m[f.code]={code:f.code,v:0,cost:0};order.push(f.code)}m[f.code].v+=f.qty*p;m[f.code].cost+=f.qty*f.buy;tot+=f.qty*p});
+  var list=order.map(function(c){return m[c]}).sort(function(a,b){return b.v-a.v}),col={};
+  list.forEach(function(x,i){x.color=PAL[i%PAL.length];col[x.code]=x.color});
+  return {list:list,tot:tot,col:col};
 }
 function assetsHTML(){
   var g=D.assets.find(function(a){return a.id==='gold'&&!a.deleted}),fs=funds();
   var h='<div class="sec">Tài sản</div><div class="card"><div class="ct">Vàng</div><textarea class="nt" rows="3" data-g="gold" placeholder="Ghi chú vàng (loại, số lượng, nơi giữ…)" autocomplete="off">'+esc(g?g.note||'':'')+'</textarea></div>';
-  h+='<div class="card"><div class="ch2"><div class="ct">Chứng chỉ quỹ</div>'+(fs.length?'<button class="stb'+(V.rep.stats?' on':'')+'" data-a="fundstats">Thống kê</button>':'')+'</div>';
+  h+='<div class="card"><div class="ch2"><div class="ct">Chứng chỉ quỹ</div></div>';
   if(fs.length){
-    if(V.rep.stats)h+=fundStats(fs);
-    h+='<div class="fh"><span>Mã</span><span>Số lượng</span><span>Giá gần nhất</span><span>Giá trị hiện tại</span></div>';
-    var cost=0,val=0,tl='';
+    var info=fundInfo(fs),GS='grid-template-columns:minmax(0,1.3fr) minmax(0,1.8fr) minmax(0,.85fr) minmax(0,1.05fr);gap:6px;font-size:13px';
+    if(info.tot)h+=statDonut(info.list,info.tot);
+    h+='<div class="fh" style="'+GS+';margin-top:8px"><span>Mã</span><span>Giá trị hiện tại</span><span>Tỷ trọng</span><span>Lời/lỗ</span></div>';
+    var cost=0,val=0,tl='',np=0;
     fs=fs.slice().sort(function(x,y){var vx=priceOf(x)?x.qty*priceOf(x):-1,vy=priceOf(y)?y.qty*priceOf(y):-1;return vy-vx});
     fs.forEach(function(f){
-      var p=priceOf(f),open=V.rep.open===f.id,pl=(p-f.buy)*f.qty;
-      h+='<button class="fr'+(open?' on':'')+'" data-a="fundtoggle" data-id="'+f.id+'"><span>'+esc(f.code)+'<i class="ar">'+(open?'▴':'▾')+'</i></span><span>'+fmtQ(f.qty)+'</span><span>'+(p?fmtP(p):'—')+'</span><span>'+(p?fmt(f.qty*p):'—')+'</span></button>';
+      var p=priceOf(f),open=V.rep.open===f.id,pl=(p-f.buy)*f.qty,pc=p?(p/f.buy-1)*100:0,dot=info.col[f.code]||'#bbb';
+      if(!p)np++;
+      h+='<button class="fr'+(open?' on':'')+'" style="'+GS+'" data-a="fundtoggle" data-id="'+f.id+'"><span style="display:flex;align-items:center;gap:6px"><i style="width:10px;height:10px;border-radius:50%;background:'+dot+';flex:none"></i><span>'+esc(f.code)+'<i class="ar">'+(open?'▴':'▾')+'</i></span></span><span>'+(p?fmt(f.qty*p)+'đ':'—')+'</span><span>'+(p?fmtN(f.qty*p/info.tot*100,1)+'%':'—')+'</span><span class="'+(pc>=0?'thu':'chi')+'">'+(p?(pc>=0?'+':'')+fmtN(pc,2)+'%':'—')+'</span></button>';
       if(p){cost+=f.qty*f.buy;val+=f.qty*p}
       tl+='<div class="tr"><span>'+esc(f.code)+' ('+holdShort(f.date)+')</span>'+(p?plHTML(pl,(p/f.buy-1)*100):'<span class="mut">chưa có giá</span>')+'</div>';
       if(open){
@@ -602,7 +597,9 @@ function assetsHTML(){
           +'<div class="bt2"><button data-a="fundedit" data-id="'+f.id+'">Sửa</button><button class="red" data-a="funddel" data-id="'+f.id+'">Xóa</button></div></div>';
       }
     });
-    if(cost>0){var tp=val-cost,to=V.rep.openTotal;h+='<div class="fr" style="grid-template-columns:auto 1fr;font-size:14px"><span>Tổng giá trị hiện tại</span><span style="text-align:right"><b>'+fmt(val)+'đ</b></span></div>';h+='<button class="fr'+(to?' on':'')+'" data-a="totaltoggle" style="grid-template-columns:auto 1fr;font-size:14px"><span>Tổng lời/lỗ<i class="ar">'+(to?'▴':'▾')+'</i></span><span style="text-align:right">'+plHTML(tp,(val/cost-1)*100)+'</span></button>'+(to?'<div class="fd">'+tl+'</div>':'')}
+    if(val>0)h+='<div class="fr" style="'+GS+';cursor:default"><span><b>Tổng</b></span><span><b>'+fmt(val)+'đ</b></span><span></span><span></span></div>';
+    if(np)h+='<div class="mut" style="margin-top:4px">'+np+' mã chưa có giá, không tính</div>';
+    if(cost>0){var tp=val-cost,to=V.rep.openTotal;h+='<button class="fr'+(to?' on':'')+'" data-a="totaltoggle" style="grid-template-columns:auto 1fr;font-size:14px"><span>Tổng lời/lỗ<i class="ar">'+(to?'▴':'▾')+'</i></span><span style="text-align:right">'+plHTML(tp,(val/cost-1)*100)+'</span></button>'+(to?'<div class="fd">'+tl+'</div>':'')}
   }else h+='<div class="empty" style="padding:14px 0">Chưa có mã quỹ nào</div>';
   h+='<button class="ghost" data-a="fundadd">+ Thêm mã quỹ</button>';
   if(fs.length){
@@ -973,7 +970,6 @@ var ACT={
       if(!ok)return;c.deleted=true;touch(c);var bd=D.budgets.find(function(b){return b.id==='b_'+c.id&&!b.deleted});if(bd){bd.deleted=true;touch(bd)}changed();
     });
   },
-  fundstats:function(){V.rep.stats=!V.rep.stats;refreshAssets()},
   totaltoggle:function(){V.rep.openTotal=!V.rep.openTotal;refreshAssets()},
   fundtoggle:function(t){V.rep.open=V.rep.open===t.dataset.id?null:t.dataset.id;refreshAssets()},
   fundadd:function(){openPage('fund',null)},

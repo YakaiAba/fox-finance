@@ -75,11 +75,12 @@ h3,h4{margin:12px 0 8px;font-size:15px;color:var(--navy)}
 .sum b:not(.thu):not(.chi){color:#111}
 .thu{color:var(--thu)} .chi{color:var(--chi)}
 .sec{font-size:18px;font-weight:700;color:var(--navy);margin:18px 2px 8px}
-.fh,.fr{display:grid;grid-template-columns:1fr .95fr 1.2fr 1.2fr;gap:4px;width:100%;text-align:right;align-items:center}
-.fh{font-size:12px;color:var(--mut);padding:6px 0;border-bottom:1px solid var(--line)}
-.fr{padding:11px 0;border-bottom:1px solid var(--line);font-size:14px;font-variant-numeric:tabular-nums}
+.fh,.fr{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,.95fr) minmax(0,1.3fr) minmax(0,1.3fr);gap:10px;width:100%;text-align:right;align-items:center}
+.fh{font-size:clamp(11px,3.2vw,12px);color:var(--mut);padding:6px 0;border-bottom:1px solid var(--line)}
+.fr{padding:11px 0;border-bottom:1px solid var(--line);font-size:clamp(12px,3.7vw,14px);font-variant-numeric:tabular-nums}
 .fr>*{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .fh>:first-child,.fr>:first-child{text-align:left}
+.ar{font-style:normal;font-size:10px;margin-left:4px;color:#6b7280}
 .fr>:first-child{font-weight:700;color:var(--navy)}
 .fr.on{border-bottom-color:transparent}
 .fd{background:var(--tint);border-radius:10px;padding:10px;margin:0 0 8px;font-size:14px}
@@ -181,7 +182,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.7 (31/10/2026)';
+var APP_VER='1.8 (31/10/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -520,6 +521,7 @@ function liveFmt(raw,ev){
   if(dp!==null){if(!ip)ip='0';return ip+','+dp.slice(0,2)}
   return ip;
 }
+function fmtP(n){return fmtN(n,n>=1e6?0:2)}
 function fmtQ(n){return fmtN(n,2).replace(/,?0+$/,'')}
 function numStr(n){return String(n).replace('.',',')}
 function dmy(s){var p=parse(s);return pad(p.d)+'-'+pad(p.m)+'-'+p.y}
@@ -542,7 +544,7 @@ function assetsHTML(){
     var cost=0,val=0;
     fs.forEach(function(f){
       var p=priceOf(f),open=V.rep.open===f.id;
-      h+='<button class="fr'+(open?' on':'')+'" data-a="fundtoggle" data-id="'+f.id+'"><span>'+esc(f.code)+(open?' ▴':' ▾')+'</span><span>'+fmtQ(f.qty)+'</span><span>'+fmtN(f.buy,2)+'</span><span>'+(p?fmtN(p,2):'—')+'</span></button>';
+      h+='<button class="fr'+(open?' on':'')+'" data-a="fundtoggle" data-id="'+f.id+'"><span>'+esc(f.code)+'<i class="ar">'+(open?'▴':'▾')+'</i></span><span>'+fmtQ(f.qty)+'</span><span>'+fmtP(f.buy)+'</span><span>'+(p?fmtP(p):'—')+'</span></button>';
       if(p){cost+=f.qty*f.buy;val+=f.qty*p}
       if(open){
         var n=navOf(f),pl=(p-f.buy)*f.qty,ty=n&&n.type?' '+esc(String(n.type).toLowerCase().replace(/^quỹ\s*/,'')):'';
@@ -570,27 +572,49 @@ function refreshAssets(){
   el.innerHTML=assetsHTML();
 }
 var NAV={busy:false};
+function navDirect(code){
+  var body={types:['NEW_FUND','TRADING_FUND'],issuerIds:[],sortOrder:'DESC',sortField:'navTo6Months',page:1,pageSize:20,isIpo:false,fundAssetTypes:[],bondRemainPeriods:[],searchField:code,isBuyByReward:false,thirdAppIds:[]};
+  return fetch('https://api.fmarket.vn/res/products/filter',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(body)}).then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}).then(function(j){
+    var d=(j&&j.data)||j||{},rows=d.rows||d.items||d.content||[],row=null;
+    rows.forEach(function(x){if(!row&&String(x.shortName||x.code||x.productCode||'').toUpperCase()===code)row=x});
+    if(!row)throw new Error('không tìm thấy mã');
+    var nav=Number(row.nav||row.navPrice||row.lastNav||row.currentNav);if(!(nav>0))throw new Error('không đọc được giá');
+    var raw=row.lastNavDate||row.navDate||'',dt=typeof raw==='number'?new Date(raw):null;
+    return {nav:nav,date:dt?ds(dt.getFullYear(),dt.getMonth()+1,dt.getDate()):(/^\d{4}-\d{2}-\d{2}/.test(String(raw))?String(raw).slice(0,10):''),name:row.name||'',type:String((row.dataFundAssetType&&row.dataFundAssetType.name)||row.fundType||'')};
+  });
+}
 function fetchNav(manual){
   var fs=funds();if(!fs.length||NAV.busy)return;
-  if(!S.url||!S.secret){if(manual)toast('Cần bật đồng bộ Google Sheets để tự lấy giá');return}
   var codes=[];fs.forEach(function(f){if(codes.indexOf(f.code)<0)codes.push(f.code)});
   NAV.busy=true;L.navAt=Date.now();saveL();refreshAssets();
-  var ctl=typeof AbortController!=='undefined'?new AbortController():null,to=setTimeout(function(){ctl&&ctl.abort()},30000);
-  fetch(S.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({secret:S.secret,action:'nav',codes:codes}),signal:ctl?ctl.signal:undefined})
-  .then(function(r){return r.json()})
-  .then(function(j){
-    if(!j.ok)L.navErr=j.err==='secret'?'Sai mã bí mật':'Máy chủ báo lỗi';
-    else if(!j.navs)L.navErr='Cần cập nhật Code.gs lên bản mới để lấy giá';
-    else{
-      L.nav=L.nav||{};var bad=[];
-      var perm=false;
-      codes.forEach(function(c){if(j.navs[c]&&j.navs[c].nav>0)L.nav[c]=Object.assign({at:Date.now()},j.navs[c]);else{var e=j.errs&&j.errs[c]||'';if(/external_request|quyền|permission/i.test(e))perm=true;bad.push(c+(e&&!perm?' ('+e+')':''))}});
-      L.navErr=perm?'Apps Script chưa được cấp quyền gọi ra ngoài. Mở Apps Script, chạy hàm capQuyen và bấm Cho phép, rồi Triển khai > Phiên bản mới.':(bad.length?'Không lấy được giá: '+bad.join(', '):'');
-      if(bad.length<codes.length)L.navOk=Date.now();
-    }
-  })
-  .catch(function(){L.navErr='Không kết nối được máy chủ'})
-  .then(function(){clearTimeout(to);NAV.busy=false;saveL();refreshAssets()});
+  var got={},err='';
+  var p;
+  if(S.url&&S.secret){
+    var ctl=typeof AbortController!=='undefined'?new AbortController():null,to=setTimeout(function(){ctl&&ctl.abort()},30000);
+    p=fetch(S.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({secret:S.secret,action:'nav',codes:codes}),signal:ctl?ctl.signal:undefined})
+    .then(function(r){return r.json()})
+    .then(function(j){
+      clearTimeout(to);
+      if(!j.ok)err=j.err==='secret'?'Sai mã bí mật':'Máy chủ báo lỗi';
+      else if(!j.navs)err='Cần cập nhật Code.gs lên bản mới để lấy giá';
+      else{
+        var bad=[],perm=false;L.nav=L.nav||{};
+        codes.forEach(function(c){if(j.navs[c]&&j.navs[c].nav>0){L.nav[c]=Object.assign({at:Date.now()},j.navs[c]);got[c]=1}else{var e=j.errs&&j.errs[c]||'';if(/external_request|quyền|permission/i.test(e))perm=true;bad.push(c+(e?' ('+e+')':''))}});
+        err=perm?'Apps Script chưa được cấp quyền gọi ra ngoài. Mở Apps Script, chạy hàm capQuyen và bấm Cho phép, rồi Triển khai > Phiên bản mới.':(bad.length?'Không lấy được giá: '+bad.join(', '):'');
+      }
+    })
+    .catch(function(){err='Không kết nối được máy chủ'});
+  }else{p=Promise.resolve();err='Bật đồng bộ Google Sheets để tự lấy giá, hoặc nhập giá tay.'}
+  p.then(function(){
+    var miss=codes.filter(function(c){return !got[c]});
+    return Promise.all(miss.map(function(c){return navDirect(c).then(function(r){L.nav=L.nav||{};L.nav[c]=Object.assign({at:Date.now()},r);got[c]=1}).catch(function(){})}));
+  }).then(function(){
+    var n=Object.keys(got).length;
+    if(n===codes.length)err='';
+    if(n)L.navOk=Date.now();
+    L.navErr=err;
+    NAV.busy=false;saveL();refreshAssets();
+  });
 }
 
 /* Ngân sách */

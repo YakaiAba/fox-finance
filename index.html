@@ -164,6 +164,13 @@ body.kp .pb,body.kp main{padding-bottom:330px}
 .emo button.on{border:2px solid var(--navy);background:var(--tint)}
 #toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:rgba(20,20,30,.92);color:#fff;padding:10px 16px;border-radius:12px;z-index:60;font-size:14px;display:none;max-width:86%;text-align:center}
 svg text{font-family:inherit}
+.wsec{margin-top:16px;padding-top:6px;border-top:1px solid var(--line)}
+.wrow{display:flex;gap:8px;align-items:stretch}.wrow .inp{flex:1;min-width:0;width:auto}
+.uni{display:flex;background:#e9ebf0;border-radius:10px;padding:3px;flex:none}
+.uni button{min-width:46px;padding:0 10px;border-radius:8px;font-weight:700;font-size:16px;color:#555}
+.uni button.on{background:#fff;color:var(--navy);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.wh{font-size:12.5px;color:var(--mut);margin-top:4px;min-height:1em}
+.fr small{display:block;font-size:11.5px;line-height:1.2}
 </style>
 </head>
 <body>
@@ -187,7 +194,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.22 (31/10/2026)';
+var APP_VER='1.23 (31/10/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -255,7 +262,7 @@ var V={
 };
 var tab='nhap';
 var pages=[];
-var editSt=null,fundSt=null;
+var editSt=null,fundSt=null,watchSt=null;
 var BAG='<img src="data:image/png;base64,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" width="24" height="24" alt="" draggable="false">';
 var CALI='<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><rect x="2" y="3" width="20" height="19" rx="3" fill="#fff" stroke="#d32f2f" stroke-width="1.4"/><path d="M2 6a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v3.2H2z" fill="#e53935"/><text x="12" y="8" font-size="5" font-weight="700" fill="#fff" text-anchor="middle">June</text><text x="12" y="19.6" font-size="10.5" font-weight="800" fill="#222" text-anchor="middle">21</text></svg>';
 var TABS=[['nhap','<span class="pen">✏️</span>','Nhập vào'],['cal',CALI,'Lịch'],['rep','📊','Báo cáo'],['bud',BAG,'Ngân sách'],['more','⋯','Khác']];
@@ -399,7 +406,7 @@ function render(){
   else if(tab==='bud')m.innerHTML=budHTML();
   else m.innerHTML=moreHTML();
   if(pages.length)renderPage();
-  if(tab==='rep'&&funds().length&&S.url&&S.secret&&!NAV.busy&&Date.now()-(L.navAt||0)>(L.navErr?5:30)*60000)fetchNav(false);
+  if(tab==='rep'&&(funds().length||watches().length)&&S.url&&S.secret&&!NAV.busy&&Date.now()-(L.navAt||0)>(L.navErr?5:30)*60000)fetchNav(false);
 }
 function sumE(f){var s=0;E().forEach(function(e){if(f(e))s+=e.amount});return s}
 function sub(e,showDate){var p=[];if(showDate)p.push(dlabel(e.date));if(e.note)p.push(esc(e.note));return p.length?'<small>'+p.join(' · ')+'</small>':''}
@@ -540,6 +547,15 @@ function holdStr(s){
 }
 function holdShort(s){var a=parse(s),b=parse(today()),m=(b.y-a.y)*12+(b.m-a.m),d=b.d-a.d;if(d<0)m--;if(m>=1)return m+' tháng';var t=Math.round((new Date(b.y,b.m-1,b.d)-new Date(a.y,a.m-1,a.d))/864e5);return Math.max(t,0)+' ngày'}
 function funds(){return D.assets.filter(function(a){return a.kind==='fund'&&!a.deleted}).sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:(a.id<b.id?-1:1)})}
+function watches(){return D.assets.filter(function(a){return a.kind==='watch'&&!a.deleted}).sort(function(a,b){var c=a.code.localeCompare(b.code,'vi');return c||(a.id<b.id?-1:1)})}
+function wTarget(w,dir){
+  var v=dir==='up'?w.upV:w.dnV,u=dir==='up'?w.upU:w.dnU;
+  if(!(v>0))return 0;
+  if(u==='p')return w.ref*(1+(dir==='up'?1:-1)*v/100);
+  return v;
+}
+function wPct(w,t){return (t/w.ref-1)*100}
+function pctS(p){return (p>=0?'+':'')+fmtN(p,2)+'%'}
 function navOf(f){var n=L.nav&&L.nav[f.code];return n&&n.nav>0?n:null}
 function priceOf(f){var n=navOf(f);return n?n.nav:(f.man>0?f.man:0)}
 function plHTML(pl,pc){return '<b class="'+(pl>=0?'thu':'chi')+'">'+(pl>=0?'+':'')+fmt(pl)+' ('+(pc>=0?'+':'')+fmtN(pc,2)+'%)</b>'}
@@ -570,7 +586,7 @@ function fundInfo(fs){
   return {list:list,tot:tot,col:col};
 }
 function assetsHTML(){
-  var g=D.assets.find(function(a){return a.id==='gold'&&!a.deleted}),fs=funds();
+  var g=D.assets.find(function(a){return a.id==='gold'&&!a.deleted}),fs=funds(),ws=watches();
   var h='<div class="sec">Tài sản</div><div class="card"><div class="ct">Vàng</div><textarea class="nt" rows="3" data-g="gold" placeholder="Ghi chú vàng (loại, số lượng, nơi giữ…)" autocomplete="off">'+esc(g?g.note||'':'')+'</textarea></div>';
   h+='<div class="card"><div class="ch2"><div class="ct">Chứng chỉ quỹ</div></div>';
   if(fs.length){
@@ -602,13 +618,39 @@ function assetsHTML(){
     if(np)h+='<div class="mut" style="margin-top:4px">'+np+' mã chưa có giá, không tính</div>';
     if(cost>0){var tp=val-cost,to=V.rep.openTotal;h+='<button class="fr'+(to?' on':'')+'" data-a="totaltoggle" style="grid-template-columns:auto 1fr;font-size:14px"><span>Tổng lời/lỗ<i class="ar">'+(to?'▴':'▾')+'</i></span><span style="text-align:right">'+plHTML(tp,(val/cost-1)*100)+'</span></button>'+(to?'<div class="fd">'+tl+'</div>':'')}
   }else h+='<div class="empty">Chưa có mã quỹ nào</div>';
-  h+='<div class="fbar"><button class="ghost" data-a="fundadd">+ Thêm mã quỹ</button>'+(fs.length?'<button class="ghost" data-a="navnow">'+(NAV.busy?'Đang lấy giá…':'↻ Cập nhật giá')+'</button>':'')+'</div>';
-  if(fs.length){
+  h+='<div class="fbar"><button class="ghost" data-a="fundadd">+ Thêm mã quỹ</button>'+((fs.length||ws.length)?'<button class="ghost" data-a="navnow">'+(NAV.busy?'Đang lấy giá…':'↻ Cập nhật giá')+'</button>':'')+'</div>';
+  if(fs.length||ws.length){
     var st=L.navErr?'<span class="chi nerr">'+esc(L.navErr)+'</span>':(L.navOk?'Giá cập nhật lúc '+hhmm(L.navOk)+' '+dshort(ds(new Date(L.navOk).getFullYear(),new Date(L.navOk).getMonth()+1,new Date(L.navOk).getDate())):(S.url?'Chưa lấy giá':'Bật đồng bộ Google Sheets để tự lấy giá, hoặc nhập giá tay khi sửa mã quỹ'));
     h+='<div class="mut" style="margin-top:10px;text-align:center">'+st+'</div>';
   }
+  h+=watchHTML(ws);
   if(S.url&&S.sv===1)h+='<div class="mut" style="margin-top:8px;text-align:center">Code.gs chưa cập nhật: Tài sản chỉ lưu trên máy này.</div>';
   return h+'</div>';
+}
+function watchHTML(ws){
+  var GS='grid-template-columns:minmax(0,1fr) minmax(0,1.25fr) minmax(0,1.25fr) minmax(0,1.25fr);gap:6px;font-size:13px';
+  var h='<div class="wsec"><div class="ct">Chờ đợi giá</div>';
+  if(ws.length){
+    h+='<div class="fh" style="'+GS+'"><span>Mã</span><span>Đối chiếu</span><span>Đợi giảm</span><span>Đợi tăng</span></div>';
+    ws.forEach(function(w){
+      var open=V.rep.openW===w.id,p=priceOf(w),td=wTarget(w,'dn'),tu=wTarget(w,'up'),n=navOf(w);
+      var hit=p&&((td&&p<=td)||(tu&&p>=tu));
+      function cell(t,cls){return t?'<span>'+fmtQ(t)+'<small class="'+cls+'">'+pctS(wPct(w,t))+'</small></span>':'<span class="mut">—</span>'}
+      h+='<button class="fr'+(open?' on':'')+'" style="'+GS+'" data-a="watchtoggle" data-id="'+w.id+'"><span>'+(hit?'🔔 ':'')+esc(w.code)+'<i class="ar">'+(open?'▴':'▾')+'</i></span><span>'+fmtQ(w.ref)+'</span>'+cell(td,'chi')+cell(tu,'thu')+'</button>';
+      if(open){
+        h+='<div class="fd"><div><b>'+esc(w.code)+'</b>'+(n&&n.name?'<br><span class="mut">'+esc(n.name)+'</span>':'')+'</div>'
+          +'<div>Giá đối chiếu: <b>'+fmtQ(w.ref)+'</b></div>'
+          +'<div>Giá đợi giảm: '+(td?'<b>'+fmtQ(td)+'</b> <span class="chi">('+pctS(wPct(w,td))+')</span>'+(w.dnU==='p'?' <span class="mut">nhập '+fmtQ(w.dnV)+'%</span>':''):'<span class="mut">không đặt</span>')+'</div>'
+          +'<div>Giá đợi tăng: '+(tu?'<b>'+fmtQ(tu)+'</b> <span class="thu">('+pctS(wPct(w,tu))+')</span>'+(w.upU==='p'?' <span class="mut">nhập '+fmtQ(w.upV)+'%</span>':''):'<span class="mut">không đặt</span>')+'</div>'
+          +'<div>Giá gần nhất: '+(p?'<b>'+fmtQ(p)+'</b>'+(n&&n.date?' <span class="mut">(ngày '+dmy(n.date)+')</span>':''):'<span class="mut">chưa có</span>')+'</div>'
+          +(p&&td?'<div>Đến vùng giảm: '+(p<=td?'<b class="thu">✓ đã chạm</b>':'cần giảm thêm <b>'+fmtN((1-td/p)*100,2)+'%</b>')+'</div>':'')
+          +(p&&tu?'<div>Đến vùng tăng: '+(p>=tu?'<b class="thu">✓ đã chạm</b>':'cần tăng thêm <b>'+fmtN((tu/p-1)*100,2)+'%</b>')+'</div>':'')
+          +(p&&(w.ref/p>20||p/w.ref>20)?'<div class="chi nerr">⚠ Giá đối chiếu và giá gần nhất chênh quá lớn: có thể nhập sai dấu thập phân. Bấm Sửa để kiểm tra.</div>':'')
+          +'<div class="bt2"><button data-a="watchedit" data-id="'+w.id+'">Sửa</button><button class="red" data-a="watchdel" data-id="'+w.id+'">Xóa</button></div></div>';
+      }
+    });
+  }else h+='<div class="empty">Chưa có mã nào chờ giá</div>';
+  return h+'<div class="fbar"><button class="ghost" data-a="watchadd">+ Thêm mã quỹ</button></div></div>';
 }
 function refreshAssets(){
   var el=$('#assets');if(!el)return;var ae=document.activeElement;
@@ -628,7 +670,7 @@ function navDirect(code){
   });
 }
 function fetchNav(manual){
-  var fs=funds();if(!fs.length||NAV.busy)return;
+  var fs=funds().concat(watches());if(!fs.length||NAV.busy)return;
   var codes=[];fs.forEach(function(f){if(codes.indexOf(f.code)<0)codes.push(f.code)});
   NAV.busy=true;L.navAt=Date.now();saveL();refreshAssets();
   var got={},err='';
@@ -693,7 +735,7 @@ function moreHTML(){
 }
 
 /* ---------- trang riêng ---------- */
-var PTITLE={edit:'Chỉnh sửa',cats:'Danh mục thu chi',basic:'Cài đặt cơ bản',sync:'Đồng bộ Google Sheets',balance:'Báo cáo thay đổi số dư',search:'Tìm kiếm giao dịch',backup:'Sao lưu dữ liệu',about:'Thông tin ứng dụng',catlist:'Chi tiết danh mục',fund:'Mã quỹ',help:'Hướng dẫn sử dụng'};
+var PTITLE={edit:'Chỉnh sửa',cats:'Danh mục thu chi',basic:'Cài đặt cơ bản',sync:'Đồng bộ Google Sheets',balance:'Báo cáo thay đổi số dư',search:'Tìm kiếm giao dịch',backup:'Sao lưu dữ liệu',about:'Thông tin ứng dụng',catlist:'Chi tiết danh mục',fund:'Mã quỹ',watch:'Chờ đợi giá',help:'Hướng dẫn sử dụng'};
 function openPage(name,arg){
   if(name==='edit'){
     var e=D.entries.find(function(x){return x.id===arg});if(!e)return;
@@ -702,6 +744,10 @@ function openPage(name,arg){
   if(name==='fund'){
     var fo=arg&&D.assets.find(function(x){return x.id===arg});
     fundSt=fo?{id:fo.id,code:fo.code,qty:liveFmt(numStr(fo.qty)),buy:liveFmt(numStr(fo.buy)),man:fo.man?liveFmt(numStr(fo.man)):'',date:fo.date}:{id:null,code:'',qty:'',buy:'',man:'',date:today()};
+  }
+  if(name==='watch'){
+    var wo=arg&&D.assets.find(function(x){return x.id===arg});
+    watchSt=wo?{id:wo.id,code:wo.code,ref:liveFmt(numStr(wo.ref)),upV:wo.upV?liveFmt(numStr(wo.upV)):'',upU:wo.upU||'d',dnV:wo.dnV?liveFmt(numStr(wo.dnV)):'',dnU:wo.dnU||'d'}:{id:null,code:'',ref:'',upV:'',upU:'d',dnV:'',dnU:'d'};
   }
   pages.push({name:name,arg:arg,pg:0,q:'',ft:'all'});
   $('#page').classList.add('show');renderPage();$('#pbody').scrollTop=0;
@@ -718,13 +764,13 @@ function closePage(){
 var SETP={basic:1,sync:1,cats:1,catlist:0,backup:1};
 function renderPage(){
   var p=pages[pages.length-1];if(!p)return;
-  $('#ptt').textContent=p.name==='catlist'?cat(p.arg).name:p.name==='fund'?(fundSt.id?'Sửa mã quỹ':'Thêm mã quỹ'):PTITLE[p.name];
+  $('#ptt').textContent=p.name==='catlist'?cat(p.arg).name:p.name==='fund'?(fundSt.id?'Sửa mã quỹ':'Thêm mã quỹ'):p.name==='watch'?(watchSt.id?'Sửa mã chờ giá':'Thêm mã chờ giá'):PTITLE[p.name];
   $('#pexit').textContent=SETP[p.name]?'Lưu lại & Thoát':'Thoát';
   var b=$('#pbody'),top=b.scrollTop;
-  var fn={edit:pgEdit,cats:pgCats,basic:pgBasic,sync:pgSync,balance:pgBalance,search:pgSearch,backup:pgBackup,about:pgAbout,catlist:pgCatList,fund:pgFund,help:pgHelp}[p.name];
+  var fn={edit:pgEdit,cats:pgCats,basic:pgBasic,sync:pgSync,balance:pgBalance,search:pgSearch,backup:pgBackup,about:pgAbout,catlist:pgCatList,fund:pgFund,watch:pgWatch,help:pgHelp}[p.name];
   b.innerHTML=fn(p);
   b.scrollTop=top;
-  if(p.name==='basic'||p.name==='sync'||p.name==='search'||p.name==='fund')bindPageInputs(p);
+  if(p.name==='basic'||p.name==='sync'||p.name==='search'||p.name==='fund'||p.name==='watch')bindPageInputs(p);
 }
 function pgEdit(p){
   if(!D.entries.find(function(x){return x.id===editSt.id&&!x.deleted})){setTimeout(closePage,0);return ''}
@@ -798,8 +844,8 @@ function pgHelp(){
   function sec(t,l){return '<div class="card"><div class="ct">'+t+'</div>'+l.map(function(x){return '<div style="margin:5px 0">• '+x+'</div>'}).join('')+'</div>'}
   return sec('Ghi thu chi',['Tab <b>Nhập vào</b>: bấm <b>Thu nhập</b> hoặc <b>Chi tiêu</b>, bấm ô số tiền để mở bàn phím tính (có + − × ÷, nút 000), chọn danh mục, ghi chú nếu cần rồi bấm Lưu.','Đổi ngày bằng ô ngày; chọn ngày/tháng/năm trong hộp hiện ra.','Sửa hoặc xóa: tab <b>Lịch</b> → bấm vào khoản.'])
   +sec('Xem lại',['<b>Lịch</b>: ô ngày có + (có thu), − (có chi) và tổng tiền ngày đó.','<b>Báo cáo</b>: xem theo Tháng / Năm / Toàn kì; bấm một danh mục để xem các khoản. Nút 📷 xuất ảnh báo cáo.','<b>Ngân sách</b>: bấm vào mục để đặt hạn mức mỗi tháng.','<b>Khác → Danh mục thu chi</b>: thêm, sửa, xóa, sắp xếp danh mục.'])
-  +sec('Tài sản (cuối tab Báo cáo)',['<b>Vàng</b>: chỉ là ô ghi chú.','<b>Chứng chỉ quỹ</b>: nhập mã, số lượng, giá mua, ngày mua. Bấm vào mã để xem lời/lỗ, thời gian giữ và nhật ký giao dịch.','Giá gần nhất tự lấy từ fmarket khi đã bật đồng bộ; chưa lấy được thì nhập giá tay khi sửa mã quỹ.'])
-  +sec('Sao lưu JSON là gì? (quan trọng)',['Là một file lưu <b>toàn bộ dữ liệu bạn đã nhập</b>: các khoản thu chi, danh mục, ngân sách, ghi chú vàng, mã chứng chỉ quỹ và nhật ký giao dịch.','Không gồm cài đặt tên app, tên máy, địa chỉ và mã bí mật đồng bộ, giá quỹ tự lấy (app lấy lại khi cần).','Dữ liệu nằm trong máy này. Mất máy, xóa Safari hoặc <b>xóa biểu tượng trên màn hình chính</b> là mất dữ liệu nếu chưa sao lưu.','<b>Khác → Sao lưu dữ liệu</b>: xuất file lưu vào Tệp/iCloud hoặc gửi cho chính mình. Nên làm ít nhất mỗi tuần; chọn Tự động để app nhắc.','Nhập file vào lại sẽ <b>gộp</b> với dữ liệu hiện có, không xóa gì. Đổi sang máy mới thì nhập file này.'])
+  +sec('Tài sản (cuối tab Báo cáo)',['<b>Vàng</b>: chỉ là ô ghi chú.','<b>Chứng chỉ quỹ</b>: nhập mã, số lượng, giá mua, ngày mua. Bấm vào mã để xem lời/lỗ, thời gian giữ và nhật ký giao dịch.','<b>Chờ đợi giá</b> (dưới dòng giá cập nhật): thêm mã quỹ bạn quan tâm, nhập giá đối chiếu, giá đợi tăng và/hoặc giảm (chọn đ hoặc %). Cột % cho biết khoảng cách so với giá đối chiếu; 🔔 hiện khi giá gần nhất đã chạm vùng giá.','Giá gần nhất tự lấy từ fmarket khi đã bật đồng bộ; chưa lấy được thì nhập giá tay khi sửa mã quỹ.'])
+  +sec('Sao lưu JSON là gì? (quan trọng)',['Là một file lưu <b>toàn bộ dữ liệu bạn đã nhập</b>: các khoản thu chi, danh mục, ngân sách, ghi chú vàng, mã chứng chỉ quỹ, nhật ký giao dịch và danh sách chờ đợi giá.','Không gồm cài đặt tên app, tên máy, địa chỉ và mã bí mật đồng bộ, giá quỹ tự lấy (app lấy lại khi cần).','Dữ liệu nằm trong máy này. Mất máy, xóa Safari hoặc <b>xóa biểu tượng trên màn hình chính</b> là mất dữ liệu nếu chưa sao lưu.','<b>Khác → Sao lưu dữ liệu</b>: xuất file lưu vào Tệp/iCloud hoặc gửi cho chính mình. Nên làm ít nhất mỗi tuần; chọn Tự động để app nhắc.','Nhập file vào lại sẽ <b>gộp</b> với dữ liệu hiện có, không xóa gì. Đổi sang máy mới thì nhập file này.'])
   +sec('Đồng bộ Google Sheets là gì?',['Là tự động gửi dữ liệu (cùng loại như file JSON) lên một bảng Google Sheets của bạn, và nhận lại thay đổi từ máy kia. Dùng để <b>iPhone và iPad luôn giống nhau</b>, không cần xuất nhập file.','Đồng thời bảng Sheets là nơi lưu dự phòng thứ hai: có các tab dễ đọc (Thu chi, Danh mục, Tài sản…) và bản sao lưu mỗi ngày giữ 30 ngày.','Cách bật: <b>Khác → Đồng bộ Google Sheets</b>, nhập địa chỉ Apps Script và mã bí mật, hai máy dùng giống nhau.','Góc trên phải báo tình trạng: ☁ Đã lưu, ⏳ Chờ gửi, ⚠ lỗi. Mất mạng thì app tự gửi lại khi có mạng.','Đồng bộ cũng là cách để app tự lấy giá chứng chỉ quỹ. Cập nhật Code.gs bằng <b>Phiên bản mới</b>, không chọn Triển khai mới.'])
   +sec('Sao lưu JSON và đồng bộ khác nhau thế nào?',['<b>Đồng bộ</b>: tự động, giữ hai máy khớp nhau, nhưng xóa nhầm ở máy này sẽ lan sang máy kia.','<b>File JSON</b>: bạn tự giữ, lùi lại được về một ngày cũ. Nên dùng cả hai.']);
 }
@@ -813,12 +859,32 @@ function checkAuto(){
   L.askedAt=Date.now();saveL();
   dlg('<h2>Đến hạn sao lưu</h2><div>'+(m==='day'?'Hôm nay chưa sao lưu.':'Tuần này chưa sao lưu.')+' Bấm "Sao lưu ngay" để xuất file JSON.</div>',[{t:'Để sau'},{t:'Sao lưu ngay',c:'pr',f:function(){exportBackup()}}]);
 }
+function wPrev(dir){
+  var s=watchSt,ref=parseNum(s.ref),v=parseNum(dir==='up'?s.upV:s.dnV),u=dir==='up'?s.upU:s.dnU;
+  if(!ref||!v)return '';
+  var t=u==='p'?ref*(1+(dir==='up'?1:-1)*v/100):v;
+  return 'Giá đợi '+fmtQ(t)+'đ · '+pctS((t/ref-1)*100)+' so với giá đối chiếu';
+}
+function wUnit(k,u){return '<div class="uni"><button class="'+(u==='d'?'on':'')+'" data-a="wunit" data-w="'+k+'" data-u="d">đ</button><button class="'+(u==='p'?'on':'')+'" data-a="wunit" data-w="'+k+'" data-u="p">%</button></div>'}
+function pgWatch(){
+  var s=watchSt,n=navOf({code:s.code.trim().toUpperCase()}),ph=n?fmtQ(n.nav):'30.857,18';
+  return '<div class="card"><label class="l" style="margin-top:0" for="wc">Mã quỹ</label><input class="inp" id="wc" maxlength="16" autocapitalize="characters" autocomplete="off" placeholder="Ví dụ: DCBF" value="'+esc(s.code)+'">'
+   +'<label class="l" for="wr">Giá đối chiếu (đ / chứng chỉ)</label><input class="inp" id="wr" inputmode="decimal" autocomplete="off" placeholder="'+ph+'" value="'+esc(s.ref)+'"><div class="wh">Nhập giá bất kỳ làm mốc, ví dụ giá bạn đang theo dõi.</div>'
+   +'<label class="l" for="wu">Giá đợi tăng (không bắt buộc)</label><div class="wrow"><input class="inp" id="wu" inputmode="decimal" autocomplete="off" placeholder="'+(s.upU==='p'?'5':ph)+'" value="'+esc(s.upV)+'">'+wUnit('up',s.upU)+'</div><div class="wh" id="wuh">'+wPrev('up')+'</div>'
+   +'<label class="l" for="wd">Giá đợi giảm (không bắt buộc)</label><div class="wrow"><input class="inp" id="wd" inputmode="decimal" autocomplete="off" placeholder="'+(s.dnU==='p'?'5':ph)+'" value="'+esc(s.dnV)+'">'+wUnit('dn',s.dnU)+'</div><div class="wh" id="wdh">'+wPrev('dn')+'</div>'
+   +'<div class="wh" style="margin-top:10px">Chọn <b>đ</b>: số nhập là mức giá cần chờ. Chọn <b>%</b>: số nhập là mức tăng/giảm so với giá đối chiếu. Cần nhập ít nhất một trong hai ô.</div></div>'
+   +'<button class="primary" data-a="watchsave">Lưu</button>';
+}
 function pgAbout(){
   var n=D.entries.length,del=D.entries.filter(function(e){return e.deleted}).length;
   return '<div class="card"><div>Phiên bản: <b>'+APP_VER+'</b></div><div>Tên máy: <b>'+(esc(L.dev)||'(chưa đặt)')+'</b></div><div>Số khoản lưu trong máy: <b>'+n+'</b> (đã xóa ẩn: '+del+')</div><div>Lưu trữ bền vững: <b id="pst">…</b></div></div><div class="mut">Không xóa biểu tượng trên màn hình chính để cập nhật: biểu tượng và Safari là hai kho dữ liệu riêng, xóa biểu tượng sẽ mất dữ liệu chưa sao lưu.</div>';
 }
 function bindPageInputs(p){
-  if(p.name==='fund'){
+  if(p.name==='watch'){
+    $('#wc').oninput=function(){watchSt.code=this.value};
+    function upd(){$('#wuh').textContent=wPrev('up');$('#wdh').textContent=wPrev('dn')}
+    [['wr','ref'],['wu','upV'],['wd','dnV']].forEach(function(x){var el=$('#'+x[0]);el.oninput=function(ev){el.value=liveFmt(el.value,ev);watchSt[x[1]]=el.value;upd()}});
+  }else if(p.name==='fund'){
     $('#fc').oninput=function(){fundSt.code=this.value};
     [['fq','qty'],['fb','buy'],['fm','man']].forEach(function(x){var el=$('#'+x[0]);el.oninput=function(ev){el.value=liveFmt(el.value,ev);fundSt[x[1]]=el.value}});
   }else if(p.name==='basic'){
@@ -992,6 +1058,39 @@ var ACT={
     var f=D.assets.find(function(x){return x.id===t.dataset.id});if(!f)return;
     confirmBox('Xóa mã quỹ?','<b>'+esc(f.code)+'</b> · '+fmtQ(f.qty)+' chứng chỉ, mua '+dmy(f.date)+'<br>Nhật ký giao dịch của mã này cũng bị xóa.','Xóa',true).then(function(ok){
       if(!ok)return;f.deleted=true;touch(f);if(V.rep.open===f.id)V.rep.open=null;toast('Đã xóa mã quỹ');changed();
+    });
+  },
+  watchtoggle:function(t){V.rep.openW=V.rep.openW===t.dataset.id?null:t.dataset.id;refreshAssets()},
+  watchadd:function(){openPage('watch',null)},
+  watchedit:function(t){openPage('watch',t.dataset.id)},
+  wunit:function(t){watchSt[t.dataset.w==='up'?'upU':'dnU']=t.dataset.u;renderPage()},
+  watchsave:function(){
+    var s=watchSt,code=s.code.trim().toUpperCase(),ref=parseNum(s.ref),uv=parseNum(s.upV),dv=parseNum(s.dnV);
+    if(!/^[A-Z0-9._-]{2,16}$/.test(code)){toast('Mã quỹ chỉ gồm chữ, số và dấu - . _ (2–16 ký tự)');return}
+    if(!ref){toast('Nhập giá đối chiếu lớn hơn 0');return}
+    if(!uv&&!dv){toast('Nhập giá đợi tăng hoặc giá đợi giảm');return}
+    var tu=uv?(s.upU==='p'?ref*(1+uv/100):uv):0,td=dv?(s.dnU==='p'?ref*(1-dv/100):dv):0;
+    if(uv&&tu<=ref){toast('Giá đợi tăng phải lớn hơn giá đối chiếu');return}
+    if(dv&&(td<=0||td>=ref)){toast('Giá đợi giảm phải nhỏ hơn giá đối chiếu và lớn hơn 0');return}
+    var p=priceOf({code:code}),warn=[];
+    if(p&&(ref/p>20||p/ref>20))warn.push('Giá đối chiếu <b>'+fmtQ(ref)+'</b> chênh hơn 20 lần so với giá gần nhất <b>'+fmtQ(p)+'</b>.');
+    if(tu&&tu/ref>20)warn.push('Giá đợi tăng <b>'+fmtQ(tu)+'</b> gấp hơn 20 lần giá đối chiếu.');
+    if(td&&ref/td>20)warn.push('Giá đợi giảm <b>'+fmtQ(td)+'</b> thấp hơn giá đối chiếu hơn 20 lần.');
+    function go(){
+      var w=s.id&&D.assets.find(function(x){return x.id===s.id});
+      if(w){w.code=code;w.ref=ref;w.upV=uv;w.upU=s.upU;w.dnV=dv;w.dnU=s.dnU;touch(w)}
+      else{w={id:'w'+uid(),kind:'watch',code:code,ref:ref,upV:uv,upU:s.upU,dnV:dv,dnU:s.dnU};touch(w);D.assets.push(w)}
+      V.rep.openW=w.id;
+      if(!L.nav||!L.nav[code]){L.navAt=0;saveL()}
+      popPage();toast('Đã lưu mã '+code+' vào Chờ đợi giá');changed();
+    }
+    if(warn.length){confirmBox('Kiểm tra lại số vừa nhập',warn.join('<br>')+'<br>Có thể bạn gõ nhầm dấu chấm và dấu phẩy.','Vẫn lưu',false).then(function(ok){if(ok)go()})}
+    else go();
+  },
+  watchdel:function(t){
+    var w=D.assets.find(function(x){return x.id===t.dataset.id});if(!w)return;
+    confirmBox('Xóa mã chờ giá?','<b>'+esc(w.code)+'</b> · giá đối chiếu '+fmtQ(w.ref),'Xóa',true).then(function(ok){
+      if(!ok)return;w.deleted=true;touch(w);if(V.rep.openW===w.id)V.rep.openW=null;toast('Đã xóa mã chờ giá');changed();
     });
   },
   navnow:function(){L.navErr='';fetchNav(true)},

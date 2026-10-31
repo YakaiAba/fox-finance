@@ -182,7 +182,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.10 (31/10/2026)';
+var APP_VER='1.11 (31/10/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -643,9 +643,8 @@ function moreHTML(){
   var bk=backupInfo(),h='';
   h+='<div class="'+(bk.bad?'warn':'ok')+'">'+(bk.bad?'⚠ ':'✓ ')+bk.txt+'</div>';
   h+='<div class="card"><button class="li" data-a="pg" data-p="basic"><i>⚙️</i><span>Cài đặt cơ bản</span></button><button class="li" data-a="pg" data-p="cats" data-arg="chi"><i>🗂️</i><span>Danh mục thu chi</span></button></div>';
-  h+='<div class="card"><button class="li" data-a="pg" data-p="sync"><i>☁️</i><span>Đồng bộ Google Sheets</span><em>'+(S.url?esc(SYN.msg||''):'Chưa bật')+'</em></button></div>';
   h+='<div class="card"><button class="li" data-a="pg" data-p="balance"><i>📈</i><span>Báo cáo thay đổi số dư</span></button><button class="li" data-a="pg" data-p="search"><i>🔍</i><span>Tìm kiếm giao dịch</span></button></div>';
-  h+='<div class="card"><button class="li" data-a="pg" data-p="backup"><i>💾</i><span>Sao lưu dữ liệu</span></button><button class="li" data-a="pg" data-p="help"><i>📖</i><span>Hướng dẫn sử dụng</span></button><button class="li" data-a="pg" data-p="about"><i>ℹ️</i><span>Thông tin ứng dụng</span></button></div>';
+  h+='<div class="card"><button class="li" data-a="pg" data-p="sync"><i>☁️</i><span>Đồng bộ Google Sheets</span><em>'+(S.url?esc(SYN.msg||''):'Chưa bật')+'</em></button><button class="li" data-a="pg" data-p="backup"><i>💾</i><span>Sao lưu dữ liệu</span></button><button class="li" data-a="pg" data-p="help"><i>📖</i><span>Hướng dẫn sử dụng</span></button><button class="li" data-a="pg" data-p="about"><i>ℹ️</i><span>Thông tin ứng dụng</span></button></div>';
   return h;
 }
 

@@ -222,7 +222,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.42 (01/11/2026)';
+var APP_VER='1.44 (01/11/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -286,7 +286,9 @@ var V={
   nhap:{type:'chi',date:today(),expr:'',cat:null,note:''},
   cal:{y:now.getFullYear(),m:now.getMonth()+1,sel:today()},
   rep:{mode:'m',y:now.getFullYear(),m:now.getMonth()+1,type:'chi'},
-  bud:{y:now.getFullYear(),m:now.getMonth()+1}
+  bud:{y:now.getFullYear(),m:now.getMonth()+1},
+  ast:{mode:'m',y:now.getFullYear(),m:now.getMonth()+1},
+  fr:{y:now.getFullYear(),m:now.getMonth()+1}
 };
 var tab='nhap';
 var pages=[];
@@ -596,16 +598,19 @@ function series(type){
   for(i=a;i<=b;i++)pts.push({x:String(i),y:0});es.forEach(function(e){pts[+e.date.slice(0,4)-a].y+=e.amount});return {pts:pts,by:'năm'};
 }
 function niceStep(v){var p=Math.pow(10,Math.floor(Math.log10(v))),f=v/p;return (f<=1?1:f<=2?2:f<=5?5:10)*p}
-function lineChart(pts,color,title){
+function lineChart(pts,color,title,zoom){
   var W=358,H=200,pl=40,pr=10,pt=22,pb=26;
-  var max=Math.max.apply(null,pts.map(function(p){return p.y}));
-  if(max<=0)return '<div class="empty">Chưa có dữ liệu</div>';
+  var ys=pts.map(function(p){return p.y}),max=Math.max.apply(null,ys),min=Math.min.apply(null,ys);
+  if(!pts.length||(!zoom&&max<=0))return '<div class="empty">Chưa có dữ liệu</div>';
   if(pts.length<2)return '<div class="empty">Cần ít nhất 2 mốc thời gian</div>';
-  var step=niceStep(max/4),top=step*Math.ceil(max/step),unit=top>=1e6?1e6:1e3,uname=unit===1e6?'triệu đồng':'nghìn đồng';
+  var lo=0;
+  if(zoom){var rg=max-min;if(rg>0){var s0=niceStep(rg/3);lo=Math.floor((min-rg*.15)/s0)*s0;if(min>=0&&lo<0)lo=0}else lo=Math.min(0,min)}
+  var step=niceStep(Math.max(max-lo,1)/4),top=lo+step*Math.ceil((max-lo)/step);if(top<=lo)top=lo+step;
+  var am=Math.max(Math.abs(top),Math.abs(lo)),unit=am>=1e6?1e6:1e3,uname=unit===1e6?'triệu đồng':'nghìn đồng';
   function X(i){return pl+(W-pl-pr)*i/(pts.length-1)}
-  function Y(v){return H-pb-(H-pt-pb)*v/top}
+  function Y(v){return H-pb-(H-pt-pb)*(v-lo)/(top-lo)}
   var g='',v;
-  for(v=0;v<=top+1e-9;v+=step){g+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e5ea"/><text x="'+(pl-4)+'" y="'+(Y(v)+4)+'" font-size="10" fill="#6b7280" text-anchor="end">'+String(+(v/unit).toFixed(2)).replace('.',',')+'</text>'}
+  for(v=lo;v<=top+1e-9;v+=step){g+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="#e3e5ea"/><text x="'+(pl-4)+'" y="'+(Y(v)+4)+'" font-size="10" fill="#6b7280" text-anchor="end">'+String(+(v/unit).toFixed(2)).replace('.',',')+'</text>'}
   var xs=Math.ceil(pts.length/7),xl='';
   pts.forEach(function(p,i){if(i%xs===0||i===pts.length-1&&pts.length<=12)xl+='<text x="'+X(i)+'" y="'+(H-8)+'" font-size="10" fill="#6b7280" text-anchor="middle">'+p.x+'</text>'});
   var P=pts.map(function(p,i){return [X(i),Y(p.y)]}),d='M'+P[0][0]+' '+P[0][1];
@@ -637,7 +642,7 @@ function repHTML(){
   var tt=th+ch,rt=[[th,'Thu nhập','#2e7d32','thu','+'],[ch,'Chi tiêu','#c62828','chi','-']];
   h+='<div class="card"><div class="ct">Tỷ lệ thu chi</div>'+donut({total:tt,cc:th-ch>=0?'#2e7d32':'#c62828',cv:(th-ch>=0?'+':'-')+fmtShort(Math.abs(th-ch)),list:rt.map(function(x){return {v:x[0],c:{color:x[2]}}})})
    +(tt?rt.map(function(x){return '<div class="lgr"><span><i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+x[2]+';margin-right:6px"></i>'+x[1]+'</span><span class="'+x[3]+'">'+x[4]+money(x[0])+' <small>'+(x[0]/tt*100).toFixed(1).replace('.',',')+'%</small></span></div>'}).join(''):'')
-   +'<div class="tot"><span>Tổng</span><b class="'+(th-ch>=0?'thu':'chi')+'">'+(th-ch>=0?'+':'-')+money(Math.abs(th-ch))+'</b></div></div>';
+   +'<div class="tot"><span>Tổng tiền mặt</span><b class="'+(th-ch>=0?'thu':'chi')+'">'+(th-ch>=0?'+':'-')+money(Math.abs(th-ch))+'</b></div></div>';
   h+='<div class="seg"><button data-a="reptype" data-v="thu" class="thu'+(r.type==='thu'?' on':'')+'">Thu nhập</button><button data-a="reptype" data-v="chi" class="chi'+(r.type==='chi'?' on':'')+'">Chi tiêu</button></div>';
   var g=groups(r.type);
   h+='<div class="card">';
@@ -725,7 +730,7 @@ function fundInfo(fs){
 }
 function assetsHTML(){
   var g=D.assets.find(function(a){return a.id==='gold'&&!a.deleted}),fs=funds(),ws=watches();
-  var h='<div class="sec">Tài sản</div><div class="card"><div class="ct">Vàng</div><textarea class="nt" rows="3" data-g="gold" placeholder="Ghi chú vàng (loại, số lượng, nơi giữ…)" autocomplete="off">'+esc(g?g.note||'':'')+'</textarea></div>';
+  var h='<div class="sec">Đầu tư</div><div class="card"><div class="ct">Vàng</div><textarea class="nt" rows="3" data-g="gold" placeholder="Ghi chú vàng (loại, số lượng, nơi giữ…)" autocomplete="off">'+esc(g?g.note||'':'')+'</textarea></div>';
   h+='<div class="card"><div class="ch2"><div class="ct">Chứng chỉ quỹ</div></div>';
   if(fs.length){
     var info=fundInfo(fs),GS='grid-template-columns:minmax(0,1.3fr) minmax(0,1.8fr) minmax(0,.85fr) minmax(0,1.05fr);gap:6px;font-size:13px';
@@ -761,10 +766,10 @@ function assetsHTML(){
     var st=L.navErr?'<span class="chi nerr">'+esc(L.navErr)+'</span>':(L.navOk?navAtTxt():(S.url||priceUrl()?'Chưa lấy giá':'Bật đồng bộ Google Sheets để tự lấy giá, hoặc nhập giá tay khi sửa mã quỹ'));
     h+='<div class="mut" style="margin-top:10px;text-align:center">'+st+'</div>';
   }
-  if(fs.length||flogs().length)h+='<button class="ghost" data-a="pg" data-p="fundrep" style="margin-top:8px">📊 Báo cáo biến động chứng chỉ quỹ</button>';
+  if(fs.length||flogs().length)h+='<button class="ghost" data-a="pg" data-p="fundrep" style="margin-top:8px">Báo cáo biến động chứng chỉ quỹ</button>';
   h+=watchHTML(ws);
   if(S.url&&S.sv===1)h+='<div class="mut" style="margin-top:8px;text-align:center">Code.gs chưa cập nhật: Tài sản chỉ lưu trên máy này.</div>';
-  return h+'</div>';
+  return h+'</div>'+astHTML();
 }
 function checkAlerts(){
   if($('#dl').classList.contains('show'))return;
@@ -939,6 +944,7 @@ function renderPage(){
   var fn={edit:pgEdit,cats:pgCats,basic:pgBasic,sync:pgSync,balance:pgBalance,search:pgSearch,fundrep:pgFundRep,backup:pgBackup,about:pgAbout,catlist:pgCatList,fund:pgFund,watch:pgWatch,cd:pgCd,cdsug:pgCdSug,help:pgHelp}[p.name];
   b.innerHTML=fn(p);
   b.scrollTop=top;
+  if(p.name==='fundrep')fitCal();
   if(p.name==='basic'||p.name==='sync'||p.name==='search'||p.name==='fund'||p.name==='watch'||p.name==='cd')bindPageInputs(p);
 }
 function pgEdit(p){
@@ -1051,7 +1057,7 @@ function lockSetBio(){
   if(!bioOK()){toast('Máy này không hỗ trợ Face ID / Touch ID trong trình duyệt');return Promise.resolve(false)}
   return bioCreate().then(function(id){L.lock.cred=id;saveL();return true}).catch(function(){toast('Không bật được Face ID / Touch ID, vẫn dùng mã PIN');return false});
 }
-/* Báo cáo quỹ: mốc thứ 6 hằng tuần + nhật ký mua bán */
+/* Báo cáo quỹ: mốc mỗi ngày + nhật ký mua bán */
 function lastFri(t){var p=parse(t),d=new Date(p.y,p.m-1,p.d);d.setDate(d.getDate()-(d.getDay()+2)%7);return ds(d.getFullYear(),d.getMonth()+1,d.getDate())}
 function snaps(){return D.assets.filter(function(a){return a.kind==='snap'&&!a.deleted}).sort(function(a,b){return a.date<b.date?-1:1})}
 function flogs(){return D.assets.filter(function(a){return a.kind==='flog'&&!a.deleted}).sort(function(a,b){return (b.at||0)-(a.at||0)})}
@@ -1060,25 +1066,76 @@ function snapFund(){
   var fs=funds();if(!fs.length||fs.some(function(f){return !priceOf(f)}))return;
   var val=0,cost=0,items=fs.map(function(f){var p=priceOf(f);val+=f.qty*p;cost+=f.qty*f.buy;return {c:f.code,q:f.qty,b:f.buy,p:p}});
   val=Math.round(val);cost=Math.round(cost);
-  var ss=snaps(),latest=ss.length?ss[ss.length-1].date:'',t=today(),fr=lastFri(t),date=null;
-  if(!latest)date=t;else if(latest<fr)date=fr;else if(t===fr&&latest===fr)date=fr;else return;
-  var id='s'+date,r=D.assets.find(function(a){return a.id===id});
+  var t=today(),id='s'+t,r=D.assets.find(function(a){return a.id===id});
   if(r&&!r.deleted&&r.val===val&&r.cost===cost)return;
-  if(!r){r={id:id,kind:'snap',date:date};D.assets.push(r)}
-  r.deleted=false;r.val=val;r.cost=cost;r.items=items;r.at=Date.now();r.late=date!==t?t:'';touch(r);changed();
+  if(!r){r={id:id,kind:'snap',date:t};D.assets.push(r)}
+  r.deleted=false;r.val=val;r.cost=cost;r.items=items;r.at=Date.now();touch(r);changed();
+}
+/* giá trị quỹ từng ngày: ngày không có mốc dùng mốc gần nhất trước đó */
+function fundDays(a,b){
+  var ss=snaps(),out={},k=-1,prev=null,d=a;
+  while(k+1<ss.length&&ss[k+1].date<=a)k++;
+  var t=new Date(parse(a).y,parse(a).m-1,parse(a).d);
+  for(;d<=b;){
+    while(k+1<ss.length&&ss[k+1].date<=d)k++;
+    var cur=k>=0?ss[k]:null;
+    out[d]={v:cur?cur.val:null,cost:cur?cur.cost:0,exact:!!(cur&&cur.date===d)};
+    t.setDate(t.getDate()+1);d=ds(t.getFullYear(),t.getMonth()+1,t.getDate());
+  }
+  return out;
+}
+function fundNow(){var v=0;funds().forEach(function(f){var p=priceOf(f);if(p)v+=f.qty*p});return v}
+function cashAt(){var es=E().slice().sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:0}),i=0,c=0;return function(d){while(i<es.length&&es[i].date<=d){c+=es[i].type==='thu'?es[i].amount:-es[i].amount;i++}return c}}
+function cashAll(){var c=0;E().forEach(function(e){c+=e.type==='thu'?e.amount:-e.amount});return c}
+function astPts(){
+  var a=V.ast,t=today(),from,to,ss=snaps(),es=E().map(function(e){return e.date}).sort();
+  if(a.mode==='y'){from=a.y+'-01-01';to=a.y+'-12-31'}else{from=ds(a.y,a.m,1);to=ds(a.y,a.m,dim(a.y,a.m))}
+  if(to>t)to=t;
+  var start=ss.length?ss[0].date:(es[0]||'');if(!start||start>from)from=start;
+  if(!from||from>to)return [];
+  var fd=fundDays(from,to),cash=cashAt(),pts=[],t2=new Date(parse(from).y,parse(from).m-1,parse(from).d),d=from;
+  for(;d<=to;){
+    var f=fd[d];pts.push({x:a.mode==='y'?pad(parse(d).d)+'/'+pad(parse(d).m):String(parse(d).d),y:cash(d)+(f.v||0)});
+    t2.setDate(t2.getDate()+1);d=ds(t2.getFullYear(),t2.getMonth()+1,t2.getDate());
+  }
+  return pts;
+}
+function astHTML(){
+  var a=V.ast,inv=fundNow(),cash=cashAll(),tot=inv+cash;
+  var h='<div class="card"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><b>Biến động tài sản</b><b style="font-size:18px" class="'+(tot>=0?'':'chi')+'">'+(tot<0?'-':'')+fmt(Math.abs(tot))+'đ</b></div>'
+   +'<div class="mut" style="text-align:right;margin-bottom:8px">Đầu tư '+fmt(inv)+'đ + tiền mặt '+(cash<0?'-':'')+fmt(Math.abs(cash))+'đ</div>'
+   +'<div class="seg" style="max-width:none"><button data-a="astmode" data-v="m" class="'+(a.mode==='m'?'on':'')+'">Tháng</button><button data-a="astmode" data-v="y" class="'+(a.mode==='y'?'on':'')+'">Năm</button></div>'
+   +navHTML(a.mode==='y'?'Năm '+a.y:pad(a.m)+'/'+a.y,a.mode==='y'?'':monthSub(a.y,a.m),'astprev','astnext')
+   +lineChart(astPts(),'#12306B','Tổng tài sản theo ngày',true)
+   +'<div class="mut" style="margin-top:4px">Tổng tài sản = giá trị đầu tư (chứng chỉ quỹ) + tiền mặt (tổng thu − tổng chi đã nhập). Ngày không mở app dùng giá trị gần nhất trước đó; biểu đồ bắt đầu từ ngày app ghi giá trị quỹ đầu tiên.</div></div>';
+  return h;
 }
 function pgFundRep(){
-  var ss=snaps(),h='';
+  var f=V.fr,n=dim(f.y,f.m),t=today(),first=(new Date(f.y,f.m-1,1).getDay()+6)%7,rows=Math.ceil((first+n)/7),ss=snaps(),h='';
+  var a=ds(f.y,f.m,1),b=ds(f.y,f.m,n);if(b>t)b=t;
+  var pd=new Date(f.y,f.m-1,0),prevD=ds(pd.getFullYear(),pd.getMonth()+1,pd.getDate()),fd=a<=b?fundDays(prevD,b):{};
   if(ss.length){
-    h+='<div class="card">'+lineChart(ss.map(function(x){return {x:x.date.slice(8)+'/'+x.date.slice(5,7),y:x.val}}),'#12306B','Tổng giá trị chứng chỉ quỹ theo tuần')+'</div>';
-    var GS='display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.2fr) minmax(0,1.3fr) minmax(0,1.3fr);gap:6px;font-size:12.5px;padding:7px 0;border-top:1px solid var(--line);align-items:start';
-    h+='<div class="card"><div class="ct">Mốc thứ 6 hằng tuần</div><div class="mut" style="'+GS.replace('border-top:1px solid var(--line);','')+'"><span>Ngày</span><span>Giá trị</span><span>So tuần trước</span><span>Lời/lỗ</span></div>';
-    h+=ss.slice().reverse().map(function(x,k,a){var pv=a[k+1];
-      return '<div style="'+GS+'"><span>'+x.date.slice(8)+'/'+x.date.slice(5,7)+(x.late?'*':'')+'</span><span>'+fmt(x.val)+'</span><span>'+(pv?plHTML(x.val-pv.val,pv.val?(x.val/pv.val-1)*100:0):'<span class="mut">—</span>')+'</span><span>'+(x.cost>0?plHTML(x.val-x.cost,(x.val/x.cost-1)*100):'—')+'</span></div>'}).join('')+'</div>';
-  }else h+='<div class="card"><div class="empty">Chưa có mốc nào. App tự ghi mốc vào thứ 6 hằng tuần khi bạn mở app và các mã đã có giá.</div></div>';
+    var last=ss[ss.length-1];
+    h+='<div class="card"><div class="dh" style="margin-top:0"><span>Giá trị gần nhất ('+dshort(last.date)+')</span><b>'+fmt(last.val)+'đ</b></div>'+(last.cost>0?'<div class="tr" style="display:flex;justify-content:space-between;padding:6px 2px"><span>Vốn '+fmt(last.cost)+'đ</span>'+plHTML(last.val-last.cost,(last.val/last.cost-1)*100)+'</div>':'')+'</div>';
+  }
+  h+=navHTML(pad(f.m)+'/'+f.y,monthSub(f.y,f.m),'frprev','frnext');
+  h+='<div class="cal">'+['T2','T3','T4','T5','T6','T7','CN'].map(function(x,i){return '<div class="h'+(i===5?' sa':'')+(i===6?' su':'')+'">'+x+'</div>'}).join('');
+  var pts=[];
+  for(var i=0;i<rows*7;i++){
+    var d=i-first+1;
+    if(d<1||d>n){var o=new Date(f.y,f.m-1,d);h+='<button class="o" type="button"><span class="d">'+o.getDate()+'</span></button>';continue}
+    var dd=ds(f.y,f.m,d),x=dd<=b?fd[dd]:null,body='';
+    if(x&&x.v!==null){
+      var pv=fd[ds(new Date(f.y,f.m-1,d-1).getFullYear(),new Date(f.y,f.m-1,d-1).getMonth()+1,new Date(f.y,f.m-1,d-1).getDate())],df=x.exact&&pv&&pv.v!==null?x.v-pv.v:0;
+      body='<span class="nt2" style="'+(x.exact?'':'color:#9aa0aa;font-weight:500')+'" data-s="'+shortAmt(x.v)+'">'+calAmt(x.v)+'</span>'+(df?'<span class="nt2 '+(df>0?'t':'c')+'" data-s="'+(df>0?'+':'-')+shortAmt(Math.abs(df))+'">'+(df>0?'+':'-')+calAmt(Math.abs(df))+'</span>':'');
+      pts.push({x:String(d),y:x.v});
+    }
+    h+='<button type="button" class="'+(dd===t?'td':'')+'"><span class="top"><span class="d">'+d+'</span></span>'+body+'</button>';
+  }
+  h+='</div><div class="mut" style="margin:6px 2px 10px">Dòng trên: giá trị chứng chỉ quỹ cuối ngày (màu xám nhạt: ngày không mở app, dùng giá trị gần nhất trước đó). Dòng dưới: chênh so với ngày trước, gồm cả phần mua/bán trong ngày.'+(L.navOk?'<br>'+navAtTxt():'')+'</div>';
+  h+='<div class="card">'+lineChart(pts,'#12306B','Giá trị chứng chỉ quỹ theo ngày',true)+'</div>';
   var lg=flogs();
   h+='<div class="card"><div class="ct">Nhật ký mua bán</div>'+(lg.length?lg.map(function(x){return '<div style="display:flex;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line)"><div style="flex:1;min-width:0;font-size:14px"><div><b>'+esc(x.act)+' '+esc(x.code)+'</b> <span class="mut">'+dshort(x.date)+'</span></div><div class="mut">'+(x.qty?fmtQ(x.qty)+' chứng chỉ':'')+(x.price?' × '+fmtN(x.price,2):'')+(x.note?(x.qty?' · ':'')+esc(x.note):'')+'</div></div><button class="red" data-a="flogdel" data-id="'+x.id+'" style="padding:6px 12px;font-size:13px;border:1px solid #e3b5b5;border-radius:10px;color:var(--chi);background:#fff">Xóa</button></div>'}).join(''):'<div class="empty">Chưa có giao dịch. Thêm, sửa số lượng hoặc xóa mã quỹ thì app tự ghi vào đây.</div>')+'</div>';
-  h+='<div class="mut">Chênh lệch so tuần trước gồm cả phần mua/bán trong tuần. Mốc dùng giá gần nhất lúc mở app; nếu mở sau thứ 6 thì mốc ghi vào thứ 6 gần nhất và có dấu *. Mốc đầu tiên ghi ngay khi có giá.'+(L.navOk?'<br>'+navAtTxt():'')+'</div>';
   return h;
 }
 function pgBasic(){
@@ -1124,7 +1181,7 @@ function pgHelp(){
   function sec(t,l){return '<div class="card"><div class="ct">'+t+'</div>'+l.map(function(x){return '<div style="margin:5px 0">• '+x+'</div>'}).join('')+'</div>'}
   return sec('Ghi thu chi',['Tab <b>Thu chi</b>: bấm <b>Thu nhập</b> hoặc <b>Chi tiêu</b>, bấm ô số tiền để mở bàn phím tính (có + − × ÷, nút 000), chọn danh mục, ghi chú nếu cần rồi bấm Lưu.','Đổi ngày bằng ô ngày; chọn ngày/tháng/năm trong hộp hiện ra.','Sửa hoặc xóa: tab <b>Lịch</b> → bấm vào khoản.'])
   +sec('Xem lại',['<b>Lịch</b>: ô ngày hiện ⭐️ nếu có sự kiện, dòng đỏ là tổng chi, dòng xanh là tổng thu của ngày đó (rút gọn: 517.000đ = 517k, 1.008.000đ = 1,008tr). Bấm vào một ngày để mở khung chi tiết ngay dưới tuần đó (thu chi và sự kiện của ngày); bấm lại hoặc bấm Đóng để thu gọn.','<b>Danh sách sự kiện</b> (dưới lịch): bấm <b>+ Ngày lễ gợi ý</b> để thêm các ngày lễ còn lại trong năm (âm lịch tự quy đổi), hoặc <b>+ Tạo thủ công</b> cho sinh nhật, kỷ niệm… (chọn <b>Nhắc lại</b> mỗi tuần, tháng hoặc năm thì app tự tính lần kế tiếp) “Còn lại” hiện số ngày, từ 1 tháng trở lên hiện dạng tháng + ngày. Bấm vào dòng để sửa hoặc xóa. Sự kiện đã qua: xóa khỏi danh sách thì vẫn còn trên lịch, xóa hẳn ở khung chi tiết của ngày đó.','<b>Báo cáo</b>: xem theo Tháng / Năm / Tất cả; bấm một danh mục để xem các khoản. Nút 📷 xuất ảnh báo cáo.','<b>Ngân sách</b>: bấm vào mục để đặt hạn mức mỗi tháng.','<b>Thu chi → Danh mục → Chỉnh sửa</b>: thêm, sửa, xóa, sắp xếp danh mục.'])
-  +sec('Tài sản (cuối tab Báo cáo)',['<b>Vàng</b>: chỉ là ô ghi chú.','<b>Chứng chỉ quỹ</b>: nhập mã, số lượng, giá mua, ngày mua. Bấm vào mã để xem lời/lỗ, thời gian giữ và nhật ký giao dịch.','<b>Chờ đợi giá</b> (dưới dòng giá cập nhật): thêm mã quỹ bạn quan tâm, nhập giá đối chiếu và kỳ vọng (giảm hoặc tăng, tính bằng đ hoặc %). Cột Hiện tại cho biết giá gần nhất và tỉ lệ % so với giá đối chiếu (âm hiện đỏ). Bấm vào dòng để xem thêm <b>Còn lại</b>: giá gần nhất còn cách điểm kỳ vọng bao nhiêu; 🔔 hiện khi đã chạm điểm kỳ vọng, và app hiện hộp nhắc khi bạn mở app (mỗi mã một lần mỗi ngày). iOS không cho web báo ngầm khi app đóng.','Giá gần nhất tự lấy từ fmarket (khi mở app hoặc bấm ↻ Cập nhật giá); chưa lấy được thì nhập giá tay khi sửa mã quỹ.'])
+  +sec('Đầu tư (cuối tab Báo cáo)',['<b>Vàng</b>: chỉ là ô ghi chú.','<b>Chứng chỉ quỹ</b>: nhập mã, số lượng, giá mua, ngày mua. Bấm vào mã để xem lời/lỗ, thời gian giữ và nhật ký giao dịch.','<b>Chờ đợi giá</b> (dưới dòng giá cập nhật): thêm mã quỹ bạn quan tâm, nhập giá đối chiếu và kỳ vọng (giảm hoặc tăng, tính bằng đ hoặc %). Cột Hiện tại cho biết giá gần nhất và tỉ lệ % so với giá đối chiếu (âm hiện đỏ). Bấm vào dòng để xem thêm <b>Còn lại</b>: giá gần nhất còn cách điểm kỳ vọng bao nhiêu; 🔔 hiện khi đã chạm điểm kỳ vọng, và app hiện hộp nhắc khi bạn mở app (mỗi mã một lần mỗi ngày). iOS không cho web báo ngầm khi app đóng.','Giá gần nhất tự lấy từ fmarket (khi mở app hoặc bấm ↻ Cập nhật giá); chưa lấy được thì nhập giá tay khi sửa mã quỹ.'])
   +sec('Sao lưu JSON là gì? (quan trọng)',['Là một file lưu <b>toàn bộ dữ liệu bạn đã nhập</b>: các khoản thu chi, danh mục, ngân sách, ghi chú vàng, mã chứng chỉ quỹ, nhật ký giao dịch danh sách chờ đợi giá và danh sách sự kiện.','Không gồm cài đặt tên app, tên máy, địa chỉ và mã bí mật đồng bộ, giá quỹ tự lấy (app lấy lại khi cần).','Dữ liệu nằm trong máy này. Mất máy, xóa Safari hoặc <b>xóa biểu tượng trên màn hình chính</b> là mất dữ liệu nếu chưa sao lưu.','<b>Khác → Sao lưu dữ liệu</b>: xuất file lưu vào Tệp/iCloud hoặc gửi cho chính mình. Nên làm ít nhất mỗi tuần; chọn Tự động để app nhắc.','Nhập file vào lại sẽ <b>gộp</b> với dữ liệu hiện có, không xóa gì. Đổi sang máy mới thì nhập file này.'])
   +sec('Đồng bộ Google Sheets là gì?',['Là tự động gửi dữ liệu (cùng loại như file JSON) lên một bảng Google Sheets của bạn, và nhận lại thay đổi từ máy kia. Dùng để <b>iPhone và iPad luôn giống nhau</b>, không cần xuất nhập file.','Đồng thời bảng Sheets là nơi lưu dự phòng thứ hai: có các tab dễ đọc (Thu chi, Danh mục, Tài sản…) và bản sao lưu mỗi ngày giữ 30 ngày.','Cách bật: <b>Khác → Đồng bộ Google Sheets</b>, nhập địa chỉ Apps Script và mã bí mật, hai máy dùng giống nhau.','Góc trên phải báo tình trạng: ☁ Đã lưu, ⏳ Chờ gửi, ⚠ lỗi. Mất mạng thì app tự gửi lại khi có mạng.','Đồng bộ cũng là cách để app tự lấy giá chứng chỉ quỹ. Cập nhật Code.gs bằng <b>Phiên bản mới</b>, không chọn Triển khai mới.'])
   +sec('Sao lưu JSON và đồng bộ khác nhau thế nào?',['<b>Đồng bộ</b>: tự động, giữ hai máy khớp nhau, nhưng xóa nhầm ở máy này sẽ lan sang máy kia.','<b>File JSON</b>: bạn tự giữ, lùi lại được về một ngày cũ. Nên dùng cả hai.']);
@@ -1385,6 +1442,11 @@ var ACT={
       if(!ok)return;flog('Xóa mã',f.code,f.qty,priceOf(f),'Mua '+dmy(f.date)+' giá '+fmtN(f.buy,2));f.deleted=true;touch(f);if(V.rep.open===f.id)V.rep.open=null;toast('Đã xóa mã quỹ');changed();
     });
   },
+  astmode:function(t){V.ast.mode=t.dataset.v;refreshAssets()},
+  astprev:function(){var a=V.ast;if(a.mode==='y')a.y--;else{a.m--;if(a.m<1){a.m=12;a.y--}}refreshAssets()},
+  astnext:function(){var a=V.ast;if(a.mode==='y')a.y++;else{a.m++;if(a.m>12){a.m=1;a.y++}}refreshAssets()},
+  frprev:function(){var f=V.fr;f.m--;if(f.m<1){f.m=12;f.y--}renderPage()},
+  frnext:function(){var f=V.fr;f.m++;if(f.m>12){f.m=1;f.y++}renderPage()},
   flogdel:function(t){var r=D.assets.find(function(x){return x.id===t.dataset.id});if(!r)return;r.deleted=true;touch(r);save();schedSync(1200);renderPage()},
   watchtoggle:function(t){V.rep.openW=V.rep.openW===t.dataset.id?null:t.dataset.id;refreshAssets()},
   watchadd:function(){openPage('watch',null)},

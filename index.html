@@ -181,6 +181,19 @@ svg text{font-family:inherit}
 .cdr .rm small{font-size:11.5px}
 .cdr.past{opacity:.55}
 .cdadd{flex:none;padding:7px 16px;border-radius:999px;background:var(--navy);color:#fff;font-weight:600}
+#lk{position:fixed;inset:0;z-index:100;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px calc(env(safe-area-inset-right) + 20px) calc(env(safe-area-inset-bottom) + 16px) 20px}
+#lk.show{display:flex}
+#lk h2{margin:0 0 4px;font-size:20px;color:var(--navy)}
+#lk .ls{color:#666;font-size:14px;min-height:20px;margin-bottom:16px;text-align:center}
+#lk .ld{display:flex;gap:14px;margin-bottom:10px}
+#lk .ld i{width:14px;height:14px;border-radius:50%;border:2px solid var(--navy)}
+#lk .ld i.on{background:var(--navy)}
+#lk .le{min-height:20px;color:var(--chi);font-weight:600;font-size:14px;margin-bottom:10px}
+#lk .lp{display:grid;grid-template-columns:repeat(3,72px);gap:12px}
+#lk .lp button{height:62px;border-radius:50%;background:#fff;border:1px solid var(--line);font-size:24px;font-weight:600;color:var(--navy)}
+#lk .lp button.x{background:none;border:0;font-size:14px;color:#555}
+#lk.sh .ld{animation:lksh .3s}
+@keyframes lksh{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
 </style>
 </head>
 <body>
@@ -200,11 +213,12 @@ svg text{font-family:inherit}
   </div>
 </div>
 <div id="dl"></div>
+<div id="lk"></div>
 <div id="toast"></div>
 <script>
 (function(){
 'use strict';
-var APP_VER='1.38 (01/11/2026)';
+var APP_VER='1.39 (01/11/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -868,14 +882,14 @@ function backupInfo(){
 function moreHTML(){
   var bk=backupInfo(),h='';
   h+='<div class="'+(bk.bad?'warn':'ok')+'">'+(bk.bad?'⚠ ':'✓ ')+bk.txt+'</div>';
-  h+='<div class="card"><button class="li" data-a="pg" data-p="basic"><i>⚙️</i><span>Cài đặt cơ bản</span></button></div>';
-  h+='<div class="card"><button class="li" data-a="pg" data-p="balance"><i>📈</i><span>Báo cáo thay đổi số dư</span></button><button class="li" data-a="pg" data-p="search"><i>🔍</i><span>Tìm kiếm giao dịch</span></button></div>';
+  h+='<div class="card"><button class="li" data-a="pg" data-p="basic"><i>⚙️</i><span>Cài đặt</span></button></div>';
+  h+='<div class="card"><button class="li" data-a="pg" data-p="search"><i>🔍</i><span>Tìm kiếm giao dịch</span></button><button class="li" data-a="pg" data-p="balance"><i>📈</i><span>Báo cáo biến động số dư</span></button></div>';
   h+='<div class="card"><button class="li" data-a="pg" data-p="sync"><i>☁️</i><span>Đồng bộ Google Sheets</span><em>'+(S.url?esc(SYN.msg||''):'Chưa bật')+'</em></button><button class="li" data-a="pg" data-p="backup"><i>💾</i><span>Sao lưu dữ liệu</span></button><button class="li" data-a="pg" data-p="help"><i>📖</i><span>Hướng dẫn sử dụng</span></button><button class="li" data-a="pg" data-p="about"><i>ℹ️</i><span>Thông tin ứng dụng</span></button></div>';
   return h;
 }
 
 /* ---------- trang riêng ---------- */
-var PTITLE={edit:'Chỉnh sửa',cats:'Danh mục thu chi',basic:'Cài đặt cơ bản',sync:'Đồng bộ Google Sheets',balance:'Báo cáo thay đổi số dư',search:'Tìm kiếm giao dịch',backup:'Sao lưu dữ liệu',about:'Thông tin ứng dụng',catlist:'Chi tiết danh mục',fund:'Mã quỹ',watch:'Chờ đợi giá',cd:'Sự kiện',cdsug:'Ngày lễ gợi ý',help:'Hướng dẫn sử dụng'};
+var PTITLE={edit:'Chỉnh sửa',cats:'Danh mục thu chi',basic:'Cài đặt',sync:'Đồng bộ Google Sheets',balance:'Báo cáo biến động số dư',search:'Tìm kiếm giao dịch',backup:'Sao lưu dữ liệu',about:'Thông tin ứng dụng',catlist:'Chi tiết danh mục',fund:'Mã quỹ',watch:'Chờ đợi giá',cd:'Sự kiện',cdsug:'Ngày lễ gợi ý',help:'Hướng dẫn sử dụng'};
 function openPage(name,arg){
   if(name==='edit'){
     var e=D.entries.find(function(x){return x.id===arg});if(!e)return;
@@ -947,9 +961,90 @@ function pgCats(p){
     +'<button class="arr" data-a="cedit" data-id="'+c.id+'">✏️</button><button class="arr" data-a="cdel" data-id="'+c.id+'">🗑️</button></div>'}).join('')||'<div class="empty">Chưa có danh mục</div>';
   return h+'</div><button class="primary" data-a="cadd">＋ Thêm danh mục</button>';
 }
+/* ---------- Bảo mật ứng dụng (khóa trên máy này, không đồng bộ) ---------- */
+var LKN=6,lkClose=null,hiddenAt=0;
+function lkOn(){return L.lock&&L.lock.on?L.lock:null}
+function b64(b){var s='',u=new Uint8Array(b);for(var i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return btoa(s)}
+function unb64(s){var a=atob(s),u=new Uint8Array(a.length);for(var i=0;i<a.length;i++)u[i]=a.charCodeAt(i);return u}
+function rnd(n){var u=new Uint8Array(n);(window.crypto||{getRandomValues:function(x){for(var i=0;i<x.length;i++)x[i]=Math.random()*256}}).getRandomValues(u);return u}
+function pinHash(pin,salt){
+  if(window.crypto&&crypto.subtle&&window.TextEncoder)return crypto.subtle.digest('SHA-256',new TextEncoder().encode(salt+':'+pin)).then(b64);
+  var h=5381,t=salt+':'+pin;for(var i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))|0;return Promise.resolve('x'+h);
+}
+function bioOK(){return !!(window.PublicKeyCredential&&navigator.credentials&&navigator.credentials.create)}
+function bioCreate(){
+  return navigator.credentials.create({publicKey:{challenge:rnd(32),rp:{name:'Quản lý tài chính',id:location.hostname},user:{id:rnd(16),name:'chu-may',displayName:'Chủ máy'},pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},timeout:60000}}).then(function(c){return b64(c.rawId)});
+}
+function bioGet(id){
+  return navigator.credentials.get({publicKey:{challenge:rnd(32),rpId:location.hostname,allowCredentials:[{type:'public-key',id:unb64(id)}],userVerification:'required',timeout:60000}}).then(function(){return true});
+}
+/* o: {title,sub,submit(pin)->Promise<true|'lỗi'|{title,sub}>, cancel?:true, bio?:fn->Promise} */
+function lockUI(o){
+  var el=$('#lk'),buf='';
+  function paint(err){
+    var d='';for(var i=0;i<LKN;i++)d+='<i class="'+(i<buf.length?'on':'')+'"></i>';
+    var k='';[1,2,3,4,5,6,7,8,9].forEach(function(n){k+='<button data-lk="'+n+'">'+n+'</button>'});
+    k+=(o.bio?'<button class="x" data-lk="bio" aria-label="Face ID / Touch ID">🔓<br>Face ID</button>':(o.cancel?'<button class="x" data-lk="cancel">Hủy</button>':'<span></span>'))+'<button data-lk="0">0</button><button class="x" data-lk="del" aria-label="Xóa số">⌫</button>';
+    el.innerHTML='<h2>'+esc(o.title)+'</h2><div class="ls">'+esc(o.sub||'')+'</div><div class="ld">'+d+'</div><div class="le">'+esc(err||'')+'</div><div class="lp">'+k+'</div>'+(o.bio&&o.cancel?'<button class="x" data-lk="cancel" style="margin-top:14px;color:#555">Hủy</button>':'');
+  }
+  function done(){el.classList.remove('show');el.innerHTML='';el.onclick=null;lkClose=null}
+  function bio(){if(!o.bio)return;o.bio().then(function(){done();o.ok&&o.ok()}).catch(function(){})}
+  el.onclick=function(e){
+    var b=e.target.closest('[data-lk]');if(!b)return;var v=b.dataset.lk;
+    if(v==='cancel'){done();o.onCancel&&o.onCancel();return}
+    if(v==='bio'){bio();return}
+    if(v==='del'){buf=buf.slice(0,-1);paint();return}
+    if(buf.length>=LKN)return;buf+=v;paint();
+    if(buf.length<LKN)return;
+    var pin=buf;
+    Promise.resolve(o.submit(pin)).then(function(r){
+      if(r===true){done();o.ok&&o.ok(pin)}
+      else if(r&&typeof r==='object'){o=Object.assign({},o,r);buf='';paint()}
+      else{buf='';paint(r||'Sai mã PIN');el.classList.remove('sh');void el.offsetWidth;el.classList.add('sh')}
+    });
+  };
+  lkClose=done;paint();el.classList.add('show');
+  return {bio:bio};
+}
+function showLock(){
+  var c=lkOn();if(!c||$('#lk').classList.contains('show'))return;
+  var u=lockUI({title:'Nhập mã PIN',sub:L.title||'Quản lý tài chính',bio:c.cred&&bioOK()?function(){return bioGet(c.cred)}:null,
+    submit:function(pin){return pinHash(pin,c.salt).then(function(h){return h===c.h?true:'Sai mã PIN'})}});
+  if(c.cred&&bioOK())setTimeout(u.bio,350);
+}
+function askPin(title,sub){
+  return new Promise(function(res){var c=lkOn();
+    lockUI({title:title,sub:sub||'',cancel:true,onCancel:function(){res(false)},ok:function(){res(true)},
+      submit:function(pin){return pinHash(pin,c.salt).then(function(h){return h===c.h?true:'Sai mã PIN'})}});
+  });
+}
+function newPin(title){
+  return new Promise(function(res){var first='';
+    lockUI({title:title,sub:'Gồm '+LKN+' số',cancel:true,onCancel:function(){res(null)},ok:function(p){res(p)},
+      submit:function(pin){
+        if(!first){first=pin;return {title:'Nhập lại mã PIN',sub:'Để xác nhận'}}
+        if(pin!==first){first='';return {title:title,sub:'Hai lần nhập không khớp, thử lại'}}
+        return true;
+      }});
+  });
+}
+function lockCard(){
+  var c=lkOn(),sg=function(a,on){return '<div class="seg" style="margin:0;max-width:150px;flex:none"><button data-a="'+a+'" data-v="1" class="'+(on?'on':'')+'">Bật</button><button data-a="'+a+'" data-v="0" class="'+(on?'':'on')+'">Tắt</button></div>'};
+  var h='<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div><b>Bảo mật ứng dụng</b><div class="mut" style="margin:2px 0 0">Mở app bằng mã PIN hoặc Face ID / Touch ID</div></div>'+sg('lktoggle',!!c)+'</div>';
+  if(c){
+    h+='<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px"><div>Face ID / Touch ID</div>'+sg('lkbio',!!c.cred)+'</div>'
+     +'<button class="ghost" data-a="lkchg" style="margin-top:10px">Đổi mã PIN</button>';
+  }
+  h+='<div class="mut" style="margin-top:10px">Khóa chỉ áp dụng trên máy này, không đồng bộ. Khóa lại sau khi để app nền hơn 30 giây. Quên mã PIN thì phải xóa dữ liệu trang web của app trong Cài đặt Safari, dữ liệu chưa sao lưu sẽ mất, nên hãy sao lưu trước.</div></div>';
+  return h;
+}
+function lockSetBio(){
+  if(!bioOK()){toast('Máy này không hỗ trợ Face ID / Touch ID trong trình duyệt');return Promise.resolve(false)}
+  return bioCreate().then(function(id){L.lock.cred=id;saveL();return true}).catch(function(){toast('Không bật được Face ID / Touch ID, vẫn dùng mã PIN');return false});
+}
 function pgBasic(){
   return '<div class="card"><label class="l" for="bt">Tên ứng dụng</label><input class="inp" id="bt" maxlength="40" value="'+esc(L.title)+'">'
-   +'<label class="l" for="bd">Tên máy (ví dụ: iPhone, iPad)</label><input class="inp" id="bd" maxlength="20" value="'+esc(L.dev)+'" placeholder="Để phân biệt máy khi đồng bộ"></div><div class="mut">Tự lưu khi bạn gõ.</div>';
+   +'<label class="l" for="bd">Tên máy (ví dụ: iPhone, iPad)</label><input class="inp" id="bd" maxlength="20" value="'+esc(L.dev)+'" placeholder="Để phân biệt máy khi đồng bộ"></div><div class="mut">Tự lưu khi bạn gõ.</div>'+lockCard();
 }
 function pgSync(){
   return '<div class="card"><div id="sst" style="font-weight:700;margin-bottom:6px">'+(S.url?esc(SYN.msg||''):'Chưa bật đồng bộ')+'</div><div class="mut" style="margin-bottom:6px">Liên kết này không bắt buộc, bạn có thể bỏ qua. Chỉ cần khi muốn iPhone và iPad luôn có cùng dữ liệu, kèm một bản lưu dự phòng trên Google Sheets của bạn.</div>'
@@ -978,7 +1073,7 @@ function searchRes(p){
   return '<div class="dh"><span>'+list.length+' kết quả</span><b>'+(list.length?(tot>=0?'+':'-')+money(Math.abs(tot)):'')+'</b></div>'+(list.slice(p.pg*20,p.pg*20+20).map(function(e){return entryRow(e,true)}).join('')||'<div class="empty">Không tìm thấy</div>')+pager(list.length,p.pg,20);
 }
 function pgSearch(p){
-  return '<input class="inp" id="sq" placeholder="Danh mục, ghi chú, số tiền hoặc ngày (dd/mm/yyyy)" value="'+esc(p.q)+'" autocomplete="off"><div class="chips">'+[['all','Tất cả'],['chi','Chi'],['thu','Thu']].map(function(x){return '<button data-a="sft" data-v="'+x[0]+'" class="'+(p.ft===x[0]?'on':'')+'">'+x[1]+'</button>'}).join('')+'</div><div id="sres">'+searchRes(p)+'</div>';
+  return '<input class="inp" id="sq" placeholder="Danh mục, ghi chú, số tiền hoặc ngày (dd/mm/yyyy)" value="'+esc(p.q)+'" autocomplete="off"><div class="chips">'+[['all','Tất cả'],['thu','Thu nhập'],['chi','Chi tiêu']].map(function(x){return '<button data-a="sft" data-v="'+x[0]+'" class="'+(p.ft===x[0]?'on':'')+'">'+x[1]+'</button>'}).join('')+'</div><div id="sres">'+searchRes(p)+'</div>';
 }
 function pgBackup(){
   var bk=backupInfo();
@@ -1157,6 +1252,22 @@ function doSync(manual){
 
 /* ---------- xử lý bấm ---------- */
 var ACT={
+  lktoggle:function(t){
+    var want=t.dataset.v==='1',c=lkOn();if(want===!!c)return;
+    if(want){newPin('Tạo mã PIN').then(function(pin){if(!pin)return;var salt=b64(rnd(12));pinHash(pin,salt).then(function(h){
+      L.lock={on:1,salt:salt,h:h,cred:''};saveL();renderPage();
+      if(bioOK())confirmBox('Dùng Face ID / Touch ID?','Mở app bằng sinh trắc học của máy (có thể nhập mã PIN thay thế).','Bật').then(function(ok){if(ok)lockSetBio().then(renderPage)});
+      else toast('Đã bật khóa bằng mã PIN');
+    })})}
+    else askPin('Nhập mã PIN','Để tắt bảo mật ứng dụng').then(function(ok){if(!ok)return;delete L.lock;saveL();renderPage();toast('Đã tắt bảo mật ứng dụng')});
+  },
+  lkbio:function(t){
+    var want=t.dataset.v==='1',c=lkOn();if(!c||want===!!c.cred)return;
+    if(want)lockSetBio().then(renderPage);else{c.cred='';saveL();renderPage()}
+  },
+  lkchg:function(){
+    askPin('Nhập mã PIN hiện tại','').then(function(ok){if(!ok)return;newPin('Mã PIN mới').then(function(pin){if(!pin)return;var salt=b64(rnd(12));pinHash(pin,salt).then(function(h){L.lock.salt=salt;L.lock.h=h;saveL();toast('Đã đổi mã PIN')})})});
+  },
   tab:function(t){if(KP.st)kpClose();tab=t.dataset.t;render();$('#main').scrollTop=0},
   calprev:function(){var c=V.cal;c.open=false;c.m--;if(c.m<1){c.m=12;c.y--}c.sel=ds(c.y,c.m,Math.min(parse(c.sel).d,dim(c.y,c.m)));render()},
   calnext:function(){var c=V.cal;c.open=false;c.m++;if(c.m>12){c.m=1;c.y++}c.sel=ds(c.y,c.m,Math.min(parse(c.sel).d,dim(c.y,c.m)));render()},
@@ -1352,11 +1463,12 @@ document.addEventListener('touchmove',function(e){if(e.touches&&e.touches.length
 document.addEventListener('contextmenu',function(e){if(!e.target.closest('input,textarea'))e.preventDefault()});
 document.addEventListener('dblclick',function(e){if(!e.target.closest('input,textarea'))e.preventDefault()});
 $('#pback').onclick=closePage;$('#pexit').onclick=closePage;
-document.addEventListener('visibilitychange',function(){if(!document.hidden){checkAuto();setTimeout(autoNav,1200)}if(!document.hidden&&S.url){SYN.bad=SYN.bad&&SYN.msg.indexOf('Sai mã')>=0;schedSync(500)}});
+document.addEventListener('visibilitychange',function(){if(document.hidden)hiddenAt=Date.now();else if(lkOn()&&hiddenAt&&Date.now()-hiddenAt>30000)showLock();if(!document.hidden){checkAuto();setTimeout(autoNav,1200)}if(!document.hidden&&S.url){SYN.bad=SYN.bad&&SYN.msg.indexOf('Sai mã')>=0;schedSync(500)}});
 setInterval(function(){if(!document.hidden&&S.url&&!SYN.bad)doSync()},60000);
 
 /* ---------- khởi động ---------- */
 if(S.url)SYN.msg=dirty()?'⏳ Chờ gửi':'☁ Đã lưu';
+showLock();
 render();
 if(S.url)schedSync(800);
 setTimeout(checkAuto,1500);

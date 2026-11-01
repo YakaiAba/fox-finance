@@ -46,8 +46,8 @@ nav button.on{background:var(--tint);color:var(--navy);font-weight:700}
 .pd label{font-size:12px;color:var(--mut);display:block;margin-bottom:2px}
 .pd select{width:100%;padding:10px 4px}
 button.lb{font:inherit}
-.cal .top{display:flex;align-items:center;gap:3px}.cal .pm{display:flex;gap:1px}.cal .pm b{font-size:14px;line-height:1}
-.cal .nt2{font-size:11px;font-weight:600;margin-top:2px}
+.cal .top{display:flex;align-items:center;justify-content:space-between;gap:2px}.cal .st{font-size:11px;line-height:1}
+.cal .nt2{font-size:9.5px;font-weight:600;margin-top:1px;white-space:nowrap;letter-spacing:-.3px;overflow:hidden}
 .row{display:flex;align-items:center;gap:4px;padding:8px 0;border-bottom:1px solid var(--line)}
 .row>b{width:62px;flex:none;font-size:15px}
 .fld{flex:1;min-width:0;text-align:center;background:var(--tint);border-radius:10px;padding:9px 4px;font-weight:600;font-size:15px;white-space:nowrap}
@@ -201,7 +201,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.35 (31/10/2026)';
+var APP_VER='1.37 (01/11/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -408,7 +408,7 @@ function render(){
   var n=$('#nav');n.innerHTML=TABS.map(function(t){return '<button data-a="tab" data-t="'+t[0]+'" class="'+(tab===t[0]?'on':'')+'"><i>'+t[1]+'</i>'+t[2]+'</button>'}).join('');
   var m=$('#main');
   if(tab==='nhap'){m.innerHTML='<div class="card frm" data-form="nhap">'+formHTML(V.nhap,false,'nhap')+'</div>';if(KP.form==='nhap'){var el=m.querySelector('[data-f="amt"]');if(el)el.classList.add('act')}}
-  else if(tab==='cal')m.innerHTML=calHTML();
+  else if(tab==='cal'){m.innerHTML=calHTML();fitCal()}
   else if(tab==='rep')m.innerHTML=repHTML();
   else if(tab==='bud')m.innerHTML=budHTML();
   else m.innerHTML=moreHTML();
@@ -433,7 +433,7 @@ function navHTML(label,sub,pa,na,pick){
 function monthSub(y,m){return '(01/'+pad(m)+' – '+dim(y,m)+'/'+pad(m)+')'}
 
 /* Lịch */
-/* Nhắc nhở */
+/* Sự kiện */
 function jdFromDate(dd,mm,yy){var a=Math.floor((14-mm)/12),y=yy+4800-a,m=mm+12*a-3;return dd+Math.floor((153*m+2)/5)+365*y+Math.floor(y/4)-Math.floor(y/100)+Math.floor(y/400)-32045}
 function jdToDate(jd){var a=jd+32044,b=Math.floor((4*a+3)/146097),c=a-Math.floor(b*146097/4),d=Math.floor((4*c+3)/1461),e=c-Math.floor(1461*d/4),m=Math.floor((5*e+2)/153);return [e-Math.floor((153*m+2)/5)+1,m+3-12*Math.floor(m/10),b*100+d-4800+Math.floor(m/10)]}
 function newMoon(k){
@@ -493,6 +493,14 @@ function cdDate(c){
   y=b.y;d=ds(y,a.m,Math.min(a.d,dim(y,a.m)));if(d<t){y++;d=ds(y,a.m,Math.min(a.d,dim(y,a.m)))}
   return d;
 }
+function cdOn(c,d){
+  var k=repKind(c);if(!k)return c.date===d;
+  if(d<c.date)return false;
+  var a=parse(c.date),b=parse(d);
+  if(k==='w')return Math.round((new Date(b.y,b.m-1,b.d)-new Date(a.y,a.m-1,a.d))/864e5)%7===0;
+  if(k==='m')return b.d===Math.min(a.d,dim(b.y,b.m));
+  return b.m===a.m&&b.d===Math.min(a.d,dim(b.y,a.m));
+}
 function cds(){
   var t=today(),all=D.assets.filter(function(a){return a.kind==='cd'&&!a.deleted});
   var up=all.filter(function(a){return cdDate(a)>=t}).sort(function(a,b){var x=cdDate(a),y=cdDate(b);return x<y?-1:x>y?1:(a.id<b.id?-1:1)});
@@ -500,7 +508,7 @@ function cds(){
   return up.concat(ps);
 }
 function cdHTML(){
-  var list=cds(),h='<div class="card" style="margin-top:12px"><div class="ct">Danh sách nhắc nhở</div>';
+  var list=cds(),h='<div class="card" style="margin-top:12px"><div class="ct">Danh sách sự kiện</div>';
   if(list.length)h+=list.map(function(c){
     var cd=cdDate(c),r=remInfo(cd);
     return '<button class="cdr'+(r.cls==='past'?' past':'')+'" data-a="cdedit" data-id="'+c.id+'"><span class="nm">'+esc(c.name)+(repKind(c)?' <i class="ar">🔁</i>':'')+'<small>'+dlabel(cd)+(repKind(c)?' · Nhắc lại mỗi '+REPN[repKind(c)]:'')+'</small></span><span class="rm'+(r.cls==='now'?' thu':'')+'">'+(r.cls?'':'<small>Còn lại</small>')+r.txt+(r.sub?'<small>('+r.sub+')</small>':'')+'</span></button>';
@@ -508,17 +516,21 @@ function cdHTML(){
   else h+='<div class="empty">Chưa có ngày nào</div>';
   return h+'<div class="fbar"><button class="ghost" data-a="cdsug">+ Ngày lễ gợi ý</button><button class="ghost" data-a="cdadd">+ Tạo thủ công</button></div></div>';
 }
+function fitCal(){[].forEach.call(document.querySelectorAll('.cal .nt2[data-s]'),function(e){if(e.scrollWidth>e.clientWidth+0.5)e.textContent=e.dataset.s})}
+function shortAmt(v){return v>=999950&&v<1e6?'1tr':fmtShort(v)}
+function calAmt(v){return v<1e6?fmt(v)+'đ':fmtShort(v)}
 function calHTML(){
   var c=V.cal,first=(new Date(c.y,c.m-1,1).getDay()+6)%7,n=dim(c.y,c.m),rows=Math.ceil((first+n)/7);
   var tot={};E().forEach(function(e){if(e.date.slice(0,7)===c.y+'-'+pad(c.m)){var o=tot[e.date]||(tot[e.date]={thu:0,chi:0});o[e.type]+=e.amount}});
   var h=navHTML(pad(c.m)+'/'+c.y,monthSub(c.y,c.m),'calprev','calnext','calpick');
   h+='<div class="cal">'+['T2','T3','T4','T5','T6','T7','CN'].map(function(x,i){return '<div class="h'+(i===5?' sa':'')+(i===6?' su':'')+'">'+x+'</div>'}).join('');
-  var td=today();
+  var td=today(),evd={},cdl=D.assets.filter(function(a){return a.kind==='cd'&&!a.deleted});
+  for(var q=1;q<=n;q++){var qd=ds(c.y,c.m,q);if(cdl.some(function(a){return cdOn(a,qd)}))evd[qd]=1}
   for(var i=0;i<rows*7;i++){
     var d=i-first+1,inM=d>=1&&d<=n,dd=ds(c.y,c.m,1);
     if(inM){dd=ds(c.y,c.m,d);var o=tot[dd];
-      var pm='',net=o?o.thu-o.chi:0;if(o){if(o.thu)pm+='<b class="t">+</b>';if(o.chi)pm+='<b class="c">−</b>'}
-      h+='<button data-a="calsel" data-d="'+dd+'" class="'+(dd===c.sel?'sel ':'')+(dd===td?'td':'')+'"><span class="top"><span class="d">'+d+'</span><span class="pm">'+pm+'</span></span>'+(o?'<span class="nt2 '+(net<0?'c':'t')+'">'+(net<0?'-':net>0?'+':'')+fmtShort(Math.abs(net))+'</span>':'')+'</button>';
+      var star=evd[dd]?'<span class="st">⭐️</span>':'';
+      h+='<button data-a="calsel" data-d="'+dd+'" class="'+(dd===c.sel?'sel ':'')+(dd===td?'td':'')+'"><span class="top"><span class="d">'+d+'</span>'+star+'</span>'+(o&&o.chi?'<span class="nt2 c" data-s="-'+shortAmt(o.chi)+'">-'+calAmt(o.chi)+'</span>':'')+(o&&o.thu?'<span class="nt2 t" data-s="+'+shortAmt(o.thu)+'">+'+calAmt(o.thu)+'</span>':'')+'</button>';
     }else{
       var t=new Date(c.y,c.m-1,d);h+='<button class="o" disabled><span class="d">'+t.getDate()+'</span></button>';
     }
@@ -529,6 +541,8 @@ function calHTML(){
   var list=E().filter(function(e){return e.date===c.sel}),net=0;list.forEach(function(e){net+=e.type==='thu'?e.amount:-e.amount});
   h+='<div class="dh"><span>'+dlabel(c.sel)+'</span><b>'+(list.length?money(net):'')+'</b></div>';
   h+=list.length?list.map(function(e){return entryRow(e)}).join(''):'<div class="empty">Chưa có khoản nào</div>';
+  var evs=D.assets.filter(function(a){return a.kind==='cd'&&!a.deleted&&cdOn(a,c.sel)});
+  if(evs.length)h+='<div class="dh"><span>Sự kiện ngày này</span></div>'+evs.map(function(e){return '<button class="cdr" data-a="cdedit" data-id="'+e.id+'"><span class="nm">'+esc(e.name)+(repKind(e)?' <i class="ar">🔁</i>':'')+'<small>'+(repKind(e)?'Nhắc lại mỗi '+REPN[repKind(e)]:'Sự kiện một lần')+'</small></span></button>'}).join('');
   h+='<button class="ghost" data-a="addday">＋ Thêm khoản ngày này</button>';
   return h+cdHTML();
 }
@@ -843,7 +857,7 @@ function moreHTML(){
 }
 
 /* ---------- trang riêng ---------- */
-var PTITLE={edit:'Chỉnh sửa',cats:'Danh mục thu chi',basic:'Cài đặt cơ bản',sync:'Đồng bộ Google Sheets',balance:'Báo cáo thay đổi số dư',search:'Tìm kiếm giao dịch',backup:'Sao lưu dữ liệu',about:'Thông tin ứng dụng',catlist:'Chi tiết danh mục',fund:'Mã quỹ',watch:'Chờ đợi giá',cd:'Nhắc nhở',cdsug:'Ngày lễ gợi ý',help:'Hướng dẫn sử dụng'};
+var PTITLE={edit:'Chỉnh sửa',cats:'Danh mục thu chi',basic:'Cài đặt cơ bản',sync:'Đồng bộ Google Sheets',balance:'Báo cáo thay đổi số dư',search:'Tìm kiếm giao dịch',backup:'Sao lưu dữ liệu',about:'Thông tin ứng dụng',catlist:'Chi tiết danh mục',fund:'Mã quỹ',watch:'Chờ đợi giá',cd:'Sự kiện',cdsug:'Ngày lễ gợi ý',help:'Hướng dẫn sử dụng'};
 function openPage(name,arg){
   if(name==='edit'){
     var e=D.entries.find(function(x){return x.id===arg});if(!e)return;
@@ -878,7 +892,7 @@ function closePage(){
 var SETP={basic:1,sync:1,cats:1,catlist:0,backup:1};
 function renderPage(){
   var p=pages[pages.length-1];if(!p)return;
-  $('#ptt').textContent=p.name==='catlist'?cat(p.arg).name:p.name==='fund'?(fundSt.id?'Sửa mã quỹ':'Thêm mã quỹ'):p.name==='watch'?(watchSt.id?'Sửa mã chờ giá':'Thêm mã chờ giá'):p.name==='cd'?(cdSt.id?'Sửa nhắc nhở':'Thêm nhắc nhở'):PTITLE[p.name];
+  $('#ptt').textContent=p.name==='catlist'?cat(p.arg).name:p.name==='fund'?(fundSt.id?'Sửa mã quỹ':'Thêm mã quỹ'):p.name==='watch'?(watchSt.id?'Sửa mã chờ giá':'Thêm mã chờ giá'):p.name==='cd'?(cdSt.id?'Sửa sự kiện':'Thêm sự kiện'):PTITLE[p.name];
   $('#pexit').textContent=SETP[p.name]?'Lưu lại & Thoát':'Thoát';
   var b=$('#pbody'),top=b.scrollTop;
   var fn={edit:pgEdit,cats:pgCats,basic:pgBasic,sync:pgSync,balance:pgBalance,search:pgSearch,backup:pgBackup,about:pgAbout,catlist:pgCatList,fund:pgFund,watch:pgWatch,cd:pgCd,cdsug:pgCdSug,help:pgHelp}[p.name];
@@ -950,16 +964,16 @@ function pgSearch(p){
 }
 function pgBackup(){
   var bk=backupInfo();
-  return '<div class="'+(bk.bad?'warn':'ok')+'">'+(bk.bad?'⚠ ':'✓ ')+bk.txt+'</div><div class="mut" style="margin:0 2px 10px">Sao lưu rất cần thiết để giữ lại thiết lập sử dụng (danh mục, ngân sách, nhắc nhở…) và các giá trị đã nhập trên ứng dụng. Bạn có thể dùng file sao lưu để nhập vào ứng dụng này trên thiết bị khác, khôi phục lại thiết lập và dữ liệu. Không gồm cài đặt riêng từng máy (tên máy, địa chỉ đồng bộ). Nên sao lưu ít nhất mỗi tuần.</div><div class="card"><div>Dữ liệu hiện có: <b>'+E().length+'</b> khoản thu chi, <b>'+catsOf('chi').length+'+'+catsOf('thu').length+'</b> danh mục.</div><div class="mut" style="margin-top:6px">Xuất ra file JSON rồi lưu vào Tệp/iCloud hoặc gửi cho chính mình. Nhập file sẽ gộp vào dữ liệu hiện có, không xóa gì.</div></div>'
+  return '<div class="'+(bk.bad?'warn':'ok')+'">'+(bk.bad?'⚠ ':'✓ ')+bk.txt+'</div><div class="mut" style="margin:0 2px 10px">Sao lưu rất cần thiết để giữ lại thiết lập sử dụng (danh mục, ngân sách, sự kiện…) và các giá trị đã nhập trên ứng dụng. Bạn có thể dùng file sao lưu để nhập vào ứng dụng này trên thiết bị khác, khôi phục lại thiết lập và dữ liệu. Không gồm cài đặt riêng từng máy (tên máy, địa chỉ đồng bộ). Nên sao lưu ít nhất mỗi tuần.</div><div class="card"><div>Dữ liệu hiện có: <b>'+E().length+'</b> khoản thu chi, <b>'+catsOf('chi').length+'+'+catsOf('thu').length+'</b> danh mục.</div><div class="mut" style="margin-top:6px">Xuất ra file JSON rồi lưu vào Tệp/iCloud hoặc gửi cho chính mình. Nhập file sẽ gộp vào dữ liệu hiện có, không xóa gì.</div></div>'
    +'<div class="card"><div class="ct">Tự động sao lưu</div><div class="chips" style="margin-bottom:4px">'+[['day','Cuối ngày'],['week','Cuối tuần'],['none','Không tự động']].map(function(x){return '<button data-a="autobk" data-v="'+x[0]+'" class="'+((L.auto||'none')===x[0]?'on':'')+'">'+x[1]+'</button>'}).join('')+'</div><div class="mut">iPhone không cho app tự ghi file ngầm, nên đến hạn (sau 21:00 mỗi ngày, hoặc tối Chủ nhật) app sẽ hiện hộp nhắc để bạn bấm "Sao lưu ngay" một lần. Vẫn sao lưu thủ công được bất cứ lúc nào.</div></div>'
    +'<button class="primary" data-a="bkout">Xuất file sao lưu (JSON)</button><button class="ghost" data-a="bkin">Nhập file sao lưu</button><input type="file" id="bkf" accept=".json,application/json" style="display:none">';
 }
 function pgHelp(){
   function sec(t,l){return '<div class="card"><div class="ct">'+t+'</div>'+l.map(function(x){return '<div style="margin:5px 0">• '+x+'</div>'}).join('')+'</div>'}
   return sec('Ghi thu chi',['Tab <b>Thu chi</b>: bấm <b>Thu nhập</b> hoặc <b>Chi tiêu</b>, bấm ô số tiền để mở bàn phím tính (có + − × ÷, nút 000), chọn danh mục, ghi chú nếu cần rồi bấm Lưu.','Đổi ngày bằng ô ngày; chọn ngày/tháng/năm trong hộp hiện ra.','Sửa hoặc xóa: tab <b>Lịch</b> → bấm vào khoản.'])
-  +sec('Xem lại',['<b>Lịch</b>: ô ngày có + (có thu), − (có chi) và tổng tiền ngày đó.','<b>Danh sách nhắc nhở</b> (dưới lịch): bấm <b>+ Ngày lễ gợi ý</b> để thêm các ngày lễ còn lại trong năm (âm lịch tự quy đổi), hoặc <b>+ Tạo thủ công</b> cho sinh nhật, kỷ niệm… (chọn <b>Nhắc lại</b> mỗi tuần, tháng hoặc năm thì app tự tính lần kế tiếp) “Còn lại” hiện số ngày, từ 1 tháng trở lên hiện dạng tháng + ngày. Bấm vào dòng để sửa hoặc xóa.','<b>Báo cáo</b>: xem theo Tháng / Năm / Tất cả; bấm một danh mục để xem các khoản. Nút 📷 xuất ảnh báo cáo.','<b>Ngân sách</b>: bấm vào mục để đặt hạn mức mỗi tháng.','<b>Thu chi → Danh mục → Chỉnh sửa</b>: thêm, sửa, xóa, sắp xếp danh mục.'])
+  +sec('Xem lại',['<b>Lịch</b>: ô ngày hiện ⭐️ nếu có sự kiện, dòng đỏ là tổng chi, dòng xanh là tổng thu của ngày đó (từ 1 triệu trở lên rút gọn thành “tr”, “tỷ”). Bấm vào một ngày để xem các khoản thu chi và sự kiện của ngày đó.','<b>Danh sách sự kiện</b> (dưới lịch): bấm <b>+ Ngày lễ gợi ý</b> để thêm các ngày lễ còn lại trong năm (âm lịch tự quy đổi), hoặc <b>+ Tạo thủ công</b> cho sinh nhật, kỷ niệm… (chọn <b>Nhắc lại</b> mỗi tuần, tháng hoặc năm thì app tự tính lần kế tiếp) “Còn lại” hiện số ngày, từ 1 tháng trở lên hiện dạng tháng + ngày. Bấm vào dòng để sửa hoặc xóa.','<b>Báo cáo</b>: xem theo Tháng / Năm / Tất cả; bấm một danh mục để xem các khoản. Nút 📷 xuất ảnh báo cáo.','<b>Ngân sách</b>: bấm vào mục để đặt hạn mức mỗi tháng.','<b>Thu chi → Danh mục → Chỉnh sửa</b>: thêm, sửa, xóa, sắp xếp danh mục.'])
   +sec('Tài sản (cuối tab Báo cáo)',['<b>Vàng</b>: chỉ là ô ghi chú.','<b>Chứng chỉ quỹ</b>: nhập mã, số lượng, giá mua, ngày mua. Bấm vào mã để xem lời/lỗ, thời gian giữ và nhật ký giao dịch.','<b>Chờ đợi giá</b> (dưới dòng giá cập nhật): thêm mã quỹ bạn quan tâm, nhập giá đối chiếu và kỳ vọng (giảm hoặc tăng, tính bằng đ hoặc %). Cột Hiện tại cho biết giá gần nhất và tỉ lệ % so với giá đối chiếu (âm hiện đỏ). Bấm vào dòng để xem thêm <b>Còn lại</b>: giá gần nhất còn cách điểm kỳ vọng bao nhiêu; 🔔 hiện khi đã chạm điểm kỳ vọng, và app hiện hộp nhắc khi bạn mở app (mỗi mã một lần mỗi ngày). iOS không cho web báo ngầm khi app đóng.','Giá gần nhất tự lấy từ fmarket (khi mở app hoặc bấm ↻ Cập nhật giá); chưa lấy được thì nhập giá tay khi sửa mã quỹ.'])
-  +sec('Sao lưu JSON là gì? (quan trọng)',['Là một file lưu <b>toàn bộ dữ liệu bạn đã nhập</b>: các khoản thu chi, danh mục, ngân sách, ghi chú vàng, mã chứng chỉ quỹ, nhật ký giao dịch danh sách chờ đợi giá và danh sách nhắc nhở.','Không gồm cài đặt tên app, tên máy, địa chỉ và mã bí mật đồng bộ, giá quỹ tự lấy (app lấy lại khi cần).','Dữ liệu nằm trong máy này. Mất máy, xóa Safari hoặc <b>xóa biểu tượng trên màn hình chính</b> là mất dữ liệu nếu chưa sao lưu.','<b>Khác → Sao lưu dữ liệu</b>: xuất file lưu vào Tệp/iCloud hoặc gửi cho chính mình. Nên làm ít nhất mỗi tuần; chọn Tự động để app nhắc.','Nhập file vào lại sẽ <b>gộp</b> với dữ liệu hiện có, không xóa gì. Đổi sang máy mới thì nhập file này.'])
+  +sec('Sao lưu JSON là gì? (quan trọng)',['Là một file lưu <b>toàn bộ dữ liệu bạn đã nhập</b>: các khoản thu chi, danh mục, ngân sách, ghi chú vàng, mã chứng chỉ quỹ, nhật ký giao dịch danh sách chờ đợi giá và danh sách sự kiện.','Không gồm cài đặt tên app, tên máy, địa chỉ và mã bí mật đồng bộ, giá quỹ tự lấy (app lấy lại khi cần).','Dữ liệu nằm trong máy này. Mất máy, xóa Safari hoặc <b>xóa biểu tượng trên màn hình chính</b> là mất dữ liệu nếu chưa sao lưu.','<b>Khác → Sao lưu dữ liệu</b>: xuất file lưu vào Tệp/iCloud hoặc gửi cho chính mình. Nên làm ít nhất mỗi tuần; chọn Tự động để app nhắc.','Nhập file vào lại sẽ <b>gộp</b> với dữ liệu hiện có, không xóa gì. Đổi sang máy mới thì nhập file này.'])
   +sec('Đồng bộ Google Sheets là gì?',['Là tự động gửi dữ liệu (cùng loại như file JSON) lên một bảng Google Sheets của bạn, và nhận lại thay đổi từ máy kia. Dùng để <b>iPhone và iPad luôn giống nhau</b>, không cần xuất nhập file.','Đồng thời bảng Sheets là nơi lưu dự phòng thứ hai: có các tab dễ đọc (Thu chi, Danh mục, Tài sản…) và bản sao lưu mỗi ngày giữ 30 ngày.','Cách bật: <b>Khác → Đồng bộ Google Sheets</b>, nhập địa chỉ Apps Script và mã bí mật, hai máy dùng giống nhau.','Góc trên phải báo tình trạng: ☁ Đã lưu, ⏳ Chờ gửi, ⚠ lỗi. Mất mạng thì app tự gửi lại khi có mạng.','Đồng bộ cũng là cách để app tự lấy giá chứng chỉ quỹ. Cập nhật Code.gs bằng <b>Phiên bản mới</b>, không chọn Triển khai mới.'])
   +sec('Sao lưu JSON và đồng bộ khác nhau thế nào?',['<b>Đồng bộ</b>: tự động, giữ hai máy khớp nhau, nhưng xóa nhầm ở máy này sẽ lan sang máy kia.','<b>File JSON</b>: bạn tự giữ, lùi lại được về một ngày cũ. Nên dùng cả hai.']);
 }
@@ -1213,7 +1227,7 @@ var ACT={
   },
   cddel:function(){
     var c=D.assets.find(function(x){return x.id===cdSt.id});if(!c)return;
-    confirmBox('Xóa nhắc nhở?','<b>'+esc(c.name)+'</b> · '+dshort(c.date),'Xóa',true).then(function(ok){
+    confirmBox('Xóa sự kiện?','<b>'+esc(c.name)+'</b> · '+dshort(c.date),'Xóa',true).then(function(ok){
       if(!ok)return;c.deleted=true;touch(c);popPage();toast('Đã xóa');changed();
     });
   },

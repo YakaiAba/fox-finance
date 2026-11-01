@@ -194,6 +194,10 @@ svg text{font-family:inherit}
 #lk .lp button.x{background:none;border:0;font-size:14px;color:#555}
 #lk.sh .ld{animation:lksh .3s}
 @keyframes lksh{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.lgr{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px;font-weight:600}
+.lgr small{font-size:12px;font-weight:400;color:var(--mut)}
+.tot{display:flex;justify-content:space-between;align-items:center;padding:12px 0 2px;font-size:18px;font-weight:700}
+.tot b{font-size:22px}
 </style>
 </head>
 <body>
@@ -218,7 +222,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.41 (01/11/2026)';
+var APP_VER='1.42 (01/11/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -623,7 +627,7 @@ function donut(g){
   if(!g.total)return '<div class="empty">Chưa có dữ liệu</div>';
   var R=70,C=2*Math.PI*R,off=0,s='';
   g.list.forEach(function(x){var l=C*x.v/g.total;s+='<circle r="'+R+'" cx="100" cy="100" fill="none" stroke="'+x.c.color+'" stroke-width="38" stroke-dasharray="'+l+' '+(C-l)+'" stroke-dashoffset="'+(-off)+'" transform="rotate(-90 100 100)"/>';off+=l});
-  return '<svg viewBox="0 0 200 200" width="220" style="display:block;margin:0 auto">'+s+'<text x="100" y="97" text-anchor="middle" font-size="11" fill="#6b7280">'+(g.cl||'Tổng')+'</text><text x="100" y="114" text-anchor="middle" font-size="13" font-weight="700">'+(g.cv||fmtShort(g.total))+'</text></svg>';
+  return '<svg viewBox="0 0 200 200" width="220" style="display:block;margin:0 auto">'+s+''+(g.cc?'<text x="100" y="108" text-anchor="middle" font-size="19" font-weight="700" fill="'+g.cc+'">'+g.cv+'</text>':'<text x="100" y="97" text-anchor="middle" font-size="11" fill="#6b7280">Tổng</text><text x="100" y="114" text-anchor="middle" font-size="13" font-weight="700">'+fmtShort(g.total)+'</text>')+'</svg>';
 }
 function repHTML(){
   var r=V.rep,lb=periodLabel();
@@ -631,9 +635,9 @@ function repHTML(){
   if(r.mode!=='all')h+=navHTML(lb[0],lb[1],'repprev','repnext');
   var ch=groups('chi').total,th=groups('thu').total;
   var tt=th+ch,rt=[[th,'Thu nhập','#2e7d32','thu','+'],[ch,'Chi tiêu','#c62828','chi','-']];
-  h+='<div class="card"><div class="ct">Tỷ lệ thu chi</div>'+donut({total:tt,cl:'Thu chi',cv:(th-ch>=0?'+':'-')+fmtShort(Math.abs(th-ch)),list:rt.map(function(x){return {v:x[0],c:{color:x[2]}}})})
-   +(tt?rt.map(function(x){return '<div class="br"><div class="t1"><span><i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+x[2]+';margin-right:6px"></i>'+x[1]+'</span><span class="'+x[3]+'">'+x[4]+money(x[0])+' <small class="mut">'+(x[0]/tt*100).toFixed(1).replace('.',',')+'%</small></span></div></div>'}).join(''):'')
-   +'<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 2px 2px"><span style="font-size:15px;color:var(--mut)">Tổng</span><b class="'+(th-ch>=0?'thu':'chi')+'" style="font-size:22px">'+(th-ch>=0?'+':'-')+money(Math.abs(th-ch))+'</b></div></div>';
+  h+='<div class="card"><div class="ct">Tỷ lệ thu chi</div>'+donut({total:tt,cc:th-ch>=0?'#2e7d32':'#c62828',cv:(th-ch>=0?'+':'-')+fmtShort(Math.abs(th-ch)),list:rt.map(function(x){return {v:x[0],c:{color:x[2]}}})})
+   +(tt?rt.map(function(x){return '<div class="lgr"><span><i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+x[2]+';margin-right:6px"></i>'+x[1]+'</span><span class="'+x[3]+'">'+x[4]+money(x[0])+' <small>'+(x[0]/tt*100).toFixed(1).replace('.',',')+'%</small></span></div>'}).join(''):'')
+   +'<div class="tot"><span>Tổng</span><b class="'+(th-ch>=0?'thu':'chi')+'">'+(th-ch>=0?'+':'-')+money(Math.abs(th-ch))+'</b></div></div>';
   h+='<div class="seg"><button data-a="reptype" data-v="thu" class="thu'+(r.type==='thu'?' on':'')+'">Thu nhập</button><button data-a="reptype" data-v="chi" class="chi'+(r.type==='chi'?' on':'')+'">Chi tiêu</button></div>';
   var g=groups(r.type);
   h+='<div class="card">';
@@ -753,11 +757,11 @@ function assetsHTML(){
     if(cost>0){var tp=val-cost,to=V.rep.openTotal;h+='<button class="fr'+(to?' on':'')+'" data-a="totaltoggle" style="grid-template-columns:auto 1fr;font-size:14px"><span>Tổng lời/lỗ<i class="ar">'+(to?'▴':'▾')+'</i></span><span style="text-align:right">'+plHTML(tp,(val/cost-1)*100)+'</span></button>'+(to?'<div class="fd">'+tl+'</div>':'')}
   }else h+='<div class="empty">Chưa có mã quỹ nào</div>';
   h+='<div class="fbar"><button class="ghost" data-a="fundadd">+ Thêm mã quỹ</button>'+((fs.length||ws.length)?'<button class="ghost" data-a="navnow">'+(NAV.busy?'Đang lấy giá…':'↻ Cập nhật giá')+'</button>':'')+'</div>';
-  if(fs.length||flogs().length)h+='<button class="ghost" data-a="pg" data-p="fundrep" style="margin-top:10px">📊 Báo cáo biến động chứng chỉ quỹ</button>';
   if(fs.length||ws.length){
     var st=L.navErr?'<span class="chi nerr">'+esc(L.navErr)+'</span>':(L.navOk?navAtTxt():(S.url||priceUrl()?'Chưa lấy giá':'Bật đồng bộ Google Sheets để tự lấy giá, hoặc nhập giá tay khi sửa mã quỹ'));
     h+='<div class="mut" style="margin-top:10px;text-align:center">'+st+'</div>';
   }
+  if(fs.length||flogs().length)h+='<button class="ghost" data-a="pg" data-p="fundrep" style="margin-top:8px">📊 Báo cáo biến động chứng chỉ quỹ</button>';
   h+=watchHTML(ws);
   if(S.url&&S.sv===1)h+='<div class="mut" style="margin-top:8px;text-align:center">Code.gs chưa cập nhật: Tài sản chỉ lưu trên máy này.</div>';
   return h+'</div>';

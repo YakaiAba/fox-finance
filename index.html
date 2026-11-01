@@ -218,7 +218,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.39 (01/11/2026)';
+var APP_VER='1.40 (01/11/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -623,7 +623,7 @@ function donut(g){
   if(!g.total)return '<div class="empty">Chưa có dữ liệu</div>';
   var R=70,C=2*Math.PI*R,off=0,s='';
   g.list.forEach(function(x){var l=C*x.v/g.total;s+='<circle r="'+R+'" cx="100" cy="100" fill="none" stroke="'+x.c.color+'" stroke-width="38" stroke-dasharray="'+l+' '+(C-l)+'" stroke-dashoffset="'+(-off)+'" transform="rotate(-90 100 100)"/>';off+=l});
-  return '<svg viewBox="0 0 200 200" width="220" style="display:block;margin:0 auto">'+s+'<text x="100" y="97" text-anchor="middle" font-size="11" fill="#6b7280">Tổng</text><text x="100" y="114" text-anchor="middle" font-size="13" font-weight="700">'+fmtShort(g.total)+'</text></svg>';
+  return '<svg viewBox="0 0 200 200" width="220" style="display:block;margin:0 auto">'+s+'<text x="100" y="97" text-anchor="middle" font-size="11" fill="#6b7280">'+(g.cl||'Tổng')+'</text><text x="100" y="114" text-anchor="middle" font-size="13" font-weight="700">'+(g.cv||fmtShort(g.total))+'</text></svg>';
 }
 function repHTML(){
   var r=V.rep,lb=periodLabel();
@@ -631,9 +631,12 @@ function repHTML(){
   if(r.mode!=='all')h+=navHTML(lb[0],lb[1],'repprev','repnext');
   var ch=groups('chi').total,th=groups('thu').total;
   h+='<div class="sum"><div>Thu nhập<b class="thu">+'+money(th)+'</b></div><div>Chi tiêu<b class="chi">-'+money(ch)+'</b></div><div>Thu chi<b>'+(th-ch>=0?'+':'-')+money(Math.abs(th-ch))+'</b></div></div>';
+  var tt=th+ch,rt=[[th,'Thu nhập','#2e7d32','thu','+'],[ch,'Chi tiêu','#c62828','chi','-']];
+  h+='<div class="card"><div class="ct">Tỷ lệ thu chi</div>'+donut({total:tt,cl:'Thu chi',cv:(th-ch>=0?'+':'-')+fmtShort(Math.abs(th-ch)),list:rt.map(function(x){return {v:x[0],c:{color:x[2]}}})})
+   +(tt?rt.map(function(x){return '<div class="br"><div class="t1"><span><i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+x[2]+';margin-right:6px"></i>'+x[1]+'</span><span class="'+x[3]+'">'+x[4]+money(x[0])+' <small class="mut">'+(x[0]/tt*100).toFixed(1).replace('.',',')+'%</small></span></div></div>'}).join(''):'')+'</div>';
   h+='<div class="seg"><button data-a="reptype" data-v="thu" class="thu'+(r.type==='thu'?' on':'')+'">Thu nhập</button><button data-a="reptype" data-v="chi" class="chi'+(r.type==='chi'?' on':'')+'">Chi tiêu</button></div>';
   var g=groups(r.type);
-  h+='<div class="card">'+donut(g);
+  h+='<div class="card">';
   h+=g.list.map(function(x){return '<button class="br" data-a="repcat" data-id="'+x.id+'"><div class="t1"><span>'+x.c.icon+' '+esc(x.c.name)+'</span><span>'+money(x.v)+' <small class="mut">'+(x.v/g.total*100).toFixed(1).replace('.',',')+'%</small></span></div><div class="bar"><i style="width:'+(x.v/g.total*100)+'%;background:'+x.c.color+'"></i></div></button>'}).join('')+'</div>';
   var se=series(r.type);
   h+='<div class="card">'+lineChart(se.pts,r.type==='chi'?'#c62828':'#2e7d32',(r.type==='chi'?'Chi tiêu':'Thu nhập')+' theo '+se.by)+'</div>';

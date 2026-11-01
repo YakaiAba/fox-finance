@@ -218,7 +218,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.40 (01/11/2026)';
+var APP_VER='1.41 (01/11/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -630,10 +630,10 @@ function repHTML(){
   var h='<div style="display:flex;gap:8px;align-items:flex-start"><div class="seg" style="flex:1;margin:0 0 12px;max-width:none"><button data-a="repmode" data-v="m" class="'+(r.mode==='m'?'on':'')+'">Tháng</button><button data-a="repmode" data-v="y" class="'+(r.mode==='y'?'on':'')+'">Năm</button><button data-a="repmode" data-v="all" class="'+(r.mode==='all'?'on':'')+'">Tất cả</button></div><button class="arr" data-a="repimg" aria-label="Xuất ảnh báo cáo" style="font-size:22px">📷</button></div>';
   if(r.mode!=='all')h+=navHTML(lb[0],lb[1],'repprev','repnext');
   var ch=groups('chi').total,th=groups('thu').total;
-  h+='<div class="sum"><div>Thu nhập<b class="thu">+'+money(th)+'</b></div><div>Chi tiêu<b class="chi">-'+money(ch)+'</b></div><div>Thu chi<b>'+(th-ch>=0?'+':'-')+money(Math.abs(th-ch))+'</b></div></div>';
   var tt=th+ch,rt=[[th,'Thu nhập','#2e7d32','thu','+'],[ch,'Chi tiêu','#c62828','chi','-']];
   h+='<div class="card"><div class="ct">Tỷ lệ thu chi</div>'+donut({total:tt,cl:'Thu chi',cv:(th-ch>=0?'+':'-')+fmtShort(Math.abs(th-ch)),list:rt.map(function(x){return {v:x[0],c:{color:x[2]}}})})
-   +(tt?rt.map(function(x){return '<div class="br"><div class="t1"><span><i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+x[2]+';margin-right:6px"></i>'+x[1]+'</span><span class="'+x[3]+'">'+x[4]+money(x[0])+' <small class="mut">'+(x[0]/tt*100).toFixed(1).replace('.',',')+'%</small></span></div></div>'}).join(''):'')+'</div>';
+   +(tt?rt.map(function(x){return '<div class="br"><div class="t1"><span><i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+x[2]+';margin-right:6px"></i>'+x[1]+'</span><span class="'+x[3]+'">'+x[4]+money(x[0])+' <small class="mut">'+(x[0]/tt*100).toFixed(1).replace('.',',')+'%</small></span></div></div>'}).join(''):'')
+   +'<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 2px 2px"><span style="font-size:15px;color:var(--mut)">Tổng</span><b class="'+(th-ch>=0?'thu':'chi')+'" style="font-size:22px">'+(th-ch>=0?'+':'-')+money(Math.abs(th-ch))+'</b></div></div>';
   h+='<div class="seg"><button data-a="reptype" data-v="thu" class="thu'+(r.type==='thu'?' on':'')+'">Thu nhập</button><button data-a="reptype" data-v="chi" class="chi'+(r.type==='chi'?' on':'')+'">Chi tiêu</button></div>';
   var g=groups(r.type);
   h+='<div class="card">';
@@ -753,8 +753,9 @@ function assetsHTML(){
     if(cost>0){var tp=val-cost,to=V.rep.openTotal;h+='<button class="fr'+(to?' on':'')+'" data-a="totaltoggle" style="grid-template-columns:auto 1fr;font-size:14px"><span>Tổng lời/lỗ<i class="ar">'+(to?'▴':'▾')+'</i></span><span style="text-align:right">'+plHTML(tp,(val/cost-1)*100)+'</span></button>'+(to?'<div class="fd">'+tl+'</div>':'')}
   }else h+='<div class="empty">Chưa có mã quỹ nào</div>';
   h+='<div class="fbar"><button class="ghost" data-a="fundadd">+ Thêm mã quỹ</button>'+((fs.length||ws.length)?'<button class="ghost" data-a="navnow">'+(NAV.busy?'Đang lấy giá…':'↻ Cập nhật giá')+'</button>':'')+'</div>';
+  if(fs.length||flogs().length)h+='<button class="ghost" data-a="pg" data-p="fundrep" style="margin-top:10px">📊 Báo cáo biến động chứng chỉ quỹ</button>';
   if(fs.length||ws.length){
-    var st=L.navErr?'<span class="chi nerr">'+esc(L.navErr)+'</span>':(L.navOk?'Giá cập nhật lúc '+hhmm(L.navOk)+' '+dshort(ds(new Date(L.navOk).getFullYear(),new Date(L.navOk).getMonth()+1,new Date(L.navOk).getDate())):(S.url||priceUrl()?'Chưa lấy giá':'Bật đồng bộ Google Sheets để tự lấy giá, hoặc nhập giá tay khi sửa mã quỹ'));
+    var st=L.navErr?'<span class="chi nerr">'+esc(L.navErr)+'</span>':(L.navOk?navAtTxt():(S.url||priceUrl()?'Chưa lấy giá':'Bật đồng bộ Google Sheets để tự lấy giá, hoặc nhập giá tay khi sửa mã quỹ'));
     h+='<div class="mut" style="margin-top:10px;text-align:center">'+st+'</div>';
   }
   h+=watchHTML(ws);
@@ -800,6 +801,7 @@ function watchHTML(ws){
   }else h+='<div class="empty">Chưa có mã nào chờ giá</div>';
   return h+'<div class="fbar"><button class="ghost" data-a="watchadd">+ Thêm mã quỹ</button></div></div>';
 }
+function navAtTxt(){var d=new Date(L.navOk);return 'Giá cập nhật lúc '+hhmm(L.navOk)+' '+dshort(ds(d.getFullYear(),d.getMonth()+1,d.getDate()))+' từ Fmarket'}
 function refreshAssets(){
   var el=$('#assets');if(!el)return;var ae=document.activeElement;
   if(ae&&ae.tagName==='TEXTAREA'&&el.contains(ae))return;
@@ -856,7 +858,7 @@ function fetchNav(manual){
     if(n)L.navOk=Date.now();
     L.navErr=err;
     NAV.busy=false;saveL();refreshAssets();
-    if(n)checkAlerts();
+    if(n){checkAlerts();snapFund()}
   });
 }
 
@@ -892,7 +894,7 @@ function moreHTML(){
 }
 
 /* ---------- trang riêng ---------- */
-var PTITLE={edit:'Chỉnh sửa',cats:'Danh mục thu chi',basic:'Cài đặt',sync:'Đồng bộ Google Sheets',balance:'Báo cáo biến động số dư',search:'Tìm kiếm giao dịch',backup:'Sao lưu dữ liệu',about:'Thông tin ứng dụng',catlist:'Chi tiết danh mục',fund:'Mã quỹ',watch:'Chờ đợi giá',cd:'Sự kiện',cdsug:'Ngày lễ gợi ý',help:'Hướng dẫn sử dụng'};
+var PTITLE={edit:'Chỉnh sửa',cats:'Danh mục thu chi',basic:'Cài đặt',sync:'Đồng bộ Google Sheets',balance:'Báo cáo biến động số dư',search:'Tìm kiếm giao dịch',fundrep:'Báo cáo chứng chỉ quỹ',backup:'Sao lưu dữ liệu',about:'Thông tin ứng dụng',catlist:'Chi tiết danh mục',fund:'Mã quỹ',watch:'Chờ đợi giá',cd:'Sự kiện',cdsug:'Ngày lễ gợi ý',help:'Hướng dẫn sử dụng'};
 function openPage(name,arg){
   if(name==='edit'){
     var e=D.entries.find(function(x){return x.id===arg});if(!e)return;
@@ -930,7 +932,7 @@ function renderPage(){
   $('#ptt').textContent=p.name==='catlist'?cat(p.arg).name:p.name==='fund'?(fundSt.id?'Sửa mã quỹ':'Thêm mã quỹ'):p.name==='watch'?(watchSt.id?'Sửa mã chờ giá':'Thêm mã chờ giá'):p.name==='cd'?(cdSt.id?'Sửa sự kiện':'Thêm sự kiện'):PTITLE[p.name];
   $('#pexit').textContent=SETP[p.name]?'Lưu lại & Thoát':'Thoát';
   var b=$('#pbody'),top=b.scrollTop;
-  var fn={edit:pgEdit,cats:pgCats,basic:pgBasic,sync:pgSync,balance:pgBalance,search:pgSearch,backup:pgBackup,about:pgAbout,catlist:pgCatList,fund:pgFund,watch:pgWatch,cd:pgCd,cdsug:pgCdSug,help:pgHelp}[p.name];
+  var fn={edit:pgEdit,cats:pgCats,basic:pgBasic,sync:pgSync,balance:pgBalance,search:pgSearch,fundrep:pgFundRep,backup:pgBackup,about:pgAbout,catlist:pgCatList,fund:pgFund,watch:pgWatch,cd:pgCd,cdsug:pgCdSug,help:pgHelp}[p.name];
   b.innerHTML=fn(p);
   b.scrollTop=top;
   if(p.name==='basic'||p.name==='sync'||p.name==='search'||p.name==='fund'||p.name==='watch'||p.name==='cd')bindPageInputs(p);
@@ -1044,6 +1046,36 @@ function lockCard(){
 function lockSetBio(){
   if(!bioOK()){toast('Máy này không hỗ trợ Face ID / Touch ID trong trình duyệt');return Promise.resolve(false)}
   return bioCreate().then(function(id){L.lock.cred=id;saveL();return true}).catch(function(){toast('Không bật được Face ID / Touch ID, vẫn dùng mã PIN');return false});
+}
+/* Báo cáo quỹ: mốc thứ 6 hằng tuần + nhật ký mua bán */
+function lastFri(t){var p=parse(t),d=new Date(p.y,p.m-1,p.d);d.setDate(d.getDate()-(d.getDay()+2)%7);return ds(d.getFullYear(),d.getMonth()+1,d.getDate())}
+function snaps(){return D.assets.filter(function(a){return a.kind==='snap'&&!a.deleted}).sort(function(a,b){return a.date<b.date?-1:1})}
+function flogs(){return D.assets.filter(function(a){return a.kind==='flog'&&!a.deleted}).sort(function(a,b){return (b.at||0)-(a.at||0)})}
+function flog(act,code,qty,price,note){var r={id:'l'+uid(),kind:'flog',date:today(),at:Date.now(),code:code,act:act,qty:qty,price:price||0,note:note||''};touch(r);D.assets.push(r)}
+function snapFund(){
+  var fs=funds();if(!fs.length||fs.some(function(f){return !priceOf(f)}))return;
+  var val=0,cost=0,items=fs.map(function(f){var p=priceOf(f);val+=f.qty*p;cost+=f.qty*f.buy;return {c:f.code,q:f.qty,b:f.buy,p:p}});
+  val=Math.round(val);cost=Math.round(cost);
+  var ss=snaps(),latest=ss.length?ss[ss.length-1].date:'',t=today(),fr=lastFri(t),date=null;
+  if(!latest)date=t;else if(latest<fr)date=fr;else if(t===fr&&latest===fr)date=fr;else return;
+  var id='s'+date,r=D.assets.find(function(a){return a.id===id});
+  if(r&&!r.deleted&&r.val===val&&r.cost===cost)return;
+  if(!r){r={id:id,kind:'snap',date:date};D.assets.push(r)}
+  r.deleted=false;r.val=val;r.cost=cost;r.items=items;r.at=Date.now();r.late=date!==t?t:'';touch(r);changed();
+}
+function pgFundRep(){
+  var ss=snaps(),h='';
+  if(ss.length){
+    h+='<div class="card">'+lineChart(ss.map(function(x){return {x:x.date.slice(8)+'/'+x.date.slice(5,7),y:x.val}}),'#12306B','Tổng giá trị chứng chỉ quỹ theo tuần')+'</div>';
+    var GS='display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.2fr) minmax(0,1.3fr) minmax(0,1.3fr);gap:6px;font-size:12.5px;padding:7px 0;border-top:1px solid var(--line);align-items:start';
+    h+='<div class="card"><div class="ct">Mốc thứ 6 hằng tuần</div><div class="mut" style="'+GS.replace('border-top:1px solid var(--line);','')+'"><span>Ngày</span><span>Giá trị</span><span>So tuần trước</span><span>Lời/lỗ</span></div>';
+    h+=ss.slice().reverse().map(function(x,k,a){var pv=a[k+1];
+      return '<div style="'+GS+'"><span>'+x.date.slice(8)+'/'+x.date.slice(5,7)+(x.late?'*':'')+'</span><span>'+fmt(x.val)+'</span><span>'+(pv?plHTML(x.val-pv.val,pv.val?(x.val/pv.val-1)*100:0):'<span class="mut">—</span>')+'</span><span>'+(x.cost>0?plHTML(x.val-x.cost,(x.val/x.cost-1)*100):'—')+'</span></div>'}).join('')+'</div>';
+  }else h+='<div class="card"><div class="empty">Chưa có mốc nào. App tự ghi mốc vào thứ 6 hằng tuần khi bạn mở app và các mã đã có giá.</div></div>';
+  var lg=flogs();
+  h+='<div class="card"><div class="ct">Nhật ký mua bán</div>'+(lg.length?lg.map(function(x){return '<div style="display:flex;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line)"><div style="flex:1;min-width:0;font-size:14px"><div><b>'+esc(x.act)+' '+esc(x.code)+'</b> <span class="mut">'+dshort(x.date)+'</span></div><div class="mut">'+(x.qty?fmtQ(x.qty)+' chứng chỉ':'')+(x.price?' × '+fmtN(x.price,2):'')+(x.note?(x.qty?' · ':'')+esc(x.note):'')+'</div></div><button class="red" data-a="flogdel" data-id="'+x.id+'" style="padding:6px 12px;font-size:13px;border:1px solid #e3b5b5;border-radius:10px;color:var(--chi);background:#fff">Xóa</button></div>'}).join(''):'<div class="empty">Chưa có giao dịch. Thêm, sửa số lượng hoặc xóa mã quỹ thì app tự ghi vào đây.</div>')+'</div>';
+  h+='<div class="mut">Chênh lệch so tuần trước gồm cả phần mua/bán trong tuần. Mốc dùng giá gần nhất lúc mở app; nếu mở sau thứ 6 thì mốc ghi vào thứ 6 gần nhất và có dấu *. Mốc đầu tiên ghi ngay khi có giá.'+(L.navOk?'<br>'+navAtTxt():'')+'</div>';
+  return h;
 }
 function pgBasic(){
   return '<div class="card"><label class="l" for="bt">Tên ứng dụng</label><input class="inp" id="bt" maxlength="40" value="'+esc(L.title)+'">'
@@ -1334,8 +1366,11 @@ var ACT={
     if(!q){toast('Nhập số lượng lớn hơn 0');return}
     if(!b){toast('Nhập giá mua lớn hơn 0');return}
     var f=s.id&&D.assets.find(function(x){return x.id===s.id});
-    if(f){f.code=code;f.qty=q;f.buy=b;f.date=s.date;f.man=m;touch(f)}
-    else{f={id:'f'+uid(),kind:'fund',code:code,qty:q,buy:b,date:s.date,man:m,log:''};touch(f);D.assets.push(f)}
+    if(f){
+      if(q!==f.qty)flog(q>f.qty?'Mua thêm':'Bán bớt',code,Math.abs(q-f.qty),q>f.qty?b:priceOf(f),'Số lượng '+fmtQ(f.qty)+' → '+fmtQ(q));
+      else if(b!==f.buy||code!==f.code)flog('Sửa',code,0,0,(b!==f.buy?'Giá mua '+fmtN(f.buy,2)+' → '+fmtN(b,2):'')+(code!==f.code?(b!==f.buy?'; ':'')+'đổi mã '+f.code+' → '+code:''));
+      f.code=code;f.qty=q;f.buy=b;f.date=s.date;f.man=m;touch(f)}
+    else{f={id:'f'+uid(),kind:'fund',code:code,qty:q,buy:b,date:s.date,man:m,log:''};touch(f);D.assets.push(f);flog('Mua',code,q,b,'Ngày mua '+dmy(s.date))}
     V.rep.open=f.id;
     if(!L.nav||!L.nav[code]){L.navAt=0;saveL()}
     popPage();toast('Đã lưu mã '+code);changed();
@@ -1343,9 +1378,10 @@ var ACT={
   funddel:function(t){
     var f=D.assets.find(function(x){return x.id===t.dataset.id});if(!f)return;
     confirmBox('Xóa mã quỹ?','<b>'+esc(f.code)+'</b> · '+fmtQ(f.qty)+' chứng chỉ, mua '+dmy(f.date)+'<br>Nhật ký giao dịch của mã này cũng bị xóa.','Xóa',true).then(function(ok){
-      if(!ok)return;f.deleted=true;touch(f);if(V.rep.open===f.id)V.rep.open=null;toast('Đã xóa mã quỹ');changed();
+      if(!ok)return;flog('Xóa mã',f.code,f.qty,priceOf(f),'Mua '+dmy(f.date)+' giá '+fmtN(f.buy,2));f.deleted=true;touch(f);if(V.rep.open===f.id)V.rep.open=null;toast('Đã xóa mã quỹ');changed();
     });
   },
+  flogdel:function(t){var r=D.assets.find(function(x){return x.id===t.dataset.id});if(!r)return;r.deleted=true;touch(r);save();schedSync(1200);renderPage()},
   watchtoggle:function(t){V.rep.openW=V.rep.openW===t.dataset.id?null:t.dataset.id;refreshAssets()},
   watchadd:function(){openPage('watch',null)},
   watchedit:function(t){openPage('watch',t.dataset.id)},
@@ -1473,6 +1509,7 @@ setInterval(function(){if(!document.hidden&&S.url&&!SYN.bad)doSync()},60000);
 if(S.url)SYN.msg=dirty()?'⏳ Chờ gửi':'☁ Đã lưu';
 showLock();
 render();
+snapFund();
 if(S.url)schedSync(800);
 setTimeout(checkAuto,1500);
 setTimeout(autoNav,2500);

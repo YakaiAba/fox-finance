@@ -198,6 +198,14 @@ svg text{font-family:inherit}
 .lgr small{font-size:12px;font-weight:400;color:var(--mut)}
 .tot{display:flex;justify-content:space-between;align-items:center;padding:12px 0 2px;font-size:18px;font-weight:700}
 .tot b{font-size:22px}
+.sec.tg{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;padding:0 2px;background:none;border:0}
+.sec.tg i{font-style:normal;font-size:14px;color:#6b7280}
+.icr{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;text-align:left;padding:10px 0;font-weight:700}
+.icr small{font-weight:600;color:var(--mut);font-size:13px}.icr i{font-style:normal;font-size:12px;color:#6b7280;margin-left:6px}
+.ig{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,.9fr) minmax(0,1.3fr);gap:8px;width:100%;text-align:right;align-items:center}
+.ih{font-size:12px;color:var(--mut);padding:6px 0;border-bottom:1px solid var(--line)}
+.ir{padding:11px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.ig>:first-child{text-align:left}.ir>:first-child{font-weight:700;color:var(--navy);overflow-wrap:anywhere}
 </style>
 </head>
 <body>
@@ -222,7 +230,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.45 (01/11/2026)';
+var APP_VER='1.46 (02/11/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -288,11 +296,12 @@ var V={
   rep:{mode:'m',y:now.getFullYear(),m:now.getMonth()+1,type:'chi'},
   bud:{y:now.getFullYear(),m:now.getMonth()+1},
   ast:{mode:'m',y:now.getFullYear(),m:now.getMonth()+1},
-  fr:{y:now.getFullYear(),m:now.getMonth()+1}
+  fr:{y:now.getFullYear(),m:now.getMonth()+1},
+  inv:{open:false,adding:false,cat:null,item:null}
 };
 var tab='nhap';
 var pages=[];
-var editSt=null,fundSt=null,watchSt=null,cdSt=null,cdY=new Date().getFullYear();
+var editSt=null,invSt=null,fundSt=null,watchSt=null,cdSt=null,cdY=new Date().getFullYear();
 var BAG='<img src="data:image/png;base64,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" width="24" height="24" alt="" draggable="false">';
 var CALI='<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><rect x="2" y="3" width="20" height="19" rx="3" fill="#fff" stroke="#d32f2f" stroke-width="1.4"/><path d="M2 6a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v3.2H2z" fill="#e53935"/><text x="12" y="8" font-size="5" font-weight="700" fill="#fff" text-anchor="middle">June</text><text x="12" y="19.6" font-size="10.5" font-weight="800" fill="#222" text-anchor="middle">21</text></svg>';
 var TABS=[['nhap','<span class="pen">✏️</span>','Thu chi'],['cal',CALI,'Lịch'],['rep','📊','Báo cáo'],['bud',BAG,'Ngân sách'],['more','⋯','Khác']];
@@ -728,9 +737,8 @@ function fundInfo(fs){
   list.forEach(function(x,i){x.color=PAL[i%PAL.length];col[x.code]=x.color});
   return {list:list,tot:tot,col:col};
 }
-function assetsHTML(){
-  var g=D.assets.find(function(a){return a.id==='gold'&&!a.deleted}),fs=funds(),ws=watches();
-  var h='<div class="sec">Đầu tư</div><div class="card"><div class="ct">Vàng</div><textarea class="nt" rows="3" data-g="gold" placeholder="Ghi chú vàng (loại, số lượng, nơi giữ…)" autocomplete="off">'+esc(g?g.note||'':'')+'</textarea></div>';
+function fundBlock(){
+  var fs=funds(),ws=watches(),h='';
   h+='<div class="card"><div class="ch2"><div class="ct">Chứng chỉ quỹ</div></div>';
   if(fs.length){
     var info=fundInfo(fs),GS='grid-template-columns:minmax(0,1.3fr) minmax(0,1.8fr) minmax(0,.85fr) minmax(0,1.05fr);gap:6px;font-size:13px';
@@ -769,7 +777,7 @@ function assetsHTML(){
   if(fs.length||flogs().length)h+='<button class="ghost" data-a="pg" data-p="fundrep" style="margin-top:8px">Báo cáo biến động chứng chỉ quỹ</button>';
   h+=watchHTML(ws);
   if(S.url&&S.sv===1)h+='<div class="mut" style="margin-top:8px;text-align:center">Code.gs chưa cập nhật: dữ liệu đầu tư và sự kiện chỉ lưu trên máy này.</div>';
-  return h+'</div>'+astHTML();
+  return h+'</div>';
 }
 function checkAlerts(){
   if($('#dl').classList.contains('show'))return;
@@ -903,11 +911,15 @@ function moreHTML(){
 }
 
 /* ---------- trang riêng ---------- */
-var PTITLE={edit:'Chỉnh sửa',cats:'Danh mục thu chi',basic:'Cài đặt',sync:'Đồng bộ Google Sheets',balance:'Báo cáo biến động số dư',search:'Tìm kiếm giao dịch',fundrep:'Báo cáo biến động chứng chỉ quỹ',backup:'Sao lưu dữ liệu',about:'Thông tin ứng dụng',catlist:'Chi tiết danh mục',fund:'Mã quỹ',watch:'Chờ đợi giá',cd:'Sự kiện',cdsug:'Ngày lễ gợi ý',help:'Hướng dẫn sử dụng'};
+var PTITLE={inv:'Tài sản',edit:'Chỉnh sửa',cats:'Danh mục thu chi',basic:'Cài đặt',sync:'Đồng bộ Google Sheets',balance:'Báo cáo biến động số dư',search:'Tìm kiếm giao dịch',fundrep:'Báo cáo biến động chứng chỉ quỹ',backup:'Sao lưu dữ liệu',about:'Thông tin ứng dụng',catlist:'Chi tiết danh mục',fund:'Mã quỹ',watch:'Chờ đợi giá',cd:'Sự kiện',cdsug:'Ngày lễ gợi ý',help:'Hướng dẫn sử dụng'};
 function openPage(name,arg){
   if(name==='edit'){
     var e=D.entries.find(function(x){return x.id===arg});if(!e)return;
     editSt={id:e.id,type:e.type,date:e.date,expr:String(e.amount),cat:e.cat,note:e.note||''};
+  }
+  if(name==='inv'){
+    var io=arg&&arg.indexOf('new:')!==0&&D.assets.find(function(x){return x.id===arg});
+    invSt=io?{id:io.id,cat:io.cat,name:io.name,qty:liveFmt(numStr(io.qty)),unit:io.unit||'',buy:liveFmt(numStr(io.buy)),date:io.date,note:io.note||''}:{id:null,cat:String(arg).slice(4),name:'',qty:'',unit:'',buy:'',date:today(),note:''};
   }
   if(name==='fund'){
     var fo=arg&&D.assets.find(function(x){return x.id===arg});
@@ -938,14 +950,14 @@ function closePage(){
 var SETP={basic:1,sync:1,cats:1,catlist:0,backup:1};
 function renderPage(){
   var p=pages[pages.length-1];if(!p)return;
-  $('#ptt').textContent=p.name==='catlist'?cat(p.arg).name:p.name==='fund'?(fundSt.id?'Sửa mã quỹ':'Thêm mã quỹ'):p.name==='watch'?(watchSt.id?'Sửa mã chờ giá':'Thêm mã chờ giá'):p.name==='cd'?(cdSt.id?'Sửa sự kiện':'Thêm sự kiện'):PTITLE[p.name];
+  $('#ptt').textContent=p.name==='catlist'?cat(p.arg).name:p.name==='fund'?(fundSt.id?'Sửa mã quỹ':'Thêm mã quỹ'):p.name==='inv'?(invSt.id?'Sửa tài sản':'Thêm tài sản'):p.name==='watch'?(watchSt.id?'Sửa mã chờ giá':'Thêm mã chờ giá'):p.name==='cd'?(cdSt.id?'Sửa sự kiện':'Thêm sự kiện'):PTITLE[p.name];
   $('#pexit').textContent=SETP[p.name]?'Lưu lại & Thoát':'Thoát';
   var b=$('#pbody'),top=b.scrollTop;
-  var fn={edit:pgEdit,cats:pgCats,basic:pgBasic,sync:pgSync,balance:pgBalance,search:pgSearch,fundrep:pgFundRep,backup:pgBackup,about:pgAbout,catlist:pgCatList,fund:pgFund,watch:pgWatch,cd:pgCd,cdsug:pgCdSug,help:pgHelp}[p.name];
+  var fn={edit:pgEdit,cats:pgCats,basic:pgBasic,sync:pgSync,balance:pgBalance,search:pgSearch,fundrep:pgFundRep,inv:pgInv,backup:pgBackup,about:pgAbout,catlist:pgCatList,fund:pgFund,watch:pgWatch,cd:pgCd,cdsug:pgCdSug,help:pgHelp}[p.name];
   b.innerHTML=fn(p);
   b.scrollTop=top;
   if(p.name==='fundrep')fitCal();
-  if(p.name==='basic'||p.name==='sync'||p.name==='search'||p.name==='fund'||p.name==='watch'||p.name==='cd')bindPageInputs(p);
+  if(p.name==='basic'||p.name==='sync'||p.name==='search'||p.name==='fund'||p.name==='watch'||p.name==='cd'||p.name==='inv')bindPageInputs(p);
 }
 function pgEdit(p){
   if(!D.entries.find(function(x){return x.id===editSt.id&&!x.deleted})){setTimeout(closePage,0);return ''}
@@ -1107,16 +1119,19 @@ function astHTML(){
    +'<div class="seg" style="max-width:none"><button data-a="astmode" data-v="m" class="'+(a.mode==='m'?'on':'')+'">Tháng</button><button data-a="astmode" data-v="y" class="'+(a.mode==='y'?'on':'')+'">Năm</button></div>'
    +navHTML(a.mode==='y'?'Năm '+a.y:pad(a.m)+'/'+a.y,a.mode==='y'?'':monthSub(a.y,a.m),'astprev','astnext')
    +lineChart(astPts(),'#12306B','Tổng tài sản theo ngày',true)
-   +'<div class="mut" style="margin-top:4px">Tổng tài sản = Giá trị đầu tư + Tiền mặt. Ngày không mở ứng dụng thì hệ thống sử dụng giá trị ngày gần nhất.</div></div>';
+   +'<div class="mut" style="margin-top:4px">Tổng tài sản = Giá trị đầu tư + Tiền mặt. Ngày không mở ứng dụng thì hệ thống sử dụng giá trị ngày gần nhất.<br>Giá trị đầu tư hiện chỉ gồm Chứng chỉ quỹ. Vàng, tiền điện tử, cổ phiếu & trái phiếu, bất động sản và các tài sản khác không được tính vì không rõ giá trị tại thời điểm hiện tại.</div></div>';
   return h;
 }
 function pgFundRep(){
   var f=V.fr,n=dim(f.y,f.m),t=today(),first=(new Date(f.y,f.m-1,1).getDay()+6)%7,rows=Math.ceil((first+n)/7),ss=snaps(),h='';
   var a=ds(f.y,f.m,1),b=ds(f.y,f.m,n);if(b>t)b=t;
   var pd=new Date(f.y,f.m-1,0),prevD=ds(pd.getFullYear(),pd.getMonth()+1,pd.getDate()),fd=a<=b?fundDays(prevD,b):{};
-  if(ss.length){
-    var last=ss[ss.length-1];
-    h+='<div class="card"><div class="dh" style="margin-top:0"><span>Giá trị gần nhất ('+dshort(last.date)+')</span><b>'+fmt(last.val)+'đ</b></div>'+(last.cost>0?'<div class="tr" style="display:flex;justify-content:space-between;padding:6px 2px"><span>Vốn '+fmt(last.cost)+'đ</span>'+plHTML(last.val-last.cost,(last.val/last.cost-1)*100)+'</div>':'')+'</div>';
+  var fv=0,fc=0;funds().forEach(function(x){var p=priceOf(x);if(p){fv+=x.qty*p;fc+=x.qty*x.buy}});
+  if(fc>0){
+    var pl=fv-fc,pc=(fv/fc-1)*100,cl=pl>=0?'thu':'chi',sg=pl>=0?'+':'-';
+    h+='<div class="card"><div class="tot" style="padding:0 0 6px"><span>Tổng giá trị hiện tại</span><b>'+fmt(fv)+'đ</b></div>'
+     +'<div class="tr" style="display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-top:1px solid var(--line)"><span>Lời/lỗ hiện tại (tiền mặt)</span><b class="'+cl+'" style="font-size:16px">'+sg+fmt(Math.abs(pl))+'đ</b></div>'
+     +'<div class="tr" style="display:flex;justify-content:space-between;align-items:baseline;padding:6px 0 0;border-top:1px solid var(--line)"><span>Lời/lỗ hiện tại (%)</span><b class="'+cl+'" style="font-size:16px">'+sg+fmtN(Math.abs(pc),2)+'%</b></div></div>';
   }
   h+=navHTML(pad(f.m)+'/'+f.y,monthSub(f.y,f.m),'frprev','frnext');
   h+='<div class="cal">'+['T2','T3','T4','T5','T6','T7','CN'].map(function(x,i){return '<div class="h'+(i===5?' sa':'')+(i===6?' su':'')+'">'+x+'</div>'}).join('');
@@ -1138,6 +1153,54 @@ function pgFundRep(){
   h+='<div class="card"><div class="ct">Nhật ký mua bán</div>'+(lg.length?lg.map(function(x){return '<div style="display:flex;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line)"><div style="flex:1;min-width:0;font-size:14px"><div><b>'+esc(x.act)+' '+esc(x.code)+'</b> <span class="mut">'+dshort(x.date)+'</span></div><div class="mut">'+(x.qty?fmtQ(x.qty)+' chứng chỉ':'')+(x.price?' × '+fmtN(x.price,2):'')+(x.note?(x.qty?' · ':'')+esc(x.note):'')+'</div></div><button class="red" data-a="flogdel" data-id="'+x.id+'" style="padding:6px 12px;font-size:13px;border:1px solid #e3b5b5;border-radius:10px;color:var(--chi);background:#fff">Xóa</button></div>'}).join(''):'<div class="empty">Chưa có giao dịch. Thêm, sửa số lượng hoặc xóa mã quỹ thì ứng dụng tự ghi vào đây.</div>')+'</div>';
   return h;
 }
+/* ---------- Danh mục đầu tư ---------- */
+var ICATS=[['gold','Vàng'],['crypto','Tiền điện tử'],['stock','Cổ phiếu & trái phiếu'],['fund','Chứng chỉ quỹ'],['realty','Bất động sản'],['other','Khác']];
+var IPH={gold:['Vàng nhẫn','1','lượng','Mua trực tiếp tại tiệm vàng ABC…'],crypto:['Bitcoin','0,05','BTC','Mua trên sàn…'],stock:['Cổ phiếu VNM','100','cổ phiếu','Mua qua công ty chứng khoán…'],fund:['','','',''],realty:['Căn hộ…','1','căn','Địa chỉ, tình trạng pháp lý…'],other:['Tên tài sản','1','','Ghi chú thêm…']};
+function icName(c){return ICATS.filter(function(x){return x[0]===c})[0][1]}
+function invItems(c){return D.assets.filter(function(a){return a.kind==='inv'&&a.cat===c&&!a.deleted}).sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:(a.id<b.id?-1:1)})}
+function goldNote(){var g=D.assets.find(function(a){return a.id==='gold'&&!a.deleted});return g&&g.note&&g.note.trim()?g:null}
+function icRec(c){return D.assets.find(function(a){return a.kind==='icat'&&a.cat===c&&!a.deleted})}
+function icHas(c){return !!icRec(c)||invItems(c).length>0||(c==='fund'&&(funds().length>0||watches().length>0||flogs().length>0))||(c==='gold'&&!!goldNote())}
+function invTot(c){var t=0;invItems(c).forEach(function(a){t+=a.qty*a.buy});return t}
+function invHTML(){
+  var v=V.inv,h='<button class="sec tg" data-a="invtoggle"><span>Danh mục đầu tư</span><i>'+(v.open?'▴':'▾')+'</i></button>';
+  if(!v.open)return h;
+  h+='<button class="ghost" data-a="invadd" style="margin:0 0 10px">＋ Thêm danh mục</button>';
+  if(v.adding)h+='<div class="card">'+ICATS.map(function(x){var has=icHas(x[0]);return '<button class="br" '+(has?'disabled style="color:#9aa0aa;cursor:default"':'data-a="invpick" data-c="'+x[0]+'"')+'><div class="t1"><span>'+x[1]+'</span><span>'+(has?'✓ Đã thêm':'')+'</span></div></button>'}).join('')+'</div>';
+  ICATS.forEach(function(x){
+    var c=x[0];if(!icHas(c))return;
+    var open=v.cat===c,sm=c==='fund'?(fundNow()?fmt(fundNow())+'đ':''):(invItems(c).length?fmt(invTot(c))+'đ':'');
+    h+='<div class="card" style="padding:2px 12px"><button class="icr" data-a="invcat" data-c="'+c+'"><span>'+x[1]+'</span><span><small>'+sm+'</small><i>'+(open?'▴':'▾')+'</i></span></button></div>';
+    if(!open)return;
+    if(c==='fund'){h+=fundBlock();if(!funds().length&&!watches().length&&!flogs().length)h+='<button class="ghost red" data-a="invdelcat" data-c="fund" style="margin:-4px 0 12px">Xóa danh mục này</button>';return}
+    var it=invItems(c),gn=goldNote();
+    h+='<div class="card">';
+    if(it.length){
+      h+='<div class="ig ih"><span>Tên</span><span>Số lượng</span><span>Thành tiền</span></div>';
+      it.forEach(function(a){
+        var op=v.item===a.id,tt=a.qty*a.buy;
+        h+='<button class="ig ir" data-a="invitem" data-id="'+a.id+'"><span>'+esc(a.name)+'<i class="ar">'+(op?'▴':'▾')+'</i></span><span>'+fmtQ(a.qty)+(a.unit?' '+esc(a.unit):'')+'</span><span>'+fmt(tt)+'đ</span></button>';
+        if(op)h+='<div class="fd"><div>Ngày mua: <b>'+dshort(a.date)+'</b></div><div>Số lượng: <b>'+fmtQ(a.qty)+(a.unit?' '+esc(a.unit):'')+'</b></div><div>Giá mua: <b>'+fmtN(a.buy,2).replace(/,00$/,'')+'đ'+(a.unit?' / '+esc(a.unit):'')+'</b></div><div>Thành tiền: <b>'+fmt(tt)+'đ</b></div>'+(a.note?'<div>Mô tả: '+esc(a.note)+'</div>':'')+'<div class="bt2"><button data-a="invedit" data-id="'+a.id+'">Sửa</button><button class="red" data-a="invdel" data-id="'+a.id+'">Xóa</button></div></div>';
+      });
+      h+='<div class="ig" style="padding:10px 0 2px;font-weight:700"><span>Tổng giá mua</span><span></span><span>'+fmt(invTot(c))+'đ</span></div>';
+    }else h+='<div class="empty">Chưa có tài sản</div>';
+    if(c==='gold'&&gn)h+='<div class="mut" style="margin-top:8px">Ghi chú vàng cũ:</div><textarea class="nt" rows="3" data-g="gold" autocomplete="off" style="width:100%">'+esc(gn.note)+'</textarea>';
+    h+='<button class="ghost" data-a="invnew" data-c="'+c+'">＋ Thêm tài sản</button><button class="ghost red" data-a="invdelcat" data-c="'+c+'">Xóa danh mục này</button></div>';
+  });
+  return h;
+}
+function assetsHTML(){return invHTML()+astHTML()}
+function pgInv(){
+  var s=invSt,ph=IPH[s.cat]||IPH.other;
+  return '<div class="card"><div class="mut" style="margin-bottom:2px">Danh mục: <b>'+icName(s.cat)+'</b></div><label class="l" for="in">Tên tài sản</label><input class="inp" id="in" maxlength="60" autocomplete="off" placeholder="Ví dụ: '+esc(ph[0])+'" value="'+esc(s.name)+'">'
+   +'<label class="l">Ngày mua</label><button class="fld" data-a="idate" style="width:100%;padding:11px">'+dlabel(s.date)+' ▾</button>'
+   +'<label class="l" for="iq">Số lượng</label><input class="inp" id="iq" inputmode="decimal" autocomplete="off" placeholder="'+esc(ph[1])+'" value="'+esc(s.qty)+'">'
+   +'<label class="l" for="iu">Đơn vị (không bắt buộc)</label><input class="inp" id="iu" maxlength="20" autocomplete="off" placeholder="'+esc(ph[2]||'lượng, cây, căn…')+'" value="'+esc(s.unit)+'">'
+   +'<label class="l" for="ib">Giá mua (đ / 1 đơn vị)</label><input class="inp" id="ib" inputmode="decimal" autocomplete="off" placeholder="160.000.000" value="'+esc(s.buy)+'"><div class="mut" id="it" style="margin-top:4px">'+invPrev()+'</div>'
+   +'<label class="l" for="id">Mô tả</label><textarea class="nt" id="id" rows="3" style="width:100%" placeholder="'+esc(ph[3])+'">'+esc(s.note)+'</textarea></div>'
+   +'<button class="primary" data-a="invsave">Lưu</button>';
+}
+function invPrev(){var q=parseNum(invSt.qty),b=parseNum(invSt.buy);return q&&b?'Thành tiền: '+fmt(q*b)+'đ':''}
 function pgBasic(){
   return '<div class="card"><label class="l" for="bt">Tên ứng dụng</label><input class="inp" id="bt" maxlength="40" value="'+esc(L.title)+'">'
    +'<label class="l" for="bd">Tên máy (ví dụ: iPhone, iPad)</label><input class="inp" id="bd" maxlength="20" value="'+esc(L.dev)+'" placeholder="Để phân biệt máy khi đồng bộ"></div><div class="mut">Tự lưu khi bạn gõ.</div>'+lockCard();
@@ -1181,7 +1244,7 @@ function pgHelp(){
   function sec(t,l){return '<div class="card"><div class="ct">'+t+'</div>'+l.map(function(x){return '<div style="margin:5px 0">• '+x+'</div>'}).join('')+'</div>'}
   return sec('Ghi thu chi',['Tab <b>Thu chi</b>: bấm <b>Thu nhập</b> hoặc <b>Chi tiêu</b>, bấm ô số tiền để mở bàn phím tính (có + − × ÷, nút 000), chọn danh mục, ghi chú nếu cần rồi bấm Lưu.','Đổi ngày bằng ô ngày; chọn ngày/tháng/năm trong hộp hiện ra.','Sửa hoặc xóa: tab <b>Lịch</b> → bấm vào khoản.'])
   +sec('Xem lại',['<b>Lịch</b>: ô ngày hiện ⭐️ nếu có sự kiện, dòng đỏ là tổng chi, dòng xanh là tổng thu của ngày đó (rút gọn: 517.000đ = 517k, 1.008.000đ = 1,008tr). Bấm vào một ngày để mở khung chi tiết ngay dưới tuần đó (thu chi và sự kiện của ngày); bấm lại hoặc bấm Đóng để thu gọn.','<b>Danh sách sự kiện</b> (dưới lịch): bấm <b>+ Ngày lễ gợi ý</b> để thêm các ngày lễ còn lại trong năm (âm lịch tự quy đổi), hoặc <b>+ Tạo thủ công</b> cho sinh nhật, kỷ niệm… (chọn <b>Nhắc lại</b> mỗi tuần, tháng hoặc năm thì ứng dụng tự tính lần kế tiếp) “Còn lại” hiện số ngày, từ 1 tháng trở lên hiện dạng tháng + ngày. Bấm vào dòng để sửa hoặc xóa. Sự kiện đã qua: xóa khỏi danh sách thì vẫn còn trên lịch, xóa hẳn ở khung chi tiết của ngày đó.','<b>Báo cáo</b>: xem theo Tháng / Năm / Tất cả; bấm một danh mục để xem các khoản. Nút 📷 xuất ảnh báo cáo.','<b>Ngân sách</b>: bấm vào mục để đặt hạn mức mỗi tháng.','<b>Thu chi → Danh mục → Chỉnh sửa</b>: thêm, sửa, xóa, sắp xếp danh mục.'])
-  +sec('Đầu tư (cuối tab Báo cáo)',['<b>Vàng</b>: chỉ là ô ghi chú.','<b>Chứng chỉ quỹ</b>: nhập mã, số lượng, giá mua, ngày mua. Bấm vào mã để xem lời/lỗ, thời gian giữ và nhật ký giao dịch.','<b>Chờ đợi giá</b> (dưới dòng giá cập nhật): thêm mã quỹ bạn quan tâm, nhập giá đối chiếu và kỳ vọng (giảm hoặc tăng, tính bằng đ hoặc %). Cột Hiện tại cho biết giá gần nhất và tỉ lệ % so với giá đối chiếu (âm hiện đỏ). Bấm vào dòng để xem thêm <b>Còn lại</b>: giá gần nhất còn cách điểm kỳ vọng bao nhiêu; 🔔 hiện khi đã chạm điểm kỳ vọng, và ứng dụng hiện hộp nhắc khi bạn mở ứng dụng (mỗi mã một lần mỗi ngày). iOS không cho web báo ngầm khi ứng dụng đóng.','Giá gần nhất tự lấy từ fmarket (khi mở ứng dụng hoặc bấm ↻ Cập nhật giá); chưa lấy được thì nhập giá tay khi sửa mã quỹ.','<b>Báo cáo biến động chứng chỉ quỹ</b> (dưới dòng giá cập nhật): lịch theo tháng, mỗi ô là giá trị quỹ cuối ngày và chênh lệch so với hôm trước; ngày không mở ứng dụng thì dùng giá trị ngày gần nhất. Kèm nhật ký mua bán tự ghi khi thêm, sửa, xóa mã quỹ.','<b>Biến động tài sản</b> (cuối tab Báo cáo): Tổng tài sản = Giá trị đầu tư + Tiền mặt, biểu đồ theo ngày, xem theo Tháng hoặc Năm.'])
+  +sec('Danh mục đầu tư (cuối tab Báo cáo)',['Bấm <b>Danh mục đầu tư</b> để mở. <b>Thêm danh mục</b> rồi chọn Vàng, Tiền điện tử, Cổ phiếu & trái phiếu, Chứng chỉ quỹ, Bất động sản hoặc Khác. Bấm tên danh mục để xem tài sản bên trong; <b>Thêm tài sản</b> gồm tên, ngày mua, số lượng, giá mua (của 1 đơn vị) và mô tả. Các danh mục khác Chứng chỉ quỹ chỉ ghi lại giá mua, chưa có giá hiện tại nên không tính vào Biến động tài sản.','<b>Chứng chỉ quỹ</b>: nhập mã, số lượng, giá mua, ngày mua. Bấm vào mã để xem lời/lỗ, thời gian giữ và nhật ký giao dịch.','<b>Chờ đợi giá</b> (dưới dòng giá cập nhật): thêm mã quỹ bạn quan tâm, nhập giá đối chiếu và kỳ vọng (giảm hoặc tăng, tính bằng đ hoặc %). Cột Hiện tại cho biết giá gần nhất và tỉ lệ % so với giá đối chiếu (âm hiện đỏ). Bấm vào dòng để xem thêm <b>Còn lại</b>: giá gần nhất còn cách điểm kỳ vọng bao nhiêu; 🔔 hiện khi đã chạm điểm kỳ vọng, và ứng dụng hiện hộp nhắc khi bạn mở ứng dụng (mỗi mã một lần mỗi ngày). iOS không cho web báo ngầm khi ứng dụng đóng.','Giá gần nhất tự lấy từ fmarket (khi mở ứng dụng hoặc bấm ↻ Cập nhật giá); chưa lấy được thì nhập giá tay khi sửa mã quỹ.','<b>Báo cáo biến động chứng chỉ quỹ</b> (dưới dòng giá cập nhật): lịch theo tháng, mỗi ô là giá trị quỹ cuối ngày và chênh lệch so với hôm trước; ngày không mở ứng dụng thì dùng giá trị ngày gần nhất. Kèm nhật ký mua bán tự ghi khi thêm, sửa, xóa mã quỹ.','<b>Biến động tài sản</b> (cuối tab Báo cáo): Tổng tài sản = Giá trị đầu tư + Tiền mặt, biểu đồ theo ngày, xem theo Tháng hoặc Năm.'])
   +sec('Sao lưu JSON là gì? (quan trọng)',['Là một file lưu <b>toàn bộ dữ liệu bạn đã nhập</b>: các khoản thu chi, danh mục, ngân sách, ghi chú vàng, mã chứng chỉ quỹ, nhật ký giao dịch danh sách chờ đợi giá và danh sách sự kiện.','Không gồm cài đặt tên ứng dụng, tên máy, địa chỉ và mã bí mật đồng bộ, giá quỹ tự lấy (ứng dụng lấy lại khi cần).','Dữ liệu nằm trong máy này. Mất máy, xóa Safari hoặc <b>xóa biểu tượng trên màn hình chính</b> là mất dữ liệu nếu chưa sao lưu.','<b>Khác → Sao lưu dữ liệu</b>: xuất file lưu vào Tệp/iCloud hoặc gửi cho chính mình. Nên làm ít nhất mỗi tuần; chọn Tự động để ứng dụng nhắc.','Nhập file vào lại sẽ <b>gộp</b> với dữ liệu hiện có, không xóa gì. Đổi sang máy mới thì nhập file này.'])
   +sec('Đồng bộ Google Sheets là gì?',['Là tự động gửi dữ liệu (cùng loại như file JSON) lên một bảng Google Sheets của bạn, và nhận lại thay đổi từ máy kia. Dùng để <b>iPhone và iPad luôn giống nhau</b>, không cần xuất nhập file.','Đồng thời bảng Sheets là nơi lưu dự phòng thứ hai: có các tab dễ đọc (Thu chi, Danh mục, Tài sản…) và bản sao lưu mỗi ngày giữ 30 ngày.','Cách bật: <b>Khác → Đồng bộ Google Sheets</b>, nhập địa chỉ Apps Script và mã bí mật, hai máy dùng giống nhau.','Góc trên phải báo tình trạng: ☁ Đã lưu, ⏳ Chờ gửi, ⚠ lỗi. Mất mạng thì ứng dụng tự gửi lại khi có mạng.','Đồng bộ cũng là cách để ứng dụng tự lấy giá chứng chỉ quỹ. Cập nhật Code.gs bằng <b>Phiên bản mới</b>, không chọn Triển khai mới.'])
   +sec('Sao lưu JSON và đồng bộ khác nhau thế nào?',['<b>Đồng bộ</b>: tự động, giữ hai máy khớp nhau, nhưng xóa nhầm ở máy này sẽ lan sang máy kia.','<b>File JSON</b>: bạn tự giữ, lùi lại được về một ngày cũ. Nên dùng cả hai.']);
@@ -1242,6 +1305,9 @@ function bindPageInputs(p){
   }else if(p.name==='watch'){
     $('#wc').oninput=function(){watchSt.code=this.value};
     [['wr','ref'],['wv','val']].forEach(function(x){var el=$('#'+x[0]);el.oninput=function(ev){el.value=liveFmt(el.value,ev);watchSt[x[1]]=el.value;$('#wh').textContent=wPrev()}});
+  }else if(p.name==='inv'){
+    $('#in').oninput=function(){invSt.name=this.value};$('#iu').oninput=function(){invSt.unit=this.value};$('#id').oninput=function(){invSt.note=this.value};
+    [['iq','qty'],['ib','buy']].forEach(function(x){var el=$('#'+x[0]);el.oninput=function(ev){el.value=liveFmt(el.value,ev);invSt[x[1]]=el.value;$('#it').textContent=invPrev()}});
   }else if(p.name==='fund'){
     $('#fc').oninput=function(){fundSt.code=this.value};
     [['fq','qty'],['fb','buy'],['fm','man']].forEach(function(x){var el=$('#'+x[0]);el.oninput=function(ev){el.value=liveFmt(el.value,ev);fundSt[x[1]]=el.value}});
@@ -1442,6 +1508,34 @@ var ACT={
       if(!ok)return;flog('Xóa mã',f.code,f.qty,priceOf(f),'Mua '+dmy(f.date)+' giá '+fmtN(f.buy,2));f.deleted=true;touch(f);if(V.rep.open===f.id)V.rep.open=null;toast('Đã xóa mã quỹ');changed();
     });
   },
+  invtoggle:function(){V.inv.open=!V.inv.open;refreshAssets()},
+  invadd:function(){V.inv.adding=!V.inv.adding;refreshAssets()},
+  invpick:function(t){var c=t.dataset.c;if(icHas(c)){toast('Đã có danh mục này');return}
+    var r=D.assets.find(function(a){return a.id==='ic_'+c});if(!r){r={id:'ic_'+c,kind:'icat',cat:c};D.assets.push(r)}r.deleted=false;touch(r);
+    V.inv.adding=false;V.inv.cat=c;V.inv.item=null;changed()},
+  invcat:function(t){var c=t.dataset.c;V.inv.cat=V.inv.cat===c?null:c;V.inv.item=null;refreshAssets()},
+  invitem:function(t){V.inv.item=V.inv.item===t.dataset.id?null:t.dataset.id;refreshAssets()},
+  invnew:function(t){openPage('inv','new:'+t.dataset.c)},
+  invedit:function(t){openPage('inv',t.dataset.id)},
+  idate:function(){pickDate(invSt.date,function(v){invSt.date=v;renderPage()})},
+  invsave:function(){
+    var s=invSt,q=parseNum(s.qty),b=parseNum(s.buy),nm=s.name.trim();
+    if(!nm){toast('Nhập tên tài sản');return}
+    if(!q){toast('Nhập số lượng lớn hơn 0');return}
+    if(!b){toast('Nhập giá mua lớn hơn 0');return}
+    var a=s.id&&D.assets.find(function(x){return x.id===s.id});
+    if(a){a.name=nm;a.qty=q;a.buy=b;a.unit=s.unit.trim();a.date=s.date;a.note=s.note.trim();touch(a)}
+    else{a={id:'i'+uid(),kind:'inv',cat:s.cat,name:nm,qty:q,unit:s.unit.trim(),buy:b,date:s.date,note:s.note.trim()};touch(a);D.assets.push(a)}
+    V.inv.open=true;V.inv.cat=s.cat;V.inv.item=a.id;popPage();toast('Đã lưu tài sản');changed();
+  },
+  invdel:function(t){var a=D.assets.find(function(x){return x.id===t.dataset.id});if(!a)return;
+    confirmBox('Xóa tài sản?','<b>'+esc(a.name)+'</b> · '+fmtQ(a.qty)+(a.unit?' '+esc(a.unit):'')+', mua '+dshort(a.date),'Xóa',true).then(function(ok){if(!ok)return;a.deleted=true;touch(a);V.inv.item=null;toast('Đã xóa tài sản');changed()})},
+  invdelcat:function(t){var c=t.dataset.c,it=invItems(c);
+    confirmBox('Xóa danh mục?','<b>'+icName(c)+'</b>'+(it.length?'<br>'+it.length+' tài sản trong danh mục này cũng bị xóa.':''),'Xóa',true).then(function(ok){if(!ok)return;
+      it.forEach(function(a){a.deleted=true;touch(a)});
+      var r=icRec(c);if(r){r.deleted=true;touch(r)}
+      var g=c==='gold'&&goldNote();if(g){g.note='';touch(g)}
+      if(V.inv.cat===c)V.inv.cat=null;toast('Đã xóa danh mục');changed()})},
   astmode:function(t){V.ast.mode=t.dataset.v;refreshAssets()},
   astprev:function(){var a=V.ast;if(a.mode==='y')a.y--;else{a.m--;if(a.m<1){a.m=12;a.y--}}refreshAssets()},
   astnext:function(){var a=V.ast;if(a.mode==='y')a.y++;else{a.m++;if(a.m>12){a.m=1;a.y++}}refreshAssets()},

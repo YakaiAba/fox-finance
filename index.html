@@ -230,7 +230,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.47 (02/11/2026)';
+var APP_VER='1.48 (02/11/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -904,7 +904,7 @@ function backupInfo(){
 function moreHTML(){
   var bk=backupInfo(),h='';
   h+='<div class="'+(bk.bad?'warn':'ok')+'">'+(bk.bad?'⚠ ':'✓ ')+bk.txt+'</div>';
-  h+='<div class="card"><button class="li" data-a="pg" data-p="basic"><i>⚙️</i><span>Cài đặt</span></button><button class="li" data-a="pg" data-p="secu"><i>🔒</i><span>Bảo mật ứng dụng</span><em>'+(lkOn()?'Đang bật':'Tắt')+'</em></button></div>';
+  h+='<div class="card"><button class="li" data-a="pg" data-p="basic"><i>⚙️</i><span>Cài đặt</span></button><button class="li" data-a="pg" data-p="secu"><i>🔒</i><span>Bảo mật ứng dụng</span><em>'+(lkSet()?'Đã thiết lập':'Chưa thiết lập')+'</em></button></div>';
   h+='<div class="card"><button class="li" data-a="pg" data-p="search"><i>🔍</i><span>Tìm kiếm giao dịch</span></button><button class="li" data-a="pg" data-p="balance"><i>📈</i><span>Báo cáo biến động số dư</span></button></div>';
   h+='<div class="card"><button class="li" data-a="pg" data-p="sync"><i>☁️</i><span>Đồng bộ Google Sheets</span><em>'+(S.url?esc(SYN.msg||''):'Chưa bật')+'</em></button><button class="li" data-a="pg" data-p="backup"><i>💾</i><span>Sao lưu dữ liệu</span></button><button class="li" data-a="pg" data-p="help"><i>📖</i><span>Hướng dẫn sử dụng</span></button><button class="li" data-a="pg" data-p="about"><i>ℹ️</i><span>Thông tin ứng dụng</span></button></div>';
   return h;
@@ -990,7 +990,8 @@ function pgCats(p){
 }
 /* ---------- Bảo mật ứng dụng (khóa trên máy này, không đồng bộ) ---------- */
 var LKN=6,lkClose=null,hiddenAt=0;
-function lkOn(){return L.lock&&L.lock.on?L.lock:null}
+function lkSet(){var c=L.lock;if(c&&c.h){if(c.open===undefined){c.open=!!c.on;delete c.on;saveL()}return c}return null}
+function lkOn(){var c=lkSet();return c&&c.open?c:null}
 function b64(b){var s='',u=new Uint8Array(b);for(var i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);return btoa(s)}
 function unb64(s){var a=atob(s),u=new Uint8Array(a.length);for(var i=0;i<a.length;i++)u[i]=a.charCodeAt(i);return u}
 function rnd(n){var u=new Uint8Array(n);(window.crypto||{getRandomValues:function(x){for(var i=0;i<x.length;i++)x[i]=Math.random()*256}}).getRandomValues(u);return u}
@@ -1040,7 +1041,7 @@ function showLock(){
   if(c.cred&&bioOK())setTimeout(u.bio,350);
 }
 function askPin(title,sub){
-  return new Promise(function(res){var c=lkOn();
+  return new Promise(function(res){var c=lkSet();
     lockUI({title:title,sub:sub||'',cancel:true,onCancel:function(){res(false)},ok:function(){res(true)},
       submit:function(pin){return pinHash(pin,c.salt).then(function(h){return h===c.h?true:'Sai mã PIN'})}});
   });
@@ -1058,10 +1059,14 @@ function newPin(title){
 function onoff(a,on){return '<div class="seg" style="margin:0;max-width:150px;flex:none"><button data-a="'+a+'" data-v="1" class="'+(on?'on':'')+'">Bật</button><button data-a="'+a+'" data-v="0" class="'+(on?'':'on')+'">Tắt</button></div>'}
 function srow(title,sub,a,on,first){return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;'+(first?'':'margin-top:14px;padding-top:14px;border-top:1px solid var(--line)')+'"><div><b>'+title+'</b>'+(sub?'<div class="mut" style="margin:2px 0 0">'+sub+'</div>':'')+'</div>'+onoff(a,on)+'</div>'}
 function pgSecu(){
-  var c=lkOn(),h='<div class="card">'+srow('Mở ứng dụng','Dùng mã PIN hoặc Face ID / Touch ID','lktoggle',!!c,true);
-  if(c)h+='<div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;gap:10px"><div>Face ID / Touch ID</div>'+onoff('lkbio',!!c.cred)+'</div><button class="ghost" data-a="lkchg" style="margin-top:10px">Đổi mã PIN</button>';
-  h+='<div class="mut" style="margin-top:10px">Khóa chỉ áp dụng trên máy này, không đồng bộ. Khóa lại sau khi để ứng dụng nền hơn 30 giây. Quên mã PIN thì phải xóa dữ liệu trang web của ứng dụng trong Cài đặt Safari, dữ liệu chưa sao lưu sẽ mất, nên hãy sao lưu trước.</div></div>';
-  h+='<div class="card">'+srow('Hiện danh mục đầu tư','Tắt: ẩn mục này trong tab Báo cáo','secinv',L.showInv!==false,true)+srow('Hiện biến động tài sản','Tắt: ẩn mục này trong tab Báo cáo','secast',L.showAst!==false)+'</div>';
+  var c=lkSet(),ok=!!c,dis=ok?'':' style="opacity:.45;pointer-events:none"';
+  var h='<div class="card">'+srow('Thiết lập bảo mật','Tạo mã PIN 6 số. Cần thiết lập trước khi dùng các tính năng bên dưới','lkset',ok,true);
+  if(ok)h+='<button class="ghost" data-a="lkchg" style="margin-top:12px">Đổi mã PIN</button>';
+  h+='<div class="mut" style="margin-top:10px">Chỉ áp dụng trên máy này, không đồng bộ. Quên mã PIN thì phải xóa dữ liệu trang web của ứng dụng trong Cài đặt Safari, dữ liệu chưa sao lưu sẽ mất, nên hãy sao lưu trước.</div></div>';
+  h+='<div class="card"'+dis+'>'+srow('Mở ứng dụng','Dùng Face ID / Touch ID hoặc mã PIN. Khóa lại sau khi để ứng dụng nền hơn 30 giây','lkopen',!!(c&&c.open),true);
+  if(c&&c.open)h+='<div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;gap:10px"><div><div>Face ID / Touch ID</div><div class="mut" style="margin:2px 0 0">Tự động quét khi mở, quét không được mới nhập mã PIN</div></div>'+onoff('lkbio',!!c.cred)+'</div>';
+  h+=srow('Hiện danh mục đầu tư','Tắt: ẩn mục này trong tab Báo cáo','secinv',L.showInv!==false)+srow('Hiện biến động tài sản','Tắt: ẩn mục này trong tab Báo cáo','secast',L.showAst!==false)+'</div>';
+  if(!ok)h+='<div class="mut" style="margin:0 2px">Hãy bật Thiết lập bảo mật để dùng các tính năng trên. Ba tính năng này hoạt động riêng biệt với nhau.</div>';
   return h;
 }
 function lockSetBio(){
@@ -1415,17 +1420,20 @@ function doSync(manual){
 
 /* ---------- xử lý bấm ---------- */
 var ACT={
-  lktoggle:function(t){
-    var want=t.dataset.v==='1',c=lkOn();if(want===!!c)return;
+  lkset:function(t){
+    var want=t.dataset.v==='1',c=lkSet();if(want===!!c)return;
     if(want){newPin('Tạo mã PIN').then(function(pin){if(!pin)return;var salt=b64(rnd(12));pinHash(pin,salt).then(function(h){
-      L.lock={on:1,salt:salt,h:h,cred:''};saveL();renderPage();
-      if(bioOK())confirmBox('Dùng Face ID / Touch ID?','Mở ứng dụng bằng sinh trắc học của máy (có thể nhập mã PIN thay thế).','Bật').then(function(ok){if(ok)lockSetBio().then(renderPage)});
-      else toast('Đã bật khóa bằng mã PIN');
-    })})}
-    else askPin('Nhập mã PIN','Để tắt bảo mật ứng dụng').then(function(ok){if(!ok)return;delete L.lock;saveL();renderPage();toast('Đã tắt bảo mật ứng dụng')});
+      L.lock={set:1,open:false,salt:salt,h:h,cred:''};saveL();renderPage();toast('Đã thiết lập bảo mật')})})}
+    else askPin('Nhập mã PIN','Để tắt thiết lập bảo mật').then(function(ok){if(!ok)return;delete L.lock;L.showInv=true;L.showAst=true;saveL();renderPage();toast('Đã tắt thiết lập bảo mật')});
+  },
+  lkopen:function(t){
+    var want=t.dataset.v==='1',c=lkSet();if(!c||want===!!c.open)return;
+    if(want){c.open=true;saveL();renderPage();
+      if(bioOK()&&!c.cred)confirmBox('Dùng Face ID / Touch ID?','Ứng dụng sẽ tự quét khi mở; quét không được thì nhập mã PIN.','Bật').then(function(ok){if(ok)lockSetBio().then(renderPage)})}
+    else askPin('Nhập mã PIN','Để tắt Mở ứng dụng').then(function(ok){if(!ok)return;c.open=false;saveL();renderPage()});
   },
   lkbio:function(t){
-    var want=t.dataset.v==='1',c=lkOn();if(!c||want===!!c.cred)return;
+    var want=t.dataset.v==='1',c=lkSet();if(!c||!c.open||want===!!c.cred)return;
     if(want)lockSetBio().then(renderPage);else{c.cred='';saveL();renderPage()}
   },
   lkchg:function(){
@@ -1509,8 +1517,8 @@ var ACT={
       if(!ok)return;flog('Xóa mã',f.code,f.qty,priceOf(f),'Mua '+dmy(f.date)+' giá '+fmtN(f.buy,2));f.deleted=true;touch(f);if(V.rep.open===f.id)V.rep.open=null;toast('Đã xóa mã quỹ');changed();
     });
   },
-  secinv:function(t){L.showInv=t.dataset.v==='1';saveL();renderPage()},
-  secast:function(t){L.showAst=t.dataset.v==='1';saveL();renderPage()},
+  secinv:function(t){if(!lkSet()){toast('Hãy thiết lập bảo mật trước');return}L.showInv=t.dataset.v==='1';saveL();renderPage()},
+  secast:function(t){if(!lkSet()){toast('Hãy thiết lập bảo mật trước');return}L.showAst=t.dataset.v==='1';saveL();renderPage()},
   asttoggle:function(){V.ast.open=!V.ast.open;refreshAssets()},
   invtoggle:function(){V.inv.open=!V.inv.open;refreshAssets()},
   invadd:function(){V.inv.adding=!V.inv.adding;refreshAssets()},

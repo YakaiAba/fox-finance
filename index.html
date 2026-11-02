@@ -230,7 +230,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.48 (02/11/2026)';
+var APP_VER='1.50 (02/11/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -739,7 +739,7 @@ function fundInfo(fs){
 }
 function fundBlock(){
   var fs=funds(),ws=watches(),h='';
-  h+='<div class="card"><div class="ch2"><div class="ct">Chứng chỉ quỹ</div></div>';
+  if(!fs.length)h+='<div class="empty">Chưa có mã quỹ</div>';
   if(fs.length){
     var info=fundInfo(fs),GS='grid-template-columns:minmax(0,1.3fr) minmax(0,1.8fr) minmax(0,.85fr) minmax(0,1.05fr);gap:6px;font-size:13px';
     if(info.tot)h+=statDonut(info.list,info.tot);
@@ -777,7 +777,7 @@ function fundBlock(){
   if(fs.length||flogs().length)h+='<button class="ghost" data-a="pg" data-p="fundrep" style="margin-top:8px">Báo cáo biến động chứng chỉ quỹ</button>';
   h+=watchHTML(ws);
   if(S.url&&S.sv===1)h+='<div class="mut" style="margin-top:8px;text-align:center">Code.gs chưa cập nhật: dữ liệu đầu tư và sự kiện chỉ lưu trên máy này.</div>';
-  return h+'</div>';
+  return h;
 }
 function checkAlerts(){
   if($('#dl').classList.contains('show'))return;
@@ -919,7 +919,7 @@ function openPage(name,arg){
   }
   if(name==='inv'){
     var io=arg&&arg.indexOf('new:')!==0&&D.assets.find(function(x){return x.id===arg});
-    invSt=io?{id:io.id,cat:io.cat,name:io.name,qty:liveFmt(numStr(io.qty)),unit:io.unit||'',buy:liveFmt(numStr(io.buy)),date:io.date,note:io.note||''}:{id:null,cat:String(arg).slice(4),name:'',qty:'',unit:'',buy:'',date:today(),note:''};
+    invSt=io?{id:io.id,cat:io.cat,rate:io.rate?liveFmt(numStr(io.rate)):'',name:io.name,qty:liveFmt(numStr(io.qty)),unit:io.unit||'',buy:liveFmt(numStr(io.buy)),date:io.date,note:io.note||''}:{id:null,cat:String(arg).slice(4),rate:'',name:'',qty:'',unit:'',buy:'',date:today(),note:''};
   }
   if(name==='fund'){
     var fo=arg&&D.assets.find(function(x){return x.id===arg});
@@ -950,7 +950,7 @@ function closePage(){
 var SETP={basic:1,sync:1,cats:1,catlist:0,backup:1};
 function renderPage(){
   var p=pages[pages.length-1];if(!p)return;
-  $('#ptt').textContent=p.name==='catlist'?cat(p.arg).name:p.name==='fund'?(fundSt.id?'Sửa mã quỹ':'Thêm mã quỹ'):p.name==='inv'?(invSt.id?'Sửa tài sản':'Thêm tài sản'):p.name==='watch'?(watchSt.id?'Sửa mã chờ giá':'Thêm mã chờ giá'):p.name==='cd'?(cdSt.id?'Sửa sự kiện':'Thêm sự kiện'):PTITLE[p.name];
+  $('#ptt').textContent=p.name==='catlist'?cat(p.arg).name:p.name==='fund'?(fundSt.id?'Sửa mã quỹ':'Thêm mã quỹ'):p.name==='inv'?(invSt.cat==='saving'?(invSt.id?'Sửa khoản gửi':'Thêm khoản gửi'):(invSt.id?'Sửa tài sản':'Thêm tài sản')):p.name==='watch'?(watchSt.id?'Sửa mã chờ giá':'Thêm mã chờ giá'):p.name==='cd'?(cdSt.id?'Sửa sự kiện':'Thêm sự kiện'):PTITLE[p.name];
   $('#pexit').textContent=SETP[p.name]?'Lưu lại & Thoát':'Thoát';
   var b=$('#pbody'),top=b.scrollTop;
   var fn={edit:pgEdit,cats:pgCats,basic:pgBasic,sync:pgSync,balance:pgBalance,search:pgSearch,fundrep:pgFundRep,inv:pgInv,secu:pgSecu,backup:pgBackup,about:pgAbout,catlist:pgCatList,fund:pgFund,watch:pgWatch,cd:pgCd,cdsug:pgCdSug,help:pgHelp}[p.name];
@@ -1160,44 +1160,60 @@ function pgFundRep(){
   return h;
 }
 /* ---------- Danh mục đầu tư ---------- */
-var ICATS=[['gold','Vàng'],['crypto','Tiền điện tử'],['stock','Cổ phiếu & trái phiếu'],['fund','Chứng chỉ quỹ'],['realty','Bất động sản'],['other','Khác']];
-var IPH={gold:['Vàng nhẫn','1','lượng','Mua trực tiếp tại tiệm vàng ABC…'],crypto:['Bitcoin','0,05','BTC','Mua trên sàn…'],stock:['Cổ phiếu VNM','100','cổ phiếu','Mua qua công ty chứng khoán…'],fund:['','','',''],realty:['Căn hộ…','1','căn','Địa chỉ, tình trạng pháp lý…'],other:['Tên tài sản','1','','Ghi chú thêm…']};
+var ICATS=[['gold','Vàng'],['crypto','Tiền điện tử'],['stock','Cổ phiếu & trái phiếu'],['fund','Chứng chỉ quỹ'],['realty','Bất động sản'],['saving','Tiền gửi tiết kiệm'],['other','Khác']];
+var IPH={gold:['Vàng nhẫn','1','lượng','Mua trực tiếp tại tiệm vàng ABC…'],crypto:['Bitcoin','0,05','BTC','Mua trên sàn…'],stock:['Cổ phiếu VNM','100','cổ phiếu','Mua qua công ty chứng khoán…'],fund:['','','',''],realty:['Căn hộ…','1','căn','Địa chỉ, tình trạng pháp lý…'],saving:['Ngân hàng ABC','','','Kỳ hạn, hình thức gửi, ghi chú…'],other:['Tên tài sản','1','','Ghi chú thêm…']};
 function icName(c){return ICATS.filter(function(x){return x[0]===c})[0][1]}
 function invItems(c){return D.assets.filter(function(a){return a.kind==='inv'&&a.cat===c&&!a.deleted}).sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:(a.id<b.id?-1:1)})}
 function goldNote(){var g=D.assets.find(function(a){return a.id==='gold'&&!a.deleted});return g&&g.note&&g.note.trim()?g:null}
+function pruneInv(keep){
+  var ch=false;
+  ICATS.forEach(function(x){var c=x[0];if(c===keep)return;var r=icRec(c);if(!r)return;
+    var empty=c==='fund'?(!funds().length&&!watches().length&&!flogs().length):(!invItems(c).length&&!(c==='gold'&&goldNote()));
+    if(empty){r.deleted=true;touch(r);ch=true}});
+  if(ch){save();schedSync(1500)}
+}
 function icRec(c){return D.assets.find(function(a){return a.kind==='icat'&&a.cat===c&&!a.deleted})}
 function icHas(c){return !!icRec(c)||invItems(c).length>0||(c==='fund'&&(funds().length>0||watches().length>0||flogs().length>0))||(c==='gold'&&!!goldNote())}
 function invTot(c){var t=0;invItems(c).forEach(function(a){t+=a.qty*a.buy});return t}
 function invHTML(){
-  var v=V.inv,h='<button class="sec tg" data-a="invtoggle"><span>Danh mục đầu tư</span><i>'+(v.open?'▴':'▾')+'</i></button>';
+  var v=V.inv,h='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:18px 2px 8px"><button class="sec tg" data-a="invtoggle" style="margin:0;padding:0;flex:1;width:auto"><span>Danh mục đầu tư</span><i>'+(v.open?'▴':'▾')+'</i></button>'+(v.open?'<button class="ghost" data-a="invadd" style="width:auto;margin:0;padding:7px 14px;font-size:14px;white-space:nowrap">＋ Thêm danh mục</button>':'')+'</div>';
   if(!v.open)return h;
-  h+='<button class="ghost" data-a="invadd" style="margin:0 0 10px">＋ Thêm danh mục</button>';
   if(v.adding)h+='<div class="card">'+ICATS.map(function(x){var has=icHas(x[0]);return '<button class="br" '+(has?'disabled style="color:#9aa0aa;cursor:default"':'data-a="invpick" data-c="'+x[0]+'"')+'><div class="t1"><span>'+x[1]+'</span><span>'+(has?'✓ Đã thêm':'')+'</span></div></button>'}).join('')+'</div>';
+  var any=false;
   ICATS.forEach(function(x){
-    var c=x[0];if(!icHas(c))return;
+    var c=x[0];if(!icHas(c))return;any=true;
     var open=v.cat===c,sm=c==='fund'?(fundNow()?fmt(fundNow())+'đ':''):(invItems(c).length?fmt(invTot(c))+'đ':'');
-    h+='<div class="card" style="padding:2px 12px"><button class="icr" data-a="invcat" data-c="'+c+'"><span>'+x[1]+'</span><span><small>'+sm+'</small><i>'+(open?'▴':'▾')+'</i></span></button></div>';
-    if(!open)return;
-    if(c==='fund'){h+=fundBlock();if(!funds().length&&!watches().length&&!flogs().length)h+='<button class="ghost red" data-a="invdelcat" data-c="fund" style="margin:-4px 0 12px">Xóa danh mục này</button>';return}
+    h+='<div class="card"><button class="icr" data-a="invcat" data-c="'+c+'" style="padding:2px 0"><span>'+x[1]+'</span><span><small>'+sm+'</small><i>'+(open?'▴':'▾')+'</i></span></button>';
+    if(!open){h+='</div>';return}
+    h+='<div style="border-top:1px solid var(--line);margin-top:6px;padding-top:6px">';
+    if(c==='fund'){h+=fundBlock();if(!funds().length&&!watches().length&&!flogs().length)h+='<button class="ghost red" data-a="invdelcat" data-c="fund" style="margin-top:10px">Xóa danh mục này</button>';h+='</div></div>';return}
     var it=invItems(c),gn=goldNote();
-    h+='<div class="card">';
     if(it.length){
-      h+='<div class="ig ih"><span>Tên</span><span>Số lượng</span><span>Thành tiền</span></div>';
+      var sv=c==='saving';
+      h+='<div class="ig ih"><span>'+(sv?'Ngân hàng':'Tên')+'</span><span>'+(sv?'Ngày gửi':'Số lượng')+'</span><span>'+(sv?'Số tiền':'Thành tiền')+'</span></div>';
       it.forEach(function(a){
         var op=v.item===a.id,tt=a.qty*a.buy;
-        h+='<button class="ig ir" data-a="invitem" data-id="'+a.id+'"><span>'+esc(a.name)+'<i class="ar">'+(op?'▴':'▾')+'</i></span><span>'+fmtQ(a.qty)+(a.unit?' '+esc(a.unit):'')+'</span><span>'+fmt(tt)+'đ</span></button>';
-        if(op)h+='<div class="fd"><div>Ngày mua: <b>'+dshort(a.date)+'</b></div><div>Số lượng: <b>'+fmtQ(a.qty)+(a.unit?' '+esc(a.unit):'')+'</b></div><div>Giá mua: <b>'+fmtN(a.buy,2).replace(/,00$/,'')+'đ'+(a.unit?' / '+esc(a.unit):'')+'</b></div><div>Thành tiền: <b>'+fmt(tt)+'đ</b></div>'+(a.note?'<div>Mô tả: '+esc(a.note)+'</div>':'')+'<div class="bt2"><button data-a="invedit" data-id="'+a.id+'">Sửa</button><button class="red" data-a="invdel" data-id="'+a.id+'">Xóa</button></div></div>';
+        h+='<button class="ig ir" data-a="invitem" data-id="'+a.id+'"><span>'+esc(a.name)+'<i class="ar">'+(op?'▴':'▾')+'</i></span><span>'+(sv?dshort(a.date).slice(0,5)+'/'+a.date.slice(2,4):fmtQ(a.qty)+(a.unit?' '+esc(a.unit):''))+'</span><span>'+fmt(tt)+'đ</span></button>';
+        if(sv&&op)h+='<div class="fd"><div>Ngày gửi: <b>'+dshort(a.date)+'</b></div><div>Số tiền: <b>'+fmt(tt)+'đ</b></div>'+(a.rate?'<div>Lãi suất: <b>'+fmtN(a.rate,2).replace(/,?0+$/,'')+'%</b></div>':'')+(a.note?'<div>Mô tả: '+esc(a.note)+'</div>':'')+'<div class="bt2"><button data-a="invedit" data-id="'+a.id+'">Sửa</button><button class="red" data-a="invdel" data-id="'+a.id+'">Xóa</button></div></div>';
+        else if(op)h+='<div class="fd"><div>Ngày mua: <b>'+dshort(a.date)+'</b></div><div>Số lượng: <b>'+fmtQ(a.qty)+(a.unit?' '+esc(a.unit):'')+'</b></div><div>Giá mua: <b>'+fmtN(a.buy,2).replace(/,00$/,'')+'đ'+(a.unit?' / '+esc(a.unit):'')+'</b></div><div>Thành tiền: <b>'+fmt(tt)+'đ</b></div>'+(a.note?'<div>Mô tả: '+esc(a.note)+'</div>':'')+'<div class="bt2"><button data-a="invedit" data-id="'+a.id+'">Sửa</button><button class="red" data-a="invdel" data-id="'+a.id+'">Xóa</button></div></div>';
       });
-      h+='<div class="ig" style="padding:10px 0 2px;font-weight:700"><span>Tổng giá mua</span><span></span><span>'+fmt(invTot(c))+'đ</span></div>';
+      h+='<div class="ig" style="padding:10px 0 2px;font-weight:700"><span>'+(c==='saving'?'Tổng tiền gửi':'Tổng giá mua')+'</span><span></span><span>'+fmt(invTot(c))+'đ</span></div>';
     }else h+='<div class="empty">Chưa có tài sản</div>';
     if(c==='gold'&&gn)h+='<div class="mut" style="margin-top:8px">Ghi chú vàng cũ:</div><textarea class="nt" rows="3" data-g="gold" autocomplete="off" style="width:100%">'+esc(gn.note)+'</textarea>';
-    h+='<button class="ghost" data-a="invnew" data-c="'+c+'">＋ Thêm tài sản</button><button class="ghost red" data-a="invdelcat" data-c="'+c+'">Xóa danh mục này</button></div>';
+    h+='<button class="ghost" data-a="invnew" data-c="'+c+'">＋ '+(c==='saving'?'Thêm khoản gửi':'Thêm tài sản')+'</button><button class="ghost red" data-a="invdelcat" data-c="'+c+'">Xóa danh mục này</button></div></div>';
   });
+  if(!any&&!v.adding)h+='<div class="mut" style="text-align:center">Chưa có danh mục. Bấm Thêm danh mục.</div>';
   return h;
 }
 function assetsHTML(){return (L.showInv===false?'':invHTML())+(L.showAst===false?'':astHTML())}
 function pgInv(){
   var s=invSt,ph=IPH[s.cat]||IPH.other;
+  if(s.cat==='saving')return '<div class="card"><div class="mut" style="margin-bottom:2px">Danh mục: <b>'+icName(s.cat)+'</b></div><label class="l" for="in">Tên ngân hàng</label><input class="inp" id="in" maxlength="60" autocomplete="off" placeholder="Ví dụ: '+esc(ph[0])+'" value="'+esc(s.name)+'">'
+   +'<label class="l">Ngày gửi</label><button class="fld" data-a="idate" style="width:100%;padding:11px">'+dlabel(s.date)+' ▾</button>'
+   +'<label class="l" for="ib">Số tiền (đ)</label><input class="inp" id="ib" inputmode="decimal" autocomplete="off" placeholder="100.000.000" value="'+esc(s.buy)+'">'
+   +'<label class="l" for="ir">Lãi suất (%, không bắt buộc)</label><input class="inp" id="ir" inputmode="decimal" autocomplete="off" placeholder="5,2" value="'+esc(s.rate)+'">'
+   +'<label class="l" for="id">Mô tả</label><textarea class="nt" id="id" rows="3" style="width:100%" placeholder="'+esc(ph[3])+'">'+esc(s.note)+'</textarea></div>'
+   +'<button class="primary" data-a="invsave">Lưu</button>';
   return '<div class="card"><div class="mut" style="margin-bottom:2px">Danh mục: <b>'+icName(s.cat)+'</b></div><label class="l" for="in">Tên tài sản</label><input class="inp" id="in" maxlength="60" autocomplete="off" placeholder="Ví dụ: '+esc(ph[0])+'" value="'+esc(s.name)+'">'
    +'<label class="l">Ngày mua</label><button class="fld" data-a="idate" style="width:100%;padding:11px">'+dlabel(s.date)+' ▾</button>'
    +'<label class="l" for="iq">Số lượng</label><input class="inp" id="iq" inputmode="decimal" autocomplete="off" placeholder="'+esc(ph[1])+'" value="'+esc(s.qty)+'">'
@@ -1312,8 +1328,10 @@ function bindPageInputs(p){
     $('#wc').oninput=function(){watchSt.code=this.value};
     [['wr','ref'],['wv','val']].forEach(function(x){var el=$('#'+x[0]);el.oninput=function(ev){el.value=liveFmt(el.value,ev);watchSt[x[1]]=el.value;$('#wh').textContent=wPrev()}});
   }else if(p.name==='inv'){
-    $('#in').oninput=function(){invSt.name=this.value};$('#iu').oninput=function(){invSt.unit=this.value};$('#id').oninput=function(){invSt.note=this.value};
-    [['iq','qty'],['ib','buy']].forEach(function(x){var el=$('#'+x[0]);el.oninput=function(ev){el.value=liveFmt(el.value,ev);invSt[x[1]]=el.value;$('#it').textContent=invPrev()}});
+    $('#in').oninput=function(){invSt.name=this.value};$('#id').oninput=function(){invSt.note=this.value};
+    if(invSt.cat==='saving'){[['ib','buy'],['ir','rate']].forEach(function(x){var el=$('#'+x[0]);el.oninput=function(ev){el.value=liveFmt(el.value,ev);invSt[x[1]]=el.value}})}
+    else{$('#iu').oninput=function(){invSt.unit=this.value};
+    [['iq','qty'],['ib','buy']].forEach(function(x){var el=$('#'+x[0]);el.oninput=function(ev){el.value=liveFmt(el.value,ev);invSt[x[1]]=el.value;$('#it').textContent=invPrev()}})}
   }else if(p.name==='fund'){
     $('#fc').oninput=function(){fundSt.code=this.value};
     [['fq','qty'],['fb','buy'],['fm','man']].forEach(function(x){var el=$('#'+x[0]);el.oninput=function(ev){el.value=liveFmt(el.value,ev);fundSt[x[1]]=el.value}});
@@ -1439,7 +1457,7 @@ var ACT={
   lkchg:function(){
     askPin('Nhập mã PIN hiện tại','').then(function(ok){if(!ok)return;newPin('Mã PIN mới').then(function(pin){if(!pin)return;var salt=b64(rnd(12));pinHash(pin,salt).then(function(h){L.lock.salt=salt;L.lock.h=h;saveL();toast('Đã đổi mã PIN')})})});
   },
-  tab:function(t){if(KP.st)kpClose();tab=t.dataset.t;render();$('#main').scrollTop=0},
+  tab:function(t){if(KP.st)kpClose();if(tab==='rep'&&t.dataset.t!=='rep'){V.inv.cat=null;V.inv.adding=false;pruneInv(null)}tab=t.dataset.t;render();$('#main').scrollTop=0},
   calprev:function(){var c=V.cal;c.open=false;c.m--;if(c.m<1){c.m=12;c.y--}c.sel=ds(c.y,c.m,Math.min(parse(c.sel).d,dim(c.y,c.m)));render()},
   calnext:function(){var c=V.cal;c.open=false;c.m++;if(c.m>12){c.m=1;c.y++}c.sel=ds(c.y,c.m,Math.min(parse(c.sel).d,dim(c.y,c.m)));render()},
   calsel:function(t){var c=V.cal,d=t.dataset.d;if(c.open&&c.sel===d)c.open=false;else{c.sel=d;c.open=true}render();if(c.open)setTimeout(function(){var el=$('.cdp');if(el&&el.scrollIntoView)el.scrollIntoView({block:'nearest',behavior:'smooth'})},60)},
@@ -1520,28 +1538,28 @@ var ACT={
   secinv:function(t){if(!lkSet()){toast('Hãy thiết lập bảo mật trước');return}L.showInv=t.dataset.v==='1';saveL();renderPage()},
   secast:function(t){if(!lkSet()){toast('Hãy thiết lập bảo mật trước');return}L.showAst=t.dataset.v==='1';saveL();renderPage()},
   asttoggle:function(){V.ast.open=!V.ast.open;refreshAssets()},
-  invtoggle:function(){V.inv.open=!V.inv.open;refreshAssets()},
-  invadd:function(){V.inv.adding=!V.inv.adding;refreshAssets()},
+  invtoggle:function(){V.inv.open=!V.inv.open;if(!V.inv.open){V.inv.cat=null;V.inv.adding=false;pruneInv(null)}refreshAssets()},
+  invadd:function(){V.inv.adding=!V.inv.adding;if(V.inv.adding){V.inv.cat=null;pruneInv(null)}refreshAssets()},
   invpick:function(t){var c=t.dataset.c;if(icHas(c)){toast('Đã có danh mục này');return}
     var r=D.assets.find(function(a){return a.id==='ic_'+c});if(!r){r={id:'ic_'+c,kind:'icat',cat:c};D.assets.push(r)}r.deleted=false;touch(r);
-    V.inv.adding=false;V.inv.cat=c;V.inv.item=null;changed()},
-  invcat:function(t){var c=t.dataset.c;V.inv.cat=V.inv.cat===c?null:c;V.inv.item=null;refreshAssets()},
+    V.inv.adding=false;V.inv.cat=c;V.inv.item=null;pruneInv(c);changed()},
+  invcat:function(t){var c=t.dataset.c;V.inv.cat=V.inv.cat===c?null:c;V.inv.item=null;pruneInv(V.inv.cat);refreshAssets()},
   invitem:function(t){V.inv.item=V.inv.item===t.dataset.id?null:t.dataset.id;refreshAssets()},
   invnew:function(t){openPage('inv','new:'+t.dataset.c)},
   invedit:function(t){openPage('inv',t.dataset.id)},
   idate:function(){pickDate(invSt.date,function(v){invSt.date=v;renderPage()})},
   invsave:function(){
-    var s=invSt,q=parseNum(s.qty),b=parseNum(s.buy),nm=s.name.trim();
-    if(!nm){toast('Nhập tên tài sản');return}
+    var sv=invSt.cat==='saving',s=invSt,q=sv?1:parseNum(s.qty),b=parseNum(s.buy),nm=s.name.trim(),rt=sv?parseNum(s.rate):0;
+    if(!nm){toast(sv?'Nhập tên ngân hàng':'Nhập tên tài sản');return}
     if(!q){toast('Nhập số lượng lớn hơn 0');return}
-    if(!b){toast('Nhập giá mua lớn hơn 0');return}
-    var a=s.id&&D.assets.find(function(x){return x.id===s.id});
-    if(a){a.name=nm;a.qty=q;a.buy=b;a.unit=s.unit.trim();a.date=s.date;a.note=s.note.trim();touch(a)}
-    else{a={id:'i'+uid(),kind:'inv',cat:s.cat,name:nm,qty:q,unit:s.unit.trim(),buy:b,date:s.date,note:s.note.trim()};touch(a);D.assets.push(a)}
+    if(!b){toast(sv?'Nhập số tiền lớn hơn 0':'Nhập giá mua lớn hơn 0');return}
+    var a=s.id&&D.assets.find(function(x){return x.id===s.id}),un=sv?'':s.unit.trim();
+    if(a){a.name=nm;a.qty=q;a.buy=b;a.unit=un;a.rate=rt;a.date=s.date;a.note=s.note.trim();touch(a)}
+    else{a={id:'i'+uid(),kind:'inv',cat:s.cat,name:nm,qty:q,unit:un,rate:rt,buy:b,date:s.date,note:s.note.trim()};touch(a);D.assets.push(a)}
     V.inv.open=true;V.inv.cat=s.cat;V.inv.item=a.id;popPage();toast('Đã lưu tài sản');changed();
   },
   invdel:function(t){var a=D.assets.find(function(x){return x.id===t.dataset.id});if(!a)return;
-    confirmBox('Xóa tài sản?','<b>'+esc(a.name)+'</b> · '+fmtQ(a.qty)+(a.unit?' '+esc(a.unit):'')+', mua '+dshort(a.date),'Xóa',true).then(function(ok){if(!ok)return;a.deleted=true;touch(a);V.inv.item=null;toast('Đã xóa tài sản');changed()})},
+    confirmBox(a.cat==='saving'?'Xóa khoản gửi?':'Xóa tài sản?','<b>'+esc(a.name)+'</b> · '+(a.cat==='saving'?fmt(a.qty*a.buy)+'đ, gửi ':fmtQ(a.qty)+(a.unit?' '+esc(a.unit):'')+', mua ')+dshort(a.date),'Xóa',true).then(function(ok){if(!ok)return;a.deleted=true;touch(a);V.inv.item=null;toast('Đã xóa tài sản');changed()})},
   invdelcat:function(t){var c=t.dataset.c,it=invItems(c);
     confirmBox('Xóa danh mục?','<b>'+icName(c)+'</b>'+(it.length?'<br>'+it.length+' tài sản trong danh mục này cũng bị xóa.':''),'Xóa',true).then(function(ok){if(!ok)return;
       it.forEach(function(a){a.deleted=true;touch(a)});

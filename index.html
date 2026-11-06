@@ -267,7 +267,7 @@ function hhmm(t){var d=new Date(t);return pad(d.getHours())+':'+pad(d.getMinutes
 var D=jget(KEY,null)||{};
 LISTS.forEach(function(l){if(!Array.isArray(D[l]))D[l]=[]});
 var L=jget(LKEY,null)||{};
-if(!L.title||L.title==='Quản lý tài chính')L.title='Fox-finance';
+if(!L.title||L.title==='Fox-finance')L.title='Fox-finance';
 if(L.dev===undefined)L.dev='';
 var S=jget(SKEY,null)||{url:'',secret:'',cursor:0,sv:0};
 var memOnly=false;

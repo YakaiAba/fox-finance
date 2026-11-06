@@ -6,11 +6,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Tài chính">
+<meta name="apple-mobile-web-app-title" content="Fox-finance">
 <meta name="theme-color" content="#12306B">
 <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
-<title>Quản lý tài chính</title>
+<title>Fox-finance</title>
 <style>
 :root{--navy:#12306B;--bg:#f4f4f6;--thu:#2e7d32;--chi:#c62828;--line:#e3e5ea;--mut:#6b7280;--tint:#eef2fb;--warn:#ef8a17}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -230,7 +230,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.52 (04/11/2026)';
+var APP_VER='1.53 (06/11/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -267,7 +267,7 @@ function hhmm(t){var d=new Date(t);return pad(d.getHours())+':'+pad(d.getMinutes
 var D=jget(KEY,null)||{};
 LISTS.forEach(function(l){if(!Array.isArray(D[l]))D[l]=[]});
 var L=jget(LKEY,null)||{};
-if(!L.title)L.title='Quản lý tài chính';
+if(!L.title||L.title==='Quản lý tài chính')L.title='Fox-finance';
 if(L.dev===undefined)L.dev='';
 var S=jget(SKEY,null)||{url:'',secret:'',cursor:0,sv:0};
 var memOnly=false;
@@ -1001,7 +1001,7 @@ function pinHash(pin,salt){
 }
 function bioOK(){return !!(window.PublicKeyCredential&&navigator.credentials&&navigator.credentials.create)}
 function bioCreate(){
-  return navigator.credentials.create({publicKey:{challenge:rnd(32),rp:{name:'Quản lý tài chính',id:location.hostname},user:{id:rnd(16),name:'chu-may',displayName:'Chủ máy'},pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},timeout:60000}}).then(function(c){return b64(c.rawId)});
+  return navigator.credentials.create({publicKey:{challenge:rnd(32),rp:{name:'Fox-finance',id:location.hostname},user:{id:rnd(16),name:'chu-may',displayName:'Chủ máy'},pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},timeout:60000}}).then(function(c){return b64(c.rawId)});
 }
 function bioGet(id){
   return navigator.credentials.get({publicKey:{challenge:rnd(32),rpId:location.hostname,allowCredentials:[{type:'public-key',id:unb64(id)}],userVerification:'required',timeout:60000}}).then(function(){return true});
@@ -1036,7 +1036,7 @@ function lockUI(o){
 }
 function showLock(){
   var c=lkOn();if(!c||$('#lk').classList.contains('show'))return;
-  var u=lockUI({title:'Nhập mã PIN',sub:L.title||'Quản lý tài chính',bio:c.cred&&bioOK()?function(){return bioGet(c.cred)}:null,
+  var u=lockUI({title:'Nhập mã PIN',sub:L.title||'Fox-finance',bio:c.cred&&bioOK()?function(){return bioGet(c.cred)}:null,
     submit:function(pin){return pinHash(pin,c.salt).then(function(h){return h===c.h?true:'Sai mã PIN'})}});
   if(c.cred&&bioOK())setTimeout(u.bio,350);
 }
@@ -1372,7 +1372,7 @@ function bindPageInputs(p){
     $('#fc').oninput=function(){fundSt.code=this.value};
     [['fq','qty'],['fb','buy'],['fm','man']].forEach(function(x){var el=$('#'+x[0]);el.oninput=function(ev){el.value=liveFmt(el.value,ev);fundSt[x[1]]=el.value}});
   }else if(p.name==='basic'){
-    $('#bt').oninput=function(){L.title=this.value.trim()||'Quản lý tài chính';saveL();$('#ttl').textContent=L.title;document.title=L.title};
+    $('#bt').oninput=function(){L.title=this.value.trim()||'Fox-finance';saveL();$('#ttl').textContent=L.title;document.title=L.title};
     $('#bd').oninput=function(){L.dev=this.value.trim();saveL()};
   }else if(p.name==='search'){
     $('#sq').oninput=function(){p.q=this.value;p.pg=0;$('#sres').innerHTML=searchRes(p)};
@@ -1397,13 +1397,13 @@ function shareFile(file,blob){
   if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file]}).then(function(){fileDone(file)}).catch(function(){})}
   else{var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;document.body.appendChild(a);a.click();setTimeout(function(){a.remove()},500);fileDone(file)}
 }
-function fileDone(file){if(file.name.indexOf('quanlytaichinh_')===0){L.lastBackup=Date.now();saveL();render();toast('Đã xuất file sao lưu')}}
+function fileDone(file){if((file.name.indexOf('fox-finance_')===0||file.name.indexOf('quanlytaichinh_')===0)){L.lastBackup=Date.now();saveL();render();toast('Đã xuất file sao lưu')}}
 
 /* ---------- sao lưu ---------- */
 function exportBackup(){
   var out={app:'chitieu',ver:1,exported:Date.now(),data:{}};
   LISTS.forEach(function(l){out.data[l]=D[l].map(function(r){var c=Object.assign({},r);delete c._l;return c})});
-  var t=new Date(),name='quanlytaichinh_'+t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate())+'.json';
+  var t=new Date(),name='fox-finance_'+t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate())+'.json';
   var blob=new Blob([JSON.stringify(out)],{type:'application/json'});
   shareFile(new File([blob],name,{type:'application/json'}),blob);
 }

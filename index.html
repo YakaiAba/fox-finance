@@ -47,6 +47,8 @@ nav button.on{background:var(--tint);color:var(--navy);font-weight:700}
 .pd select{width:100%;padding:10px 4px}
 button.lb{font:inherit}
 .cal .top{display:flex;align-items:center;justify-content:space-between;gap:2px}.cal .st{font-size:11px;line-height:1}
+.cal .ic{position:relative;display:inline-block;width:14px;height:14px;flex:none}.cal .ic .st{position:relative;z-index:1;display:block}.cal .ic .bl{position:absolute;z-index:0;left:-10px;top:0;width:18px;height:18px}.cal .ic .bl svg{width:100%;height:100%;display:block}
+.pwr{padding:8px 0;border-top:1px solid var(--line)}.pwr b{display:block}.pwr small{display:block;color:var(--mut);font-size:12px}
 .cal .nt2{font-size:9.5px;font-weight:600;margin-top:1px;white-space:nowrap;letter-spacing:-.3px;overflow:hidden}
 .row{display:flex;align-items:center;gap:4px;padding:8px 0;border-bottom:1px solid var(--line)}
 .row>b{width:62px;flex:none;font-size:15px}
@@ -230,7 +232,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.53 (06/11/2026)';
+var APP_VER='1.54 (07/11/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -297,11 +299,12 @@ var V={
   bud:{y:now.getFullYear(),m:now.getMonth()+1},
   ast:{open:false,mode:'m',y:now.getFullYear(),m:now.getMonth()+1},
   fr:{y:now.getFullYear(),m:now.getMonth()+1},
-  inv:{open:false,adding:false,cat:null,item:null}
+  inv:{open:false,adding:false,cat:null,item:null},
+  pw:{open:false}
 };
 var tab='nhap';
 var pages=[];
-var editSt=null,invSt=null,fundSt=null,watchSt=null,cdSt=null,cdY=new Date().getFullYear();
+var editSt=null,pwSt=null,invSt=null,fundSt=null,watchSt=null,cdSt=null,cdY=new Date().getFullYear();
 var BAG='<img src="data:image/png;base64,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" width="24" height="24" alt="" draggable="false">';
 var CALI='<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><rect x="2" y="3" width="20" height="19" rx="3" fill="#fff" stroke="#d32f2f" stroke-width="1.4"/><path d="M2 6a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v3.2H2z" fill="#e53935"/><text x="12" y="8" font-size="5" font-weight="700" fill="#fff" text-anchor="middle">June</text><text x="12" y="19.6" font-size="10.5" font-weight="800" fill="#222" text-anchor="middle">21</text></svg>';
 var TABS=[['nhap','<span class="pen">✏️</span>','Thu chi'],['cal',CALI,'Lịch'],['rep','📊','Báo cáo'],['bud',BAG,'Ngân sách'],['more','⋯','Khác']];
@@ -445,7 +448,8 @@ function render(){
   else if(tab==='bud')m.innerHTML=budHTML();
   else m.innerHTML=moreHTML();
   if(pages.length)renderPage();
-  if(tab==='rep')autoNav();
+  if(tab==='rep'){autoNav();autoPx()}
+  if(tab==='cal')autoPw();
 }
 function sumE(f){var s=0;E().forEach(function(e){if(f(e))s+=e.amount});return s}
 function sub(e,showDate){var p=[];if(showDate)p.push(dlabel(e.date));if(e.note)p.push(esc(e.note));return p.length?'<small>'+p.join(' · ')+'</small>':''}
@@ -548,6 +552,88 @@ function cdHTML(){
   else h+='<div class="empty">Chưa có ngày nào</div>';
   return h+'<div class="fbar"><button class="ghost" data-a="cdsug">+ Ngày lễ gợi ý</button><button class="ghost" data-a="cdadd">+ Tạo thủ công</button></div></div>';
 }
+/* ---------- Lịch cúp điện: lichcupdien.app qua GiaQuy.gs; khớp theo từ khóa (phường/xã + khu phố) ---------- */
+var PWD=[['thanh-pho-phu-quoc','Đặc khu Phú Quốc'],['thanh-pho-rach-gia','TP Rạch Giá'],['thanh-pho-ha-tien','TP Hà Tiên'],['huyen-kien-luong','Huyện Kiên Lương'],['huyen-hon-dat','Huyện Hòn Đất'],['huyen-giong-rieng','Huyện Giồng Riềng'],['huyen-go-quao','Huyện Gò Quao'],['huyen-an-bien','Huyện An Biên'],['huyen-an-minh','Huyện An Minh'],['huyen-vinh-thuan','Huyện Vĩnh Thuận'],['huyen-u-minh-thuong','Huyện U Minh Thượng'],['huyen-tan-hiep','Huyện Tân Hiệp'],['huyen-chau-thanh-kien-giang','Huyện Châu Thành'],['huyen-giang-thanh','Huyện Giang Thành'],['huyen-kien-hai','Huyện Kiên Hải']];
+var PWW=['Dương Đông','An Thới','Dương Tơ','Cửa Dương','Hàm Ninh','Bãi Thơm','Cửa Cạn','Gành Dầu','Hòn Thơm','Thổ Châu'];
+var PWST={busy:false};
+function pwLocs(){return D.assets.filter(function(a){return a.kind==='pw'&&!a.deleted}).sort(function(a,b){return a.id<b.id?-1:1})}
+function pwDist(slug){var d=PWD.filter(function(x){return x[0]===slug})[0];return d?d[1]:slug}
+function pwName(a){return (a.kp?'Khu phố '+a.kp+', ':'')+(a.ward?a.ward+', ':'')+pwDist(a.slug)}
+function pwKps(t){
+  var n=norm(t),set={},re=/(?:kp|khu pho)\s*\.?\s*(\d+)((?:\s*(?:,|;|-|va|den)\s*(?:kp|khu pho)?\s*\.?\s*\d+)*)/g,m;
+  while((m=re.exec(n))){var nums=[+m[1]],rest=m[2]||'',r2=/(,|;|-|va|den)\s*(?:kp|khu pho)?\s*\.?\s*(\d+)/g,q,prev=+m[1];
+    while((q=r2.exec(rest))){var v=+q[2];if((q[1]==='-'||q[1]==='den')&&v>prev&&v-prev<30){for(var k=prev+1;k<=v;k++)nums.push(k)}else nums.push(v);prev=v}
+    nums.forEach(function(x){set[x]=1})}
+  return set;
+}
+function pwMatch(loc,area){
+  var n=norm(area),w=norm(loc.ward||'');
+  if(w&&n.indexOf(w)<0)return false;
+  if(!loc.kp)return true;
+  var set=pwKps(area);
+  return !Object.keys(set).length||!!set[+loc.kp];
+}
+function pwIdx(){
+  var idx={};
+  pwLocs().forEach(function(loc){var c=L.pw&&L.pw[loc.slug];if(!c||!c.items)return;
+    c.items.forEach(function(it){if(pwMatch(loc,it.area))(idx[it.d]=idx[it.d]||[]).push({loc:loc,it:it})})});
+  return idx;
+}
+function pwTime(it){return it.a?it.a+'–'+it.b:'cả ngày'}
+function pwAtTxt(){return L.pwOk?'Cập nhật lúc '+hhmm(L.pwOk)+' '+dshort(ds(new Date(L.pwOk).getFullYear(),new Date(L.pwOk).getMonth()+1,new Date(L.pwOk).getDate()))+' từ lichcupdien.app':'Chưa lấy dữ liệu'}
+function autoPw(){
+  if(PWST.busy||!pwLocs().length||!priceUrl())return;
+  if(Date.now()-(L.pwAt||0)>(L.pwErr?5:60)*60000)fetchPw();
+}
+function fetchPw(){
+  var slugs=[];pwLocs().forEach(function(a){if(slugs.indexOf(a.slug)<0)slugs.push(a.slug)});if(!slugs.length||PWST.busy)return;
+  PWST.busy=true;L.pwAt=Date.now();saveL();if(tab==='cal')render();
+  var u=priceUrl(),errs=[],okn=0;L.pw=L.pw||{};
+  Promise.all(slugs.map(function(sl){
+    var ctl=typeof AbortController!=='undefined'?new AbortController():null,to=setTimeout(function(){ctl&&ctl.abort()},30000);
+    return fetch(u+(u.indexOf('?')<0?'?':'&')+'power='+encodeURIComponent(sl),{signal:ctl?ctl.signal:undefined}).then(function(r){return r.json()}).then(function(j){
+      clearTimeout(to);
+      if(j.ok&&j.items){L.pw[sl]={t:Date.now(),items:j.items};if(j.items.length)okn++;else errs.push(pwDist(sl)+': '+(j.err||'không có dữ liệu'))}
+      else errs.push(pwDist(sl)+': '+(j.err&&j.err.indexOf('power')<0?j.err:'Cần cập nhật GiaQuy.gs lên bản mới (Triển khai > Phiên bản mới)'));
+    }).catch(function(){clearTimeout(to);errs.push(pwDist(sl)+': không kết nối được máy chủ')});
+  })).then(function(){
+    if(okn)L.pwOk=Date.now();L.pwErr=errs.join(' · ');PWST.busy=false;saveL();if(tab==='cal'&&!pages.length)render()});
+}
+function pwHTML(){
+  var o=V.pw.open,h='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:18px 2px 8px"><button class="sec tg" data-a="pwtoggle" style="margin:0;padding:0;flex:1;width:auto"><span>Lịch cúp điện</span><i>'+(o?'▴':'▾')+'</i></button>'+(o?'<button class="ghost" data-a="pwadd" style="width:auto;margin:0;padding:7px 14px;font-size:14px;white-space:nowrap">＋ Thêm vị trí</button>':'')+'</div>';
+  if(!o)return h;
+  var locs=pwLocs(),idx=pwIdx(),t=today();
+  h+='<div class="card">';
+  if(!locs.length)h+='<div class="empty">Chưa có vị trí. Bấm Thêm vị trí.</div>';
+  locs.forEach(function(loc,i){
+    var rows=[];Object.keys(idx).sort().forEach(function(d){if(d>=t)idx[d].forEach(function(x){if(x.loc.id===loc.id)rows.push({d:d,it:x.it})})});
+    h+='<div class="pwr"'+(i?'':' style="border-top:0;padding-top:0"')+'><b>'+esc(pwName(loc))+'</b>';
+    h+=rows.length?rows.slice(0,12).map(function(r){return '<div style="margin-top:6px"><span class="chi">💡 '+dlabel(r.d)+'</span> · <b style="display:inline">'+pwTime(r.it)+'</b><small>'+esc(r.it.area)+'</small></div>'}).join(''):'<small style="margin-top:4px">'+((L.pw&&L.pw[loc.slug])?'Không có lịch cúp điện sắp tới':'Chưa có dữ liệu')+'</small>';
+    h+='<div class="fbar" style="justify-content:flex-start"><button class="ghost" data-a="pwedit" data-id="'+loc.id+'">Sửa</button><button class="ghost red" data-a="pwdel" data-id="'+loc.id+'">Xóa</button></div></div>';
+  });
+  if(locs.length){
+    h+='<div class="fbar"><span></span><button class="ghost" data-a="pwnow">'+(PWST.busy?'Đang lấy…':'↻ Cập nhật')+'</button></div><div class="mut" style="margin-top:10px;text-align:center">'+(L.pwErr?'<span class="chi nerr">'+esc(L.pwErr)+'</span>':pwAtTxt())+'</div>';
+    h+='<div class="mut" style="margin-top:8px;font-size:12px">Dữ liệu tổng hợp từ lichcupdien.app (nguồn các công ty điện lực), chỉ để tham khảo. App khớp theo từ khóa trong chữ "Khu vực" nên có thể sót hoặc báo thừa; nếu không ghi số khu phố thì tính cả phường/xã đó.</div>';
+  }
+  return h+'</div>';
+}
+function pgPw(){
+  var s=pwSt,dsl=s.slug&&PWD.some(function(x){return x[0]===s.slug});
+  var h='<div class="card"><label class="l">Huyện / thành phố / đặc khu (theo lichcupdien.app)</label><div class="chips" style="flex-wrap:wrap;margin:0 0 6px">'+PWD.map(function(x){return '<button data-a="pwdist" data-v="'+x[0]+'" class="'+(s.slug===x[0]?'on':'')+'">'+x[1]+'</button>'}).join('')+'</div>'
+   +'<label class="l" for="pws">Hoặc dán đường dẫn trang huyện (nơi khác)</label><input class="inp" id="pws" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off" placeholder="https://lichcupdien.app/ten-huyen/" value="'+esc(s.own)+'"><div class="mut" style="margin-top:4px">Mở lichcupdien.app, vào trang huyện của bạn rồi sao chép địa chỉ.</div>'
+   +'<label class="l" for="pwd">Phường / xã / khu vực (từ khóa)</label><input class="inp" id="pwd" maxlength="40" autocomplete="off" placeholder="Ví dụ: Dương Đông" value="'+esc(s.ward)+'">';
+  if(s.slug==='thanh-pho-phu-quoc')h+='<div class="chips" style="flex-wrap:wrap;margin:6px 0 0">'+PWW.map(function(w){return '<button data-a="pwward" data-v="'+w+'" class="'+(norm(s.ward)===norm(w)?'on':'')+'">'+w+'</button>'}).join('')+'</div>';
+  h+='<label class="l">Khu phố (không bắt buộc)</label><div class="chips" style="flex-wrap:wrap;margin:0"><button data-a="pwkp" data-v="" class="'+(s.kp===''?'on':'')+'">Cả phường/xã</button>'+[1,2,3,4,5,6,7,8,9,10,11,12].map(function(k){return '<button data-a="pwkp" data-v="'+k+'" class="'+(s.kp===String(k)?'on':'')+'">KP'+k+'</button>'}).join('')+'</div>'
+   +'<div class="mut" style="margin-top:8px">Hiển thị: <b>'+esc(pwPrevName())+'</b></div></div><button class="primary" data-a="pwsave">Lưu</button>';
+  return h;
+}
+function pwSlug(){var s=pwSt;if(s.slug)return s.slug;var o=(s.own||'').trim().replace(/[?#].*$/,'').replace(/\/+$/,'').split('/').pop().toLowerCase();return /^[a-z0-9-]{3,60}$/.test(o)?o:''}
+function pwPrevName(){var sl=pwSlug();return sl?pwName({slug:sl,ward:pwSt.ward.trim(),kp:pwSt.kp}):'chưa chọn huyện'}
+function evIcon(star,bulb){
+  if(!star&&!bulb)return '';
+  var b=bulb?'<span class="bl"><svg viewBox="0 0 24 24" aria-label="Cúp điện"><path d="M12 2a7 7 0 0 0-4 12.7V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.3A7 7 0 0 0 12 2z" fill="#eceff1" stroke="#455a64" stroke-width="1.6"/><path d="M9.5 20.5h5M10 22h4" stroke="#6b6b6b" stroke-width="1.6" stroke-linecap="round"/><path d="M9 6.5l6 6m0-6l-6 6" stroke="#d32f2f" stroke-width="3" stroke-linecap="round"/></svg></span>':'';
+  return '<span class="ic">'+b+(star?'<span class="st">⭐️</span>':'')+'</span>';
+}
 function fitCal(){[].forEach.call(document.querySelectorAll('.cal .nt2[data-s]'),function(e){if(e.scrollWidth>e.clientWidth+0.5)e.textContent=e.dataset.s})}
 function shortAmt(v){return v>=999950&&v<1e6?'1tr':fmtShort(v)}
 function numT(x,dec){return fmtN(x,dec).replace(/,?0+$/,'')}
@@ -568,6 +654,8 @@ function dayPanel(c){
   h+=list.length?list.map(function(e){return entryRow(e)}).join(''):'<div class="empty">Chưa có khoản thu chi</div>';
   var evs=D.assets.filter(function(a){return a.kind==='cd'&&!a.deleted&&cdOn(a,c.sel)});
   if(evs.length)h+='<div class="dh" style="margin-top:8px"><span>Sự kiện</span></div>'+evs.map(evRow).join('');
+  var pws=pwIdx()[c.sel];
+  if(pws&&pws.length)h+='<div class="dh" style="margin-top:8px"><span>Lịch cúp điện</span></div>'+pws.map(function(x){return '<div class="pwr" style="padding:6px 0"><b>💡 '+pwTime(x.it)+'</b><small>'+esc(pwName(x.loc))+'</small><small>'+esc(x.it.area)+'</small></div>'}).join('');
   return h+'<div class="bt2"><button data-a="addday">＋ Thêm khoản ngày này</button><button data-a="calclose">Đóng ▴</button></div></div>';
 }
 function calHTML(){
@@ -575,13 +663,13 @@ function calHTML(){
   var tot={};E().forEach(function(e){if(e.date.slice(0,7)===c.y+'-'+pad(c.m)){var o=tot[e.date]||(tot[e.date]={thu:0,chi:0});o[e.type]+=e.amount}});
   var h=navHTML(pad(c.m)+'/'+c.y,monthSub(c.y,c.m),'calprev','calnext','calpick');
   h+='<div class="cal">'+['T2','T3','T4','T5','T6','T7','CN'].map(function(x,i){return '<div class="h'+(i===5?' sa':'')+(i===6?' su':'')+'">'+x+'</div>'}).join('');
-  var td=today(),evd={},cdl=D.assets.filter(function(a){return a.kind==='cd'&&!a.deleted});
+  var td=today(),pwi=pwIdx(),evd={},cdl=D.assets.filter(function(a){return a.kind==='cd'&&!a.deleted});
   for(var q=1;q<=n;q++){var qd=ds(c.y,c.m,q);if(cdl.some(function(a){return cdOn(a,qd)}))evd[qd]=1}
   var selRow=c.sel.slice(0,7)===c.y+'-'+pad(c.m)?Math.floor((first+parse(c.sel).d-1)/7):-1;
   for(var i=0;i<rows*7;i++){
     var d=i-first+1,inM=d>=1&&d<=n,dd=ds(c.y,c.m,1);
     if(inM){dd=ds(c.y,c.m,d);var o=tot[dd];
-      var star=evd[dd]?'<span class="st">⭐️</span>':'';
+      var star=evIcon(evd[dd],pwi[dd]);
       h+='<button data-a="calsel" data-d="'+dd+'" class="'+(dd===c.sel?'sel ':'')+(dd===td?'td':'')+'"><span class="top"><span class="d">'+d+'</span>'+star+'</span>'+(o&&o.chi?'<span class="nt2 c" data-s="-'+shortAmt(o.chi)+'">-'+calAmt(o.chi)+'</span>':'')+(o&&o.thu?'<span class="nt2 t" data-s="+'+shortAmt(o.thu)+'">+'+calAmt(o.thu)+'</span>':'')+'</button>';
     }else{
       var t=new Date(c.y,c.m-1,d);h+='<button class="o" disabled><span class="d">'+t.getDate()+'</span></button>';
@@ -591,7 +679,7 @@ function calHTML(){
   h+='</div>';
   var mp=c.y+'-'+pad(c.m),th=sumE(function(e){return e.type==='thu'&&e.date.slice(0,7)===mp}),ch=sumE(function(e){return e.type==='chi'&&e.date.slice(0,7)===mp});
   h+='<div class="sum" style="margin-top:10px"><div>Thu nhập<b class="thu">'+(th?'+':'')+money(th)+'</b></div><div>Chi tiêu<b class="chi">'+(ch?'-':'')+money(ch)+'</b></div></div><div class="card" style="padding:6px 12px"><div class="tot" style="padding:6px 0"><span>Tổng tiền mặt</span><b class="'+(th-ch>=0?'thu':'chi')+'">'+(th-ch>=0?'+':'-')+money(Math.abs(th-ch))+'</b></div></div>';
-  return h+cdHTML();
+  return h+cdHTML()+pwHTML();
 }
 
 /* Báo cáo */
@@ -911,7 +999,7 @@ function moreHTML(){
 }
 
 /* ---------- trang riêng ---------- */
-var PTITLE={secu:'Bảo mật ứng dụng',inv:'Tài sản',edit:'Chỉnh sửa',cats:'Danh mục thu chi',basic:'Cài đặt',sync:'Đồng bộ Google Sheets',balance:'Báo cáo biến động số dư',search:'Tìm kiếm giao dịch',fundrep:'Báo cáo biến động chứng chỉ quỹ',backup:'Sao lưu dữ liệu',about:'Thông tin ứng dụng',catlist:'Chi tiết danh mục',fund:'Mã quỹ',watch:'Chờ đợi giá',cd:'Sự kiện',cdsug:'Ngày lễ gợi ý',help:'Hướng dẫn sử dụng'};
+var PTITLE={secu:'Bảo mật ứng dụng',inv:'Tài sản',edit:'Chỉnh sửa',cats:'Danh mục thu chi',basic:'Cài đặt',sync:'Đồng bộ Google Sheets',balance:'Báo cáo biến động số dư',search:'Tìm kiếm giao dịch',fundrep:'Báo cáo biến động chứng chỉ quỹ',backup:'Sao lưu dữ liệu',about:'Thông tin ứng dụng',catlist:'Chi tiết danh mục',fund:'Mã quỹ',watch:'Chờ đợi giá',pw:'Vị trí',cd:'Sự kiện',cdsug:'Ngày lễ gợi ý',help:'Hướng dẫn sử dụng'};
 function openPage(name,arg){
   if(name==='edit'){
     var e=D.entries.find(function(x){return x.id===arg});if(!e)return;
@@ -919,7 +1007,7 @@ function openPage(name,arg){
   }
   if(name==='inv'){
     var io=arg&&arg.indexOf('new:')!==0&&D.assets.find(function(x){return x.id===arg});
-    invSt=io?{id:io.id,cat:io.cat,term:io.term>0?String(io.term):'',rate:io.rate?liveFmt(numStr(io.rate)):'',name:io.name,qty:liveFmt(numStr(io.qty)),unit:io.unit||'',buy:liveFmt(numStr(io.buy)),date:io.date,note:io.note||''}:{id:null,cat:String(arg).slice(4),term:'',rate:'',name:'',qty:'',unit:'',buy:'',date:today(),note:''};
+    invSt=io?{id:io.id,cat:io.cat,code:io.code||'',man:io.man?liveFmt(numStr(io.man)):'',term:io.term>0?String(io.term):'',rate:io.rate?liveFmt(numStr(io.rate)):'',name:io.name,qty:liveFmt(numStr(io.qty)),unit:io.unit||'',buy:liveFmt(numStr(io.buy)),date:io.date,note:io.note||''}:{id:null,cat:String(arg).slice(4),code:'',man:'',term:'',rate:'',name:'',qty:'',unit:'',buy:'',date:today(),note:''};
   }
   if(name==='fund'){
     var fo=arg&&D.assets.find(function(x){return x.id===arg});
@@ -928,6 +1016,10 @@ function openPage(name,arg){
   if(name==='cd'){
     var co=arg&&D.assets.find(function(x){return x.id===arg});
     cdSt=co?{id:co.id,name:co.name,date:co.date,rep:repKind(co)}:{id:null,name:'',date:today(),rep:''};
+  }
+  if(name==='pw'){
+    var po=arg&&D.assets.find(function(x){return x.id===arg});
+    pwSt=po?{id:po.id,slug:po.slug,ward:po.ward||'',kp:po.kp||'',own:PWD.some(function(x){return x[0]===po.slug})?'':po.slug}:{id:null,slug:'',ward:'',kp:'',own:''};
   }
   if(name==='cdsug')cdY=new Date().getFullYear();
   if(name==='watch'){
@@ -950,14 +1042,14 @@ function closePage(){
 var SETP={basic:1,sync:1,cats:1,catlist:0,backup:1};
 function renderPage(){
   var p=pages[pages.length-1];if(!p)return;
-  $('#ptt').textContent=p.name==='catlist'?cat(p.arg).name:p.name==='fund'?(fundSt.id?'Sửa mã quỹ':'Thêm mã quỹ'):p.name==='inv'?(invSt.cat==='saving'?(invSt.id?'Sửa khoản gửi':'Thêm khoản gửi'):(invSt.id?'Sửa tài sản':'Thêm tài sản')):p.name==='watch'?(watchSt.id?'Sửa mã chờ giá':'Thêm mã chờ giá'):p.name==='cd'?(cdSt.id?'Sửa sự kiện':'Thêm sự kiện'):PTITLE[p.name];
+  $('#ptt').textContent=p.name==='catlist'?cat(p.arg).name:p.name==='fund'?(fundSt.id?'Sửa mã quỹ':'Thêm mã quỹ'):p.name==='inv'?(invSt.cat==='saving'?(invSt.id?'Sửa khoản gửi':'Thêm khoản gửi'):(invSt.id?'Sửa tài sản':'Thêm tài sản')):p.name==='watch'?(watchSt.id?'Sửa mã chờ giá':'Thêm mã chờ giá'):p.name==='cd'?(cdSt.id?'Sửa sự kiện':'Thêm sự kiện'):p.name==='pw'?(pwSt.id?'Sửa vị trí':'Thêm vị trí'):PTITLE[p.name];
   $('#pexit').textContent=SETP[p.name]?'Lưu lại & Thoát':'Thoát';
   var b=$('#pbody'),top=b.scrollTop;
-  var fn={edit:pgEdit,cats:pgCats,basic:pgBasic,sync:pgSync,balance:pgBalance,search:pgSearch,fundrep:pgFundRep,inv:pgInv,secu:pgSecu,backup:pgBackup,about:pgAbout,catlist:pgCatList,fund:pgFund,watch:pgWatch,cd:pgCd,cdsug:pgCdSug,help:pgHelp}[p.name];
+  var fn={edit:pgEdit,cats:pgCats,basic:pgBasic,sync:pgSync,balance:pgBalance,search:pgSearch,fundrep:pgFundRep,inv:pgInv,secu:pgSecu,backup:pgBackup,about:pgAbout,catlist:pgCatList,fund:pgFund,watch:pgWatch,cd:pgCd,pw:pgPw,cdsug:pgCdSug,help:pgHelp}[p.name];
   b.innerHTML=fn(p);
   b.scrollTop=top;
   if(p.name==='fundrep')fitCal();
-  if(p.name==='basic'||p.name==='sync'||p.name==='search'||p.name==='fund'||p.name==='watch'||p.name==='cd'||p.name==='inv')bindPageInputs(p);
+  if(p.name==='basic'||p.name==='sync'||p.name==='search'||p.name==='fund'||p.name==='watch'||p.name==='cd'||p.name==='inv'||p.name==='pw')bindPageInputs(p);
 }
 function pgEdit(p){
   if(!D.entries.find(function(x){return x.id===editSt.id&&!x.deleted})){setTimeout(closePage,0);return ''}
@@ -1180,9 +1272,11 @@ function svMat(a){return a.term>0?addM(a.date,a.term):''}
 function svInt(a,d){if(d<a.date)return 0;var n=ddiff(a.date,d);if(a.term>0){var cap=ddiff(a.date,svMat(a));if(n>cap)n=cap}return a.qty*a.buy*(a.rate||0)/100*n/365}
 function svVal(a,d){return d<a.date?0:a.qty*a.buy+svInt(a,d)}
 function incOf(c){var r=icRec(c);if(r&&r.inc!==undefined)return !!r.inc;return c==='fund'}
+function stPrice(a){var x=a.code&&L.px&&L.px[a.code];if(x&&x.p>0)return x.p;return a.man>0?a.man:0}
+function stNow(a,d){if(d<today())return a.qty*a.buy;var p=stPrice(a);return a.qty*(p||a.buy)}
 function catVal(c,d){
   if(c==='fund')return fundNow();
-  var t=0;invItems(c).forEach(function(a){if(a.date<=d)t+=c==='saving'?svVal(a,d):a.qty*a.buy});return t;
+  var t=0;invItems(c).forEach(function(a){if(a.date<=d)t+=c==='saving'?svVal(a,d):c==='stock'?stNow(a,d):a.qty*a.buy});return t;
 }
 function invSum(){var t=0,d=today();ICATS.forEach(function(x){if(incOf(x[0])&&icHas(x[0]))t+=catVal(x[0],d)});return t}
 function incRow(c){var on=incOf(c);return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0 2px;border-top:1px solid var(--line);margin-top:6px"><span>Tính vào biến động tài sản</span><div class="seg" style="margin:0;max-width:150px;flex:none"><button data-a="invinc" data-c="'+c+'" data-v="1" class="'+(on?'on':'')+'">Bật</button><button data-a="invinc" data-c="'+c+'" data-v="0" class="'+(on?'':'on')+'">Tắt</button></div></div>'}
@@ -1195,7 +1289,64 @@ function pruneInv(keep){
 }
 function icRec(c){return D.assets.find(function(a){return a.kind==='icat'&&a.cat===c&&!a.deleted})}
 function icHas(c){return !!icRec(c)||invItems(c).length>0||(c==='fund'&&(funds().length>0||watches().length>0||flogs().length>0))||(c==='gold'&&!!goldNote())}
-function invTot(c){var t=0,d=today();invItems(c).forEach(function(a){t+=c==='saving'?svVal(a,d):a.qty*a.buy});return t}
+function invTot(c){var t=0,d=today();invItems(c).forEach(function(a){t+=c==='saving'?svVal(a,d):c==='stock'?stNow(a,d):a.qty*a.buy});return t}
+/* ---------- Cổ phiếu & trái phiếu: giá lấy qua GiaQuy.gs (VNDirect, dự phòng TCBS) hoặc nhập tay ---------- */
+var PX={busy:false};
+function pxCodes(){var c=[];invItems('stock').forEach(function(a){if(a.code&&c.indexOf(a.code)<0)c.push(a.code)});return c}
+function pxAtTxt(){var d=new Date(L.pxOk);return 'Giá cập nhật lúc '+hhmm(L.pxOk)+' '+dshort(ds(d.getFullYear(),d.getMonth()+1,d.getDate()))+' từ '+esc(L.pxSrc||'VNDirect')}
+function autoPx(){
+  if(PX.busy||!pxCodes().length||!priceUrl())return;
+  if(Date.now()-(L.pxAt||0)>(L.pxErr?5:30)*60000)fetchPx(false);
+}
+function fetchPx(manual){
+  var codes=pxCodes();if(!codes.length||PX.busy)return;
+  PX.busy=true;L.pxAt=Date.now();saveL();refreshAssets();
+  var ctl=typeof AbortController!=='undefined'?new AbortController():null,to=setTimeout(function(){ctl&&ctl.abort()},30000),u=priceUrl();
+  fetch(u+(u.indexOf('?')<0?'?':'&')+'stocks='+encodeURIComponent(codes.join(',')),{signal:ctl?ctl.signal:undefined}).then(function(r){return r.json()}).then(function(j){
+    clearTimeout(to);var err='',n=0;
+    if(!j.ok)err='Máy chủ báo lỗi';
+    else if(!j.stocks)err='Cần cập nhật GiaQuy.gs lên bản mới (Triển khai > Phiên bản mới)';
+    else{
+      L.px=L.px||{};var bad=[],perm=false,src='';
+      codes.forEach(function(c){var x=j.stocks[c];if(x&&x.p>0){L.px[c]={p:x.p,date:x.date||'',src:x.src||'',at:Date.now()};src=x.src||src;n++}else{var e=j.errs&&j.errs[c]||'';if(/external_request|quyền|permission/i.test(e))perm=true;bad.push(c+(e?' ('+e+')':''))}});
+      if(src)L.pxSrc=src;
+      err=perm?'Apps Script chưa được cấp quyền gọi ra ngoài. Mở Apps Script, chạy hàm capQuyenCoPhieu và bấm Cho phép, rồi Triển khai > Phiên bản mới.':(bad.length?'Không lấy được giá: '+bad.join(', '):'');
+    }
+    if(n)L.pxOk=Date.now();L.pxErr=err;PX.busy=false;saveL();refreshAssets();
+  }).catch(function(){clearTimeout(to);L.pxErr='Không kết nối được máy chủ';PX.busy=false;saveL();refreshAssets()});
+}
+function stockBlock(){
+  var it=invItems('stock'),h='',GS='grid-template-columns:minmax(0,1.2fr) minmax(0,1.6fr) minmax(0,1.1fr);gap:6px;font-size:13px';
+  if(!it.length)h+='<div class="empty">Chưa có tài sản</div>';
+  else{
+    h+='<div class="fh" style="'+GS+'"><span>Mã / Tên</span><span>Giá trị hiện tại</span><span>Lời/lỗ</span></div>';
+    var cost=0,val=0,np=0,tl='';
+    it.forEach(function(a){
+      var p=stPrice(a),open=V.inv.item===a.id,am=a.qty*a.buy,cv=p?a.qty*p:0,pl=cv-am,pc=p?(p/a.buy-1)*100:0,lb=a.code||a.name;
+      if(!p)np++;else{cost+=am;val+=cv}
+      h+='<button class="fr'+(open?' on':'')+'" style="'+GS+'" data-a="invitem" data-id="'+a.id+'"><span>'+esc(lb)+'<i class="ar">'+(open?'▴':'▾')+'</i></span><span>'+(p?fmt(cv)+'đ':'—')+'</span><span class="'+(pc>=0?'thu':'chi')+'">'+(p?(pc>=0?'+':'')+fmtN(pc,2)+'%':'—')+'</span></button>';
+      tl+='<div class="tr"><span>'+esc(lb)+' ('+holdShort(a.date)+')</span>'+(p?plHTML(pl,pc):'<span class="mut">chưa có giá</span>')+'</div>';
+      if(open){
+        var x=a.code&&L.px&&L.px[a.code],fromNet=x&&x.p>0;
+        h+='<div class="fd">'+(a.code&&a.name&&a.name!==a.code?'<div>Tên: <b>'+esc(a.name)+'</b></div>':'')
+          +'<div>Ngày mua: <b>'+dshort(a.date)+'</b></div><div>Thời gian nắm giữ: <b>'+holdStr(a.date)+'</b></div>'
+          +'<div>Số lượng: <b>'+fmtQ(a.qty)+'</b></div><div>Giá mua: <b>'+fmtN(a.buy,2).replace(/,00$/,'')+'đ</b></div>'
+          +'<div>Giá hiện tại: '+(p?'<b>'+fmtN(p,2).replace(/,00$/,'')+'đ</b> <span class="mut">('+(fromNet?'giá '+esc(x.src||'mạng')+(x.date?' ngày '+dmy(x.date):''):'nhập tay')+')</span>':'<span class="mut">chưa có</span>')+'</div>'
+          +'<div>Giá trị hiện tại: '+(p?'<b>'+fmt(cv)+'đ</b>':'<span class="mut">chưa có giá</span>')+'</div>'
+          +'<div>Lời/lỗ hiện tại: '+(p?plHTML(pl,pc):'<span class="mut">chưa có giá</span>')+'</div>'
+          +'<div style="margin-top:8px">Nhật ký giao dịch:</div><textarea class="nt" rows="3" data-g="log" data-id="'+a.id+'" placeholder="Ghi lại các lần mua, bán…" autocomplete="off" style="background:#fff">'+esc(a.log||'')+'</textarea>'
+          +(a.note?'<div>Ghi chú: '+esc(a.note)+'</div>':'')+'<div class="bt2"><button data-a="invedit" data-id="'+a.id+'">Sửa</button><button class="red" data-a="invdel" data-id="'+a.id+'">Xóa</button></div></div>';
+      }
+    });
+    if(val>0)h+='<div class="fr" style="'+GS+';cursor:default"><span><b>Tổng</b></span><span><b>'+fmt(val)+'đ</b></span><span></span></div>';
+    if(np)h+='<div class="mut" style="margin-top:4px">'+np+' tài sản chưa có giá, không tính lời/lỗ</div>';
+    if(cost>0){var to=V.rep.openTotal2;h+='<button class="fr'+(to?' on':'')+'" data-a="totaltoggle2" style="grid-template-columns:auto 1fr;font-size:14px"><span>Tổng lời/lỗ<i class="ar">'+(to?'▴':'▾')+'</i></span><span style="text-align:right">'+plHTML(val-cost,(val/cost-1)*100)+'</span></button>'+(to?'<div class="fd">'+tl+'</div>':'')}
+  }
+  h+='<div class="fbar"><button class="ghost" data-a="invnew" data-c="stock">＋ Thêm tài sản</button>'+(pxCodes().length?'<button class="ghost" data-a="pxnow">'+(PX.busy?'Đang lấy giá…':'↻ Cập nhật giá')+'</button>':'')+'</div>';
+  if(pxCodes().length)h+='<div class="mut" style="margin-top:10px;text-align:center">'+(L.pxErr?'<span class="chi nerr">'+esc(L.pxErr)+'</span>':(L.pxOk?pxAtTxt():'Chưa lấy giá'))+'</div>';
+  h+='<button class="ghost red" data-a="invdelcat" data-c="stock">Xóa danh mục này</button>';
+  return h;
+}
 function invHTML(){
   var v=V.inv,h='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:18px 2px 8px"><button class="sec tg" data-a="invtoggle" style="margin:0;padding:0;flex:1;width:auto"><span>Danh mục đầu tư</span><i>'+(v.open?'▴':'▾')+'</i></button>'+(v.open?'<button class="ghost" data-a="invadd" style="width:auto;margin:0;padding:7px 14px;font-size:14px;white-space:nowrap">＋ Thêm danh mục</button>':'')+'</div>';
   if(!v.open)return h;
@@ -1208,6 +1359,7 @@ function invHTML(){
     if(!open){h+='</div>';return}
     h+='<div style="border-top:1px solid var(--line);margin-top:6px;padding-top:6px">';
     if(c==='fund'){h+=fundBlock();if(!funds().length&&!watches().length&&!flogs().length)h+='<button class="ghost red" data-a="invdelcat" data-c="fund" style="margin-top:10px">Xóa danh mục này</button>';h+='</div></div>';return}
+    if(c==='stock'){h+=stockBlock();h+='</div></div>';return}
     var it=invItems(c),gn=goldNote(),sv=c==='saving',dn=today();
     if(it.length&&sv){
       var GS='grid-template-columns:minmax(0,1fr) minmax(0,1.35fr) minmax(0,.85fr) minmax(0,1.35fr);gap:6px;font-size:13px',ti=0,tv=0;
@@ -1248,6 +1400,14 @@ function pgInv(){
    +'<label class="l" for="ik">Kỳ hạn (tháng)</label><div class="chips" style="flex-wrap:wrap;margin:0 0 6px">'+[['','Không kỳ hạn'],['1','1'],['3','3'],['6','6'],['9','9'],['12','12'],['18','18'],['24','24'],['36','36']].map(function(x){return '<button data-a="termpick" data-v="'+x[0]+'" class="'+(String(s.term)===x[0]?'on':'')+'">'+x[1]+'</button>'}).join('')+'</div><input class="inp" id="ik" inputmode="numeric" autocomplete="off" placeholder="Hoặc nhập số tháng khác" value="'+esc(s.term)+'"><div class="mut" id="it" style="margin-top:4px">'+invPrev()+'</div>'
    +'<label class="l" for="ib">Số tiền (đ)</label><input class="inp" id="ib" inputmode="decimal" autocomplete="off" placeholder="100.000.000" value="'+esc(s.buy)+'">'
    +'<label class="l" for="ir">Lãi suất (%/năm, không bắt buộc)</label><input class="inp" id="ir" inputmode="decimal" autocomplete="off" placeholder="5,2" value="'+esc(s.rate)+'">'
+   +'<label class="l" for="id">Ghi chú</label><textarea class="nt" id="id" rows="3" style="width:100%" placeholder="'+esc(ph[3])+'">'+esc(s.note)+'</textarea></div>'
+   +'<button class="primary" data-a="invsave">Lưu</button>';
+  if(s.cat==='stock')return '<div class="card"><div class="mut" style="margin-bottom:2px">Danh mục: <b>'+icName(s.cat)+'</b></div><label class="l" for="ic">Mã giao dịch (để trống nếu không có, ví dụ trái phiếu)</label><input class="inp" id="ic" maxlength="16" autocapitalize="characters" autocorrect="off" spellcheck="false" autocomplete="off" placeholder="VNM" value="'+esc(s.code)+'">'
+   +'<label class="l" for="in">Tên (không bắt buộc nếu đã có mã)</label><input class="inp" id="in" maxlength="60" autocomplete="off" placeholder="Ví dụ: Vinamilk / Trái phiếu ABC" value="'+esc(s.name)+'">'
+   +'<label class="l">Ngày mua</label><button class="fld" data-a="idate" style="width:100%;padding:11px">'+dlabel(s.date)+' ▾</button>'
+   +'<label class="l" for="iq">Số lượng</label><input class="inp" id="iq" inputmode="decimal" autocomplete="off" placeholder="100" value="'+esc(s.qty)+'">'
+   +'<label class="l" for="ib">Giá mua (đ / 1 đơn vị)</label><input class="inp" id="ib" inputmode="decimal" autocomplete="off" placeholder="62.000" value="'+esc(s.buy)+'"><div class="mut" id="it" style="margin-top:4px">'+invPrev()+'</div>'
+   +'<label class="l" for="im">Giá hiện tại nhập tay (không bắt buộc)</label><input class="inp" id="im" inputmode="decimal" autocomplete="off" placeholder="Dùng khi không có mã hoặc không lấy được giá" value="'+esc(s.man)+'">'
    +'<label class="l" for="id">Ghi chú</label><textarea class="nt" id="id" rows="3" style="width:100%" placeholder="'+esc(ph[3])+'">'+esc(s.note)+'</textarea></div>'
    +'<button class="primary" data-a="invsave">Lưu</button>';
   return '<div class="card"><div class="mut" style="margin-bottom:2px">Danh mục: <b>'+icName(s.cat)+'</b></div><label class="l" for="in">Tên tài sản</label><input class="inp" id="in" maxlength="60" autocomplete="off" placeholder="Ví dụ: '+esc(ph[0])+'" value="'+esc(s.name)+'">'
@@ -1358,7 +1518,9 @@ function pgAbout(){
   return '<div class="card"><div>Phiên bản: <b>'+APP_VER+'</b></div><div>Tên máy: <b>'+(esc(L.dev)||'(chưa đặt)')+'</b></div><div>Số khoản lưu trong máy: <b>'+n+'</b> (đã xóa ẩn: '+del+')</div><div>Lưu trữ bền vững: <b id="pst">…</b></div></div><div class="mut">Không xóa biểu tượng trên màn hình chính để cập nhật: biểu tượng và Safari là hai kho dữ liệu riêng, xóa biểu tượng sẽ mất dữ liệu chưa sao lưu.</div>';
 }
 function bindPageInputs(p){
-  if(p.name==='cd'){
+  if(p.name==='pw'){
+    $('#pwd').oninput=function(){pwSt.ward=this.value};$('#pws').oninput=function(){pwSt.own=this.value.trim();if(pwSt.own)pwSt.slug=''};
+  }else if(p.name==='cd'){
     $('#cn').oninput=function(){cdSt.name=this.value};
   }else if(p.name==='watch'){
     $('#wc').oninput=function(){watchSt.code=this.value};
@@ -1366,6 +1528,8 @@ function bindPageInputs(p){
   }else if(p.name==='inv'){
     $('#in').oninput=function(){invSt.name=this.value};$('#id').oninput=function(){invSt.note=this.value};
     if(invSt.cat==='saving'){[['ib','buy'],['ir','rate']].forEach(function(x){var el=$('#'+x[0]);el.oninput=function(ev){el.value=liveFmt(el.value,ev);invSt[x[1]]=el.value}});$('#ik').oninput=function(){this.value=this.value.replace(/\D/g,'').slice(0,3);invSt.term=this.value;$('#it').textContent=invPrev()}}
+    else if(invSt.cat==='stock'){$('#ic').oninput=function(){this.value=this.value.toUpperCase().replace(/[^A-Z0-9._-]/g,'').slice(0,16);invSt.code=this.value};
+    [['iq','qty'],['ib','buy'],['im','man']].forEach(function(x){var el=$('#'+x[0]);el.oninput=function(ev){el.value=liveFmt(el.value,ev);invSt[x[1]]=el.value;$('#it').textContent=invPrev()}})}
     else{$('#iu').oninput=function(){invSt.unit=this.value};
     [['iq','qty'],['ib','buy']].forEach(function(x){var el=$('#'+x[0]);el.oninput=function(ev){el.value=liveFmt(el.value,ev);invSt[x[1]]=el.value;$('#it').textContent=invPrev()}})}
   }else if(p.name==='fund'){
@@ -1581,19 +1745,37 @@ var ACT={
     V.inv.adding=false;V.inv.cat=c;V.inv.item=null;pruneInv(c);changed()},
   invcat:function(t){var c=t.dataset.c;V.inv.cat=V.inv.cat===c?null:c;V.inv.item=null;pruneInv(V.inv.cat);refreshAssets()},
   invitem:function(t){V.inv.item=V.inv.item===t.dataset.id?null:t.dataset.id;refreshAssets()},
+  pwtoggle:function(){V.pw.open=!V.pw.open;render();if(V.pw.open)autoPw()},
+  pwadd:function(){openPage('pw',null)},
+  pwedit:function(t){openPage('pw',t.dataset.id)},
+  pwdist:function(t){pwSt.slug=t.dataset.v;pwSt.own='';renderPage()},
+  pwward:function(t){pwSt.ward=t.dataset.v;renderPage()},
+  pwkp:function(t){pwSt.kp=t.dataset.v;renderPage()},
+  pwnow:function(){L.pwAt=0;fetchPw()},
+  pwsave:function(){
+    var sl=pwSlug();if(!sl){toast('Chọn huyện hoặc dán đường dẫn hợp lệ');return}
+    var w=pwSt.ward.trim();if(!w&&!pwSt.kp){toast('Nhập phường/xã hoặc chọn khu phố');return}
+    var a=pwSt.id&&D.assets.find(function(x){return x.id===pwSt.id});
+    if(a){a.slug=sl;a.ward=w;a.kp=pwSt.kp;touch(a)}else{a={id:'p'+uid(),kind:'pw',slug:sl,ward:w,kp:pwSt.kp};touch(a);D.assets.push(a)}
+    V.pw.open=true;L.pwAt=0;popPage();toast('Đã lưu vị trí');changed();fetchPw()},
+  pwdel:function(t){var a=D.assets.find(function(x){return x.id===t.dataset.id});if(!a)return;
+    confirmBox('Xóa vị trí?','<b>'+esc(pwName(a))+'</b>','Xóa',true).then(function(ok){if(!ok)return;a.deleted=true;touch(a);toast('Đã xóa vị trí');changed()})},
+  pxnow:function(){fetchPx(true)},
+  totaltoggle2:function(){V.rep.openTotal2=!V.rep.openTotal2;refreshAssets()},
   invnew:function(t){openPage('inv','new:'+t.dataset.c)},
   invedit:function(t){openPage('inv',t.dataset.id)},
   idate:function(){pickDate(invSt.date,function(v){invSt.date=v;renderPage()})},
   termpick:function(t){invSt.term=t.dataset.v;renderPage()},
   invinc:function(t){var c=t.dataset.c,r=icRec(c);if(!r){r={id:'ic_'+c,kind:'icat',cat:c};D.assets.push(r)}r.deleted=false;r.inc=t.dataset.v==='1';touch(r);changed()},
   invsave:function(){
-    var sv=invSt.cat==='saving',s=invSt,q=sv?1:parseNum(s.qty),b=parseNum(s.buy),nm=s.name.trim(),rt=sv?parseNum(s.rate):0;
-    if(!nm){toast(sv?'Nhập tên ngân hàng':'Nhập tên tài sản');return}
+    var sv=invSt.cat==='saving',st=invSt.cat==='stock',s=invSt,q=sv?1:parseNum(s.qty),b=parseNum(s.buy),nm=s.name.trim(),rt=sv?parseNum(s.rate):0,cd=st?s.code.trim().toUpperCase():'';
+    if(st&&!nm)nm=cd;
+    if(!nm){toast(sv?'Nhập tên ngân hàng':st?'Nhập mã hoặc tên':'Nhập tên tài sản');return}
     if(!q){toast('Nhập số lượng lớn hơn 0');return}
     if(!b){toast(sv?'Nhập số tiền lớn hơn 0':'Nhập giá mua lớn hơn 0');return}
-    var a=s.id&&D.assets.find(function(x){return x.id===s.id}),un=sv?'':s.unit.trim();
-    if(a){a.name=nm;a.qty=q;a.buy=b;a.unit=un;a.rate=rt;a.term=sv?(parseInt(s.term,10)||0):0;a.date=s.date;a.note=s.note.trim();touch(a)}
-    else{a={id:'i'+uid(),kind:'inv',cat:s.cat,name:nm,qty:q,unit:un,rate:rt,term:sv?(parseInt(s.term,10)||0):0,buy:b,date:s.date,note:s.note.trim()};touch(a);D.assets.push(a)}
+    var a=s.id&&D.assets.find(function(x){return x.id===s.id}),un=(sv||st)?'':s.unit.trim(),mn=st?parseNum(s.man):0;
+    if(a){if(st){a.code=cd;a.man=mn}a.name=nm;a.qty=q;a.buy=b;a.unit=un;a.rate=rt;a.term=sv?(parseInt(s.term,10)||0):0;a.date=s.date;a.note=s.note.trim();touch(a)}
+    else{a={id:'i'+uid(),kind:'inv',cat:s.cat,name:nm,code:cd,man:mn,qty:q,unit:un,rate:rt,term:sv?(parseInt(s.term,10)||0):0,buy:b,date:s.date,note:s.note.trim()};touch(a);D.assets.push(a)}
     V.inv.open=true;V.inv.cat=s.cat;V.inv.item=a.id;popPage();toast('Đã lưu tài sản');changed();
   },
   invdel:function(t){var a=D.assets.find(function(x){return x.id===t.dataset.id});if(!a)return;

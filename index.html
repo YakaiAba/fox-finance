@@ -232,7 +232,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.55 (07/11/2026)';
+var APP_VER='1.56 (07/11/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -1009,7 +1009,7 @@ function openPage(name,arg){
   }
   if(name==='inv'){
     var io=arg&&arg.indexOf('new:')!==0&&D.assets.find(function(x){return x.id===arg});
-    invSt=io?{id:io.id,cat:io.cat,code:io.code||'',man:io.man?liveFmt(numStr(io.man)):'',term:io.term>0?String(io.term):'',rate:io.rate?liveFmt(numStr(io.rate)):'',name:io.name,qty:liveFmt(numStr(io.qty)),unit:io.unit||'',buy:liveFmt(numStr(io.buy)),date:io.date,note:io.note||''}:{id:null,cat:String(arg).slice(4),code:'',man:'',term:'',rate:'',name:'',qty:'',unit:'',buy:'',date:today(),note:''};
+    invSt=io?{id:io.id,cat:io.cat,code:io.cat==='stock'?stCode(io):(io.code||''),man:io.man?liveFmt(numStr(io.man)):'',term:io.term>0?String(io.term):'',rate:io.rate?liveFmt(numStr(io.rate)):'',name:io.name,qty:liveFmt(numStr(io.qty)),unit:io.unit||'',buy:liveFmt(numStr(io.buy)),date:io.date,note:io.note||''}:{id:null,cat:String(arg).slice(4),code:'',man:'',term:'',rate:'',name:'',qty:'',unit:'',buy:'',date:today(),note:''};
   }
   if(name==='fund'){
     var fo=arg&&D.assets.find(function(x){return x.id===arg});
@@ -1274,7 +1274,7 @@ function svMat(a){return a.term>0?addM(a.date,a.term):''}
 function svInt(a,d){if(d<a.date)return 0;var n=ddiff(a.date,d);if(a.term>0){var cap=ddiff(a.date,svMat(a));if(n>cap)n=cap}return a.qty*a.buy*(a.rate||0)/100*n/365}
 function svVal(a,d){return d<a.date?0:a.qty*a.buy+svInt(a,d)}
 function incOf(c){var r=icRec(c);if(r&&r.inc!==undefined)return !!r.inc;return c==='fund'}
-function stPrice(a){var x=a.code&&L.px&&L.px[a.code];if(x&&x.p>0)return x.p;return a.man>0?a.man:0}
+function stPrice(a){var k=stCode(a),x=k&&L.px&&L.px[k];if(x&&x.p>0)return x.p;return a.man>0?a.man:0}
 function stNow(a,d){if(d<today())return a.qty*a.buy;var p=stPrice(a);return a.qty*(p||a.buy)}
 function catVal(c,d){
   if(c==='fund')return fundNow();
@@ -1294,14 +1294,15 @@ function icHas(c){return !!icRec(c)||invItems(c).length>0||(c==='fund'&&(funds()
 function invTot(c){var t=0,d=today();invItems(c).forEach(function(a){t+=c==='saving'?svVal(a,d):c==='stock'?stNow(a,d):a.qty*a.buy});return t}
 /* ---------- Cổ phiếu & trái phiếu: giá lấy qua GiaQuy.gs (VNDirect, dự phòng TCBS) hoặc nhập tay ---------- */
 var PX={busy:false};
-function pxCodes(){var c=[];invItems('stock').forEach(function(a){if(a.code&&c.indexOf(a.code)<0)c.push(a.code)});return c}
+function stCode(a){if(a.code)return a.code;var n=String(a.name||'').trim().toUpperCase();return /^[A-Z][A-Z0-9]{1,4}$/.test(n)?n:''}
+function pxCodes(){var c=[];invItems('stock').forEach(function(a){var k=stCode(a);if(k&&c.indexOf(k)<0)c.push(k)});return c}
 function pxAtTxt(){var d=new Date(L.pxOk);return 'Giá cập nhật lúc '+hhmm(L.pxOk)+' '+dshort(ds(d.getFullYear(),d.getMonth()+1,d.getDate()))+' từ '+esc(L.pxSrc||'VNDirect')}
 function autoPx(){
   if(PX.busy||!pxCodes().length||!priceUrl())return;
   if(Date.now()-(L.pxAt||0)>(L.pxErr?5:30)*60000)fetchPx(false);
 }
 function fetchPx(manual){
-  var codes=pxCodes();if(!codes.length||PX.busy)return;
+  var codes=pxCodes();if(PX.busy)return;if(!codes.length){L.pxErr='Chưa có mã giao dịch. Bấm Sửa để nhập mã (ví dụ FPT).';saveL();refreshAssets();return}
   PX.busy=true;L.pxAt=Date.now();saveL();refreshAssets();
   var ctl=typeof AbortController!=='undefined'?new AbortController():null,to=setTimeout(function(){ctl&&ctl.abort()},30000),u=priceUrl();
   fetch(u+(u.indexOf('?')<0?'?':'&')+'stocks='+encodeURIComponent(codes.join(',')),{signal:ctl?ctl.signal:undefined}).then(function(r){return r.json()}).then(function(j){
@@ -1324,13 +1325,13 @@ function stockBlock(){
     h+='<div class="fh" style="'+GS+'"><span>Mã / Tên</span><span>Giá trị hiện tại</span><span>Lời/lỗ</span></div>';
     var cost=0,val=0,np=0,tl='';
     it.forEach(function(a){
-      var p=stPrice(a),open=V.inv.item===a.id,am=a.qty*a.buy,cv=p?a.qty*p:0,pl=cv-am,pc=p?(p/a.buy-1)*100:0,lb=a.code||a.name;
+      var p=stPrice(a),open=V.inv.item===a.id,am=a.qty*a.buy,cv=p?a.qty*p:0,pl=cv-am,pc=p?(p/a.buy-1)*100:0,lb=stCode(a)||a.name;
       if(!p)np++;else{cost+=am;val+=cv}
       h+='<button class="fr'+(open?' on':'')+'" style="'+GS+'" data-a="invitem" data-id="'+a.id+'"><span>'+esc(lb)+'<i class="ar">'+(open?'▴':'▾')+'</i></span><span>'+(p?fmt(cv)+'đ':'—')+'</span><span class="'+(pc>=0?'thu':'chi')+'">'+(p?(pc>=0?'+':'')+fmtN(pc,2)+'%':'—')+'</span></button>';
       tl+='<div class="tr"><span>'+esc(lb)+' ('+holdShort(a.date)+')</span>'+(p?plHTML(pl,pc):'<span class="mut">chưa có giá</span>')+'</div>';
       if(open){
-        var x=a.code&&L.px&&L.px[a.code],fromNet=x&&x.p>0;
-        h+='<div class="fd">'+(a.code&&a.name&&a.name!==a.code?'<div>Tên: <b>'+esc(a.name)+'</b></div>':'')
+        var x=stCode(a)&&L.px&&L.px[stCode(a)],fromNet=x&&x.p>0;
+        h+='<div class="fd">'+(stCode(a)&&a.name&&a.name!==stCode(a)?'<div>Tên: <b>'+esc(a.name)+'</b></div>':'')
           +'<div>Ngày mua: <b>'+dshort(a.date)+'</b></div><div>Thời gian nắm giữ: <b>'+holdStr(a.date)+'</b></div>'
           +'<div>Số lượng: <b>'+fmtQ(a.qty)+'</b></div><div>Giá mua: <b>'+fmtN(a.buy,2).replace(/,00$/,'')+'đ</b></div>'
           +'<div>Giá hiện tại: '+(p?'<b>'+fmtN(p,2).replace(/,00$/,'')+'đ</b> <span class="mut">('+(fromNet?'giá '+esc(x.src||'mạng')+(x.date?' ngày '+dmy(x.date):''):'nhập tay')+')</span>':'<span class="mut">chưa có</span>')+'</div>'
@@ -1344,8 +1345,9 @@ function stockBlock(){
     if(np)h+='<div class="mut" style="margin-top:4px">'+np+' tài sản chưa có giá, không tính lời/lỗ</div>';
     if(cost>0){var to=V.rep.openTotal2;h+='<button class="fr'+(to?' on':'')+'" data-a="totaltoggle2" style="grid-template-columns:auto 1fr;font-size:14px"><span>Tổng lời/lỗ<i class="ar">'+(to?'▴':'▾')+'</i></span><span style="text-align:right">'+plHTML(val-cost,(val/cost-1)*100)+'</span></button>'+(to?'<div class="fd">'+tl+'</div>':'')}
   }
-  h+='<div class="fbar"><button class="ghost" data-a="invnew" data-c="stock">＋ Thêm tài sản</button>'+(pxCodes().length?'<button class="ghost" data-a="pxnow">'+(PX.busy?'Đang lấy giá…':'↻ Cập nhật giá')+'</button>':'')+'</div>';
-  if(pxCodes().length)h+='<div class="mut" style="margin-top:10px;text-align:center">'+(L.pxErr?'<span class="chi nerr">'+esc(L.pxErr)+'</span>':(L.pxOk?pxAtTxt():'Chưa lấy giá'))+'</div>';
+  h+='<div class="fbar"><button class="ghost" data-a="invnew" data-c="stock">＋ Thêm tài sản</button>'+(it.length?'<button class="ghost" data-a="pxnow">'+(PX.busy?'Đang lấy giá…':'↻ Cập nhật giá')+'</button>':'')+'</div>';
+  if(it.length&&!pxCodes().length)h+='<div class="mut" style="margin-top:10px;text-align:center">Chưa có mã giao dịch nên không tự lấy giá. Bấm Sửa để nhập mã (ví dụ FPT) hoặc nhập giá tay.</div>';
+  else if(it.length)h+='<div class="mut" style="margin-top:10px;text-align:center">'+(L.pxErr?'<span class="chi nerr">'+esc(L.pxErr)+'</span>':(L.pxOk?pxAtTxt():'Chưa lấy giá'))+'</div>';
   h+='<button class="ghost red" data-a="invdelcat" data-c="stock">Xóa danh mục này</button>';
   return h;
 }

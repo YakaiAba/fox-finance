@@ -232,7 +232,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.57 (07/11/2026)';
+var APP_VER='1.58 (07/11/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -565,7 +565,8 @@ var PWW=[['Dương Đông','Phường'],['An Thới','Phường'],['Dương Tơ'
 var PWST={busy:false};
 function pwLocs(){return D.assets.filter(function(a){return a.kind==='pw'&&!a.deleted}).sort(function(a,b){return a.id<b.id?-1:1})}
 function pwDist(slug){if(slug==='thanh-pho-phu-quoc')return 'Đặc khu Phú Quốc, An Giang';var d=PWDIST[slug];return d?d.n.replace(/, .*$/,'')+' ('+PWOLD[d.p]+' cũ)':slug}
-function pwName(a){return (a.kp?'Khu phố '+a.kp+', ':'')+(a.ward?a.ward+', ':'')+pwDist(a.slug)}
+function pwKpTxt(k){k=String(k||'').trim();return !k?'':/^\d+$/.test(k)?'Khu phố '+k:k}
+function pwName(a){var k=pwKpTxt(a.kp);return (k?k+', ':'')+(a.ward?a.ward+', ':'')+pwDist(a.slug)}
 function pwKps(t){
   var n=norm(t),set={},re=/(?:kp|khu pho)\s*\.?\s*(\d+)((?:\s*(?:,|;|-|va|den)\s*(?:kp|khu pho)?\s*\.?\s*\d+)*)/g,m;
   while((m=re.exec(n))){var nums=[+m[1]],rest=m[2]||'',r2=/(,|;|-|va|den)\s*(?:kp|khu pho)?\s*\.?\s*(\d+)/g,q,prev=+m[1];
@@ -574,9 +575,10 @@ function pwKps(t){
   return set;
 }
 function pwMatch(loc,area){
-  var n=norm(area),w=norm(loc.ward||'');
+  var n=norm(area).replace(/\s+/g,' '),w=norm(loc.ward||'').replace(/\s+/g,' ').replace(/^(phuong|xa|thi tran|dac khu)\s+/,''),k=String(loc.kp||'').trim();
+  if(k&&!/^\d+$/.test(k)){k=norm(k).replace(/\s+/g,' ').replace(/^(khu pho|kp|ap|thon|to dan pho|to)\s*\.?\s+/,'');return !!k&&n.indexOf(k)>=0}
   if(w&&n.indexOf(w)<0)return false;
-  if(!loc.kp)return true;
+  if(!k)return true;
   var set=pwKps(area);
   return !Object.keys(set).length||!!set[+loc.kp];
 }
@@ -639,7 +641,8 @@ function pgPw(){
   if(pq)h+='<div class="chips" style="flex-wrap:wrap;margin:0 0 6px">'+PWW.map(function(w){return '<button data-a="pwward" data-v="'+w[0]+'" class="'+(norm(s.ward)===norm(w[0])?'on':'')+'">'+w[1]+' '+w[0]+'</button>'}).join('')+'</div>';
   h+='<input class="inp" id="pwd" maxlength="40" autocomplete="off" placeholder="'+(pq?'Hoặc gõ tên khác':'Gõ tên phường/xã, ví dụ: Dương Đông')+'" value="'+esc(s.ward)+'">'
    +'<label class="l">4. Khu phố (không bắt buộc)</label><div class="chips" style="flex-wrap:wrap;margin:0"><button data-a="pwkp" data-v="" class="'+(s.kp===''?'on':'')+'">Cả phường/xã</button>'+[1,2,3,4,5,6,7,8,9,10,11,12].map(function(k){return '<button data-a="pwkp" data-v="'+k+'" class="'+(s.kp===String(k)?'on':'')+'">KP'+k+'</button>'}).join('')+'</div>'
-   +'<div class="mut" style="margin-top:8px">Hiển thị: <b>'+esc(pwPrevName())+'</b></div><div class="mut" style="margin-top:4px;font-size:12px">lichcupdien.app vẫn chia lịch theo quận/huyện cũ (trước sáp nhập 2025), nên bạn chọn huyện cũ chứa phường/xã của mình. App so tên phường/xã và số khu phố với chữ "Khu vực" của từng lịch; trùng thì báo cúp điện.</div></div><button class="primary" data-a="pwsave">Lưu</button>';
+   +'<input class="inp" id="pwk" maxlength="40" autocomplete="off" style="margin-top:8px" placeholder="Hoặc gõ tên khu phố/ấp, ví dụ: Cây Thông Ngoài" value="'+esc(/^\d+$/.test(s.kp)?'':s.kp)+'">'
+   +'<div class="mut" style="margin-top:8px">Hiển thị: <b id="pwprev">'+esc(pwPrevName())+'</b></div><div class="mut" style="margin-top:4px;font-size:12px">lichcupdien.app vẫn chia lịch theo quận/huyện cũ (trước sáp nhập 2025), nên bạn chọn huyện cũ chứa phường/xã của mình. Gõ tên khu phố/ấp thì chỉ báo lịch có đúng tên đó; chọn số KP thì báo lịch của phường/xã có số khu phố đó; để "Cả phường/xã" thì báo mọi lịch có tên phường/xã.</div></div><button class="primary" data-a="pwsave">Lưu</button>';
   return h;
 }
 function pwSlug(){var s=pwSt;if(s.slug)return s.slug;var o=(s.own||'').trim().replace(/[?#].*$/,'').replace(/\/+$/,'').split('/').pop().toLowerCase();return /^[a-z0-9-]{3,60}$/.test(o)?o:''}
@@ -1536,7 +1539,8 @@ function pgAbout(){
 }
 function bindPageInputs(p){
   if(p.name==='pw'){
-    $('#pwd').oninput=function(){pwSt.ward=this.value};var ps=$('#pws');if(ps)ps.oninput=function(){pwSt.own=this.value.trim();if(pwSt.own){pwSt.slug='';[].forEach.call(document.querySelectorAll('[data-a=pwdist].on'),function(b){b.classList.remove('on')})}};
+    $('#pwd').oninput=function(){pwSt.ward=this.value;var pp=$('#pwprev');if(pp)pp.textContent=pwPrevName()};
+    $('#pwk').oninput=function(){pwSt.kp=this.value.trim();[].forEach.call(document.querySelectorAll('[data-a=pwkp]'),function(b){b.classList.toggle('on',!pwSt.kp&&b.dataset.v==='')});var pp=$('#pwprev');if(pp)pp.textContent=pwPrevName()};var ps=$('#pws');if(ps)ps.oninput=function(){pwSt.own=this.value.trim();if(pwSt.own){pwSt.slug='';[].forEach.call(document.querySelectorAll('[data-a=pwdist].on'),function(b){b.classList.remove('on')})}};
     $('#pwp').onchange=function(){pwSt.prov=this.value;if(pwSt.slug&&pwProvOf(pwSt.slug)!==this.value)pwSt.slug='';renderPage()};
     $('#pwq').oninput=function(){var q=norm(this.value),any=false;[].forEach.call(document.querySelectorAll('.pwg'),function(g){var vis=0;[].forEach.call(g.querySelectorAll('button'),function(b){var ok=!q||b.dataset.n.indexOf(q)>=0;b.style.display=ok?'':'none';if(ok)vis++});g.style.display=vis?'':'none';if(vis)any=true});$('#pwnone').style.display=any?'none':''};
   }else if(p.name==='cd'){
@@ -1773,7 +1777,7 @@ var ACT={
   pwnow:function(){L.pwAt=0;fetchPw()},
   pwsave:function(){
     var sl=pwSlug();if(!sl){toast('Chọn quận/huyện hoặc dán đường dẫn hợp lệ');return}
-    var w=pwSt.ward.trim();if(!w&&!pwSt.kp){toast('Nhập phường/xã hoặc chọn khu phố');return}
+    var w=pwSt.ward.trim();pwSt.kp=String(pwSt.kp||'').trim();if(!w&&!pwSt.kp){toast('Nhập phường/xã hoặc khu phố');return}
     var a=pwSt.id&&D.assets.find(function(x){return x.id===pwSt.id});
     var pv=pwProvOf(sl)||pwSt.prov||'';
     if(a){a.slug=sl;a.ward=w;a.kp=pwSt.kp;a.prov=pv;touch(a)}else{a={id:'p'+uid(),kind:'pw',slug:sl,ward:w,kp:pwSt.kp,prov:pv};touch(a);D.assets.push(a)}

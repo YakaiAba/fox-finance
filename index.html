@@ -232,7 +232,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.54 (07/11/2026)';
+var APP_VER='1.55 (07/11/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -553,8 +553,8 @@ function cdHTML(){
   return h+'<div class="fbar"><button class="ghost" data-a="cdsug">+ Ngày lễ gợi ý</button><button class="ghost" data-a="cdadd">+ Tạo thủ công</button></div></div>';
 }
 /* ---------- Lịch cúp điện: lichcupdien.app qua GiaQuy.gs; khớp theo từ khóa (phường/xã + khu phố) ---------- */
-var PWD=[['thanh-pho-phu-quoc','Đặc khu Phú Quốc'],['thanh-pho-rach-gia','TP Rạch Giá'],['thanh-pho-ha-tien','TP Hà Tiên'],['huyen-kien-luong','Huyện Kiên Lương'],['huyen-hon-dat','Huyện Hòn Đất'],['huyen-giong-rieng','Huyện Giồng Riềng'],['huyen-go-quao','Huyện Gò Quao'],['huyen-an-bien','Huyện An Biên'],['huyen-an-minh','Huyện An Minh'],['huyen-vinh-thuan','Huyện Vĩnh Thuận'],['huyen-u-minh-thuong','Huyện U Minh Thượng'],['huyen-tan-hiep','Huyện Tân Hiệp'],['huyen-chau-thanh-kien-giang','Huyện Châu Thành'],['huyen-giang-thanh','Huyện Giang Thành'],['huyen-kien-hai','Huyện Kiên Hải']];
-var PWW=['Dương Đông','An Thới','Dương Tơ','Cửa Dương','Hàm Ninh','Bãi Thơm','Cửa Cạn','Gành Dầu','Hòn Thơm','Thổ Châu'];
+var PWD=[['thanh-pho-phu-quoc','Đặc khu Phú Quốc, An Giang'],['thanh-pho-rach-gia','TP Rạch Giá'],['thanh-pho-ha-tien','TP Hà Tiên'],['huyen-kien-luong','Huyện Kiên Lương'],['huyen-hon-dat','Huyện Hòn Đất'],['huyen-giong-rieng','Huyện Giồng Riềng'],['huyen-go-quao','Huyện Gò Quao'],['huyen-an-bien','Huyện An Biên'],['huyen-an-minh','Huyện An Minh'],['huyen-vinh-thuan','Huyện Vĩnh Thuận'],['huyen-u-minh-thuong','Huyện U Minh Thượng'],['huyen-tan-hiep','Huyện Tân Hiệp'],['huyen-chau-thanh-kien-giang','Huyện Châu Thành'],['huyen-giang-thanh','Huyện Giang Thành'],['huyen-kien-hai','Huyện Kiên Hải']];
+var PWW=[['Dương Đông','Phường'],['An Thới','Phường'],['Dương Tơ','Xã'],['Hàm Ninh','Xã'],['Cửa Dương','Xã'],['Bãi Thơm','Xã'],['Gành Dầu','Xã'],['Cửa Cạn','Xã']];
 var PWST={busy:false};
 function pwLocs(){return D.assets.filter(function(a){return a.kind==='pw'&&!a.deleted}).sort(function(a,b){return a.id<b.id?-1:1})}
 function pwDist(slug){var d=PWD.filter(function(x){return x[0]===slug})[0];return d?d[1]:slug}
@@ -618,13 +618,15 @@ function pwHTML(){
   return h+'</div>';
 }
 function pgPw(){
-  var s=pwSt,dsl=s.slug&&PWD.some(function(x){return x[0]===s.slug});
-  var h='<div class="card"><label class="l">Huyện / thành phố / đặc khu (theo lichcupdien.app)</label><div class="chips" style="flex-wrap:wrap;margin:0 0 6px">'+PWD.map(function(x){return '<button data-a="pwdist" data-v="'+x[0]+'" class="'+(s.slug===x[0]?'on':'')+'">'+x[1]+'</button>'}).join('')+'</div>'
-   +'<label class="l" for="pws">Hoặc dán đường dẫn trang huyện (nơi khác)</label><input class="inp" id="pws" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off" placeholder="https://lichcupdien.app/ten-huyen/" value="'+esc(s.own)+'"><div class="mut" style="margin-top:4px">Mở lichcupdien.app, vào trang huyện của bạn rồi sao chép địa chỉ.</div>'
-   +'<label class="l" for="pwd">Phường / xã / khu vực (từ khóa)</label><input class="inp" id="pwd" maxlength="40" autocomplete="off" placeholder="Ví dụ: Dương Đông" value="'+esc(s.ward)+'">';
-  if(s.slug==='thanh-pho-phu-quoc')h+='<div class="chips" style="flex-wrap:wrap;margin:6px 0 0">'+PWW.map(function(w){return '<button data-a="pwward" data-v="'+w+'" class="'+(norm(s.ward)===norm(w)?'on':'')+'">'+w+'</button>'}).join('')+'</div>';
-  h+='<label class="l">Khu phố (không bắt buộc)</label><div class="chips" style="flex-wrap:wrap;margin:0"><button data-a="pwkp" data-v="" class="'+(s.kp===''?'on':'')+'">Cả phường/xã</button>'+[1,2,3,4,5,6,7,8,9,10,11,12].map(function(k){return '<button data-a="pwkp" data-v="'+k+'" class="'+(s.kp===String(k)?'on':'')+'">KP'+k+'</button>'}).join('')+'</div>'
-   +'<div class="mut" style="margin-top:8px">Hiển thị: <b>'+esc(pwPrevName())+'</b></div></div><button class="primary" data-a="pwsave">Lưu</button>';
+  var s=pwSt,pq=s.slug==='thanh-pho-phu-quoc',oth=!!s.other||!!s.own||(s.slug&&!pq);
+  var h='<div class="card"><label class="l">1. Tỉnh/thành › Khu vực</label><div class="chips" style="flex-wrap:wrap;margin:0 0 6px"><button data-a="pwdist" data-v="thanh-pho-phu-quoc" class="'+(pq&&!oth?'on':'')+'">An Giang › Đặc khu Phú Quốc</button><button data-a="pwother" class="'+(oth?'on':'')+'">Khu vực khác…</button></div>';
+  if(oth)h+='<div class="mut">Nhóm huyện theo lichcupdien.app (Kiên Giang cũ):</div><div class="chips" style="flex-wrap:wrap;margin:4px 0 6px">'+PWD.filter(function(x){return x[0]!=='thanh-pho-phu-quoc'}).map(function(x){return '<button data-a="pwdist" data-v="'+x[0]+'" class="'+(s.slug===x[0]?'on':'')+'">'+x[1]+'</button>'}).join('')+'</div>'
+   +'<label class="l" for="pws">Hoặc dán đường dẫn trang huyện trên lichcupdien.app</label><input class="inp" id="pws" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off" placeholder="https://lichcupdien.app/ten-huyen/" value="'+esc(s.own)+'">';
+  h+='<label class="l" for="pwd">2. Phường / xã</label>';
+  if(pq&&!oth)h+='<div class="chips" style="flex-wrap:wrap;margin:0 0 6px">'+PWW.map(function(w){return '<button data-a="pwward" data-v="'+w[0]+'" class="'+(norm(s.ward)===norm(w[0])?'on':'')+'">'+w[1]+' '+w[0]+'</button>'}).join('')+'</div>';
+  h+='<input class="inp" id="pwd" maxlength="40" autocomplete="off" placeholder="'+(pq&&!oth?'Hoặc gõ tên khác':'Ví dụ: Dương Đông')+'" value="'+esc(s.ward)+'">'
+   +'<label class="l">3. Khu phố (không bắt buộc)</label><div class="chips" style="flex-wrap:wrap;margin:0"><button data-a="pwkp" data-v="" class="'+(s.kp===''?'on':'')+'">Cả phường/xã</button>'+[1,2,3,4,5,6,7,8,9,10,11,12].map(function(k){return '<button data-a="pwkp" data-v="'+k+'" class="'+(s.kp===String(k)?'on':'')+'">KP'+k+'</button>'}).join('')+'</div>'
+   +'<div class="mut" style="margin-top:8px">Hiển thị: <b>'+esc(pwPrevName())+'</b></div><div class="mut" style="margin-top:4px;font-size:12px">App so tên phường/xã và số khu phố này với chữ "Khu vực" trên lichcupdien.app; trùng thì báo cúp điện.</div></div><button class="primary" data-a="pwsave">Lưu</button>';
   return h;
 }
 function pwSlug(){var s=pwSt;if(s.slug)return s.slug;var o=(s.own||'').trim().replace(/[?#].*$/,'').replace(/\/+$/,'').split('/').pop().toLowerCase();return /^[a-z0-9-]{3,60}$/.test(o)?o:''}
@@ -1019,7 +1021,7 @@ function openPage(name,arg){
   }
   if(name==='pw'){
     var po=arg&&D.assets.find(function(x){return x.id===arg});
-    pwSt=po?{id:po.id,slug:po.slug,ward:po.ward||'',kp:po.kp||'',own:PWD.some(function(x){return x[0]===po.slug})?'':po.slug}:{id:null,slug:'',ward:'',kp:'',own:''};
+    pwSt=po?{id:po.id,slug:po.slug,ward:po.ward||'',kp:po.kp||'',own:PWD.some(function(x){return x[0]===po.slug})?'':po.slug,other:po.slug!=='thanh-pho-phu-quoc'}:{id:null,slug:'',ward:'',kp:'',own:''};
   }
   if(name==='cdsug')cdY=new Date().getFullYear();
   if(name==='watch'){
@@ -1519,7 +1521,7 @@ function pgAbout(){
 }
 function bindPageInputs(p){
   if(p.name==='pw'){
-    $('#pwd').oninput=function(){pwSt.ward=this.value};$('#pws').oninput=function(){pwSt.own=this.value.trim();if(pwSt.own)pwSt.slug=''};
+    $('#pwd').oninput=function(){pwSt.ward=this.value};var ps=$('#pws');if(ps)ps.oninput=function(){pwSt.own=this.value.trim();if(pwSt.own)pwSt.slug=''};
   }else if(p.name==='cd'){
     $('#cn').oninput=function(){cdSt.name=this.value};
   }else if(p.name==='watch'){
@@ -1748,7 +1750,8 @@ var ACT={
   pwtoggle:function(){V.pw.open=!V.pw.open;render();if(V.pw.open)autoPw()},
   pwadd:function(){openPage('pw',null)},
   pwedit:function(t){openPage('pw',t.dataset.id)},
-  pwdist:function(t){pwSt.slug=t.dataset.v;pwSt.own='';renderPage()},
+  pwdist:function(t){pwSt.slug=t.dataset.v;pwSt.own='';if(t.dataset.v==='thanh-pho-phu-quoc')pwSt.other=false;renderPage()},
+  pwother:function(){pwSt.other=true;pwSt.slug='';renderPage()},
   pwward:function(t){pwSt.ward=t.dataset.v;renderPage()},
   pwkp:function(t){pwSt.kp=t.dataset.v;renderPage()},
   pwnow:function(){L.pwAt=0;fetchPw()},

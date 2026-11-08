@@ -267,7 +267,7 @@ h3,h4{font-size:14.5px}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.62 (08/11/2026)';
+var APP_VER='1.63 (08/11/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -732,7 +732,7 @@ function pgPwList(){
     h+='<div class="fbar"><span></span><button class="ghost" data-a="pwnow">'+(PWST.busy?'Đang lấy…':'↻ Cập nhật')+'</button></div><div class="mut" style="margin-top:10px;text-align:center">'+(L.pwErr?'<span class="chi nerr">'+esc(L.pwErr)+'</span>':pwAtTxt())+'</div>';
     h+='<div class="mut" style="margin-top:8px;font-size:12px">Dữ liệu tổng hợp từ lichcupdien.app (nguồn các công ty điện lực), chỉ để tham khảo. App khớp theo từ khóa trong chữ "Khu vực" nên có thể sót hoặc báo thừa; nếu không ghi số khu phố thì tính cả phường/xã đó.</div>';
   }
-  return h+'</div><div class="mut" style="margin:4px 4px 0;font-size:13px">'+bulbI()+'Thông báo cúp điện sẽ được ghi chú tại phần <b>Lịch</b> bằng ký hiệu "bóng đèn gạch chéo" vào ngày có lịch cúp điện tại vị trí bạn đã thiết lập.</div>';
+  return h+'</div><div class="mut" style="margin:4px 4px 0;font-size:13px">Thông báo cúp điện sẽ được ghi chú tại mục <b>Lịch</b>, ký hiệu '+bulbI()+' vào ngày có lịch cúp điện tại vị trí bạn đã thiết lập.</div>';
 }
 function pgPw(){
   var s=pwSt,sl=pwSlug(),pv=s.prov||pwProvOf(sl)||'an-giang',P=PW34.filter(function(x){return x[0]===pv})[0]||PW34[0],pq=sl==='thanh-pho-phu-quoc';
@@ -857,7 +857,7 @@ function donut(g){
   if(!g.total)return '<div class="empty">Chưa có dữ liệu</div>';
   var R=70,C=2*Math.PI*R,off=0,s='';
   g.list.forEach(function(x){var l=C*x.v/g.total;s+='<circle r="'+R+'" cx="100" cy="100" fill="none" stroke="'+x.c.color+'" stroke-width="38" stroke-dasharray="'+l+' '+(C-l)+'" stroke-dashoffset="'+(-off)+'" transform="rotate(-90 100 100)"/>';off+=l});
-  return '<svg viewBox="0 0 200 200" width="220" style="display:block;margin:0 auto">'+s+''+(g.cc?'<text x="100" y="108" text-anchor="middle" font-size="19" font-weight="700" fill="'+g.cc+'">'+g.cv+'</text>':'<text x="100" y="97" text-anchor="middle" font-size="11" fill="#6b7280">Tổng</text><text x="100" y="114" text-anchor="middle" font-size="13" font-weight="700">'+fmtShort(g.total)+'</text>')+'</svg>';
+  return '<svg viewBox="0 0 200 200" width="154" style="display:block;margin:0 auto">'+s+''+(g.cc?'<text x="100" y="109" text-anchor="middle" font-size="25" font-weight="700" fill="'+g.cc+'">'+g.cv+'</text>':'<text x="100" y="95" text-anchor="middle" font-size="15" fill="#6b7280">Tổng</text><text x="100" y="117" text-anchor="middle" font-size="18" font-weight="700">'+fmtShort(g.total)+'</text>')+'</svg>';
 }
 function repHTML(){
   var r=V.rep,lb=periodLabel();
@@ -935,7 +935,7 @@ function sector(cx,cy,r1,r2,a0,a1){
   return 'M'+P(r2,t0)+' A'+r2+' '+r2+' 0 '+lg+' 1 '+P(r2,t1)+' L'+P(r1,t1)+' A'+r1+' '+r1+' 0 '+lg+' 0 '+P(r1,t0)+' Z';
 }
 function statDonut(list,tot,lbl){
-  var cx=180,cy=165,r1=44,r2=106,rm=(r1+r2)/2,f=0,s='',t='';
+  var cx=180,cy=125,r1=31,r2=74,rm=(r1+r2)/2,f=0,s='',t='';
   list.forEach(function(x){
     var sh=x.v/tot,pc=(x.v/x.cost-1)*100;
     s+=list.length===1?'<circle cx="'+cx+'" cy="'+cy+'" r="'+rm+'" fill="none" stroke="'+x.color+'" stroke-width="'+(r2-r1)+'"/>':'<path d="'+sector(cx,cy,r1,r2,f,f+sh)+'" fill="'+x.color+'" stroke="#fff" stroke-width="2"/>';
@@ -946,7 +946,7 @@ function statDonut(list,tot,lbl){
     t+='<text x="'+X+'" y="'+y0.toFixed(1)+'" text-anchor="'+anc+'" font-size="10.5" fill="'+x.color+'"><tspan x="'+X+'" font-weight="700">'+esc(x.code)+'</tspan><tspan x="'+X+'" dy="12">'+fmtN(sh*100,1)+'%</tspan><tspan x="'+X+'" dy="12">'+l3+'</tspan></text>';
     f+=sh;
   });
-  return '<svg viewBox="0 0 360 330" width="100%" style="display:block;max-width:380px;margin:0 auto" role="img" aria-label="Biểu đồ tròn tỷ trọng '+(lbl||'chứng chỉ quỹ')+'">'+s+t+'</svg>';
+  return '<svg viewBox="0 0 360 250" width="100%" style="display:block;max-width:380px;margin:0 auto" role="img" aria-label="Biểu đồ tròn tỷ trọng '+(lbl||'chứng chỉ quỹ')+'">'+s+t+'</svg>';
 }
 function fundInfo(fs){
   var m={},tot=0,order=[];

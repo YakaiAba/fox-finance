@@ -211,6 +211,38 @@ svg text{font-family:inherit}
 .ih{font-size:12px;color:var(--mut);padding:6px 0;border-bottom:1px solid var(--line)}
 .ir{padding:11px 0;border-bottom:1px solid var(--line);font-size:13.5px}
 .ig>:first-child{text-align:left}.ir>:first-child{font-weight:700;color:var(--navy);overflow-wrap:anywhere}
+
+/* giao diện gọn (1.61) */
+main{padding:10px 12px 20px}
+.seg{margin-bottom:10px}
+.row{padding:6px 0}
+.fld{padding:7px 4px;font-size:14.5px}
+.fld.big{font-size:22px;padding:6px 12px}
+.nt{padding:8px 10px}
+.grid{gap:7px}
+.cb{min-height:64px;padding:6px 2px}.cb span.e{font-size:22px}
+nav button{padding:4px 0}
+html,body{font-size:15px}
+.card{padding:11px;margin-bottom:10px;border-radius:13px}
+.primary{padding:10px 14px;margin-top:12px;font-size:15px}
+.primary.sm{padding:7px 14px;font-size:14px}
+.ghost{padding:8px 12px;margin-top:8px;font-size:14px}
+.fbar .ghost{padding:7px 12px;font-size:13.5px}
+.pf{padding:6px 14px calc(env(safe-area-inset-bottom) + 6px)}
+.pf button{padding:9px;font-size:15px}
+.ph{padding:calc(env(safe-area-inset-top) + 4px) 8px 4px}
+.ph button{font-size:26px;height:32px}
+#ptt{font-size:16px}
+.pb{padding:10px 12px 20px}
+.li{padding:10px 4px;gap:9px}.li i{font-size:18px}
+.inp{padding:8px 10px}
+label.l{margin:10px 0 3px;font-size:13.5px}
+.seg button{padding:6px 6px;font-size:14px}
+.chips button{padding:5px 11px;font-size:13.5px}
+.sec{font-size:15px;margin:14px 2px 6px}
+h3,h4{font-size:14.5px}
+.fd .bt2 button{padding:7px}
+.ckk b{font-size:15px}
 </style>
 </head>
 <body>
@@ -235,7 +267,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.60 (08/11/2026)';
+var APP_VER='1.61 (08/11/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -675,15 +707,15 @@ function dtTxt(t){var d=new Date(t),p=function(n){return ('0'+n).slice(-2)};retu
 function pgCk(){
   var s=ckSt,seg=function(k,v,t){return '<button data-a="ckseg" data-ck="'+k+'" data-v="'+v+'" class="'+(s[k]===v?'on':'')+'">'+t+'</button>'};
   var h='<div class="card"><label class="l" style="margin-top:0" for="cka">Số tiền đầu tư (đ) <span class="chi">*</span></label><input class="inp" id="cka" inputmode="decimal" autocomplete="off" placeholder="Ví dụ: 100.000.000" value="'+esc(s.amt)+'"><small class="mut">Số tiền ban đầu bạn đầu tư.</small>'
-   +'<label class="l" for="ckb">Số tiền bổ sung (đ, không bắt buộc)</label><div style="display:flex;gap:8px;align-items:center"><input class="inp" id="ckb" inputmode="decimal" autocomplete="off" placeholder="Ví dụ: 5.000.000" value="'+esc(s.add)+'" style="flex:1;min-width:0"><div class="seg" style="margin:0;flex:none;width:140px">'+seg('addU','m','Tháng')+seg('addU','y','Năm')+'</div></div><small class="mut">Số tiền góp thêm sau mỗi tháng/năm (góp vào đầu kỳ kế tiếp).</small>'
+   +'<label class="l" for="ckb">Số tiền bổ sung (đ, không bắt buộc)</label><div style="display:flex;gap:8px;align-items:center"><input class="inp" id="ckb" inputmode="decimal" autocomplete="off" placeholder="Ví dụ: 5.000.000" value="'+esc(s.add)+'" style="flex:1;min-width:0"><div class="seg" style="margin:0;flex:none;width:140px">'+seg('addU','m','Tháng')+seg('addU','y','Năm')+'</div></div><small class="mut">Số tiền sau mỗi khoảng thời gian sẽ đầu tư thêm, được góp vào đầu kỳ kế tiếp.</small>'
    +'<label class="l" for="ckn">Thời gian cần tính <span class="chi">*</span></label><div style="display:flex;gap:8px;align-items:center"><input class="inp" id="ckn" inputmode="numeric" autocomplete="off" placeholder="Ví dụ: 10" value="'+esc(s.n)+'" style="flex:1;min-width:0"><div class="seg" style="margin:0;flex:none;width:140px">'+seg('nU','m','Tháng')+seg('nU','y','Năm')+'</div></div>'
    +'<label class="l" for="ckr">Lợi nhuận (%/'+(s.nU==='y'?'năm':'tháng')+') <span class="chi">*</span></label><input class="inp" id="ckr" inputmode="decimal" autocomplete="off" placeholder="Ví dụ: '+(s.nU==='y'?'10':'0,8')+'" value="'+esc(s.r)+'"><small class="mut">Mức lợi nhuận bạn kỳ vọng, tính theo đơn vị thời gian đã chọn.</small>'
-   +'<div class="fbar" style="margin-top:12px"><button class="primary" data-a="ckrun" style="flex:1;margin:0">Xem kết quả</button><button class="ghost" data-a="ckhist" style="flex:1;margin:0">Xem lịch sử'+((L.ck||[]).length?' ('+L.ck.length+')':'')+'</button></div></div>';
+   +'<div class="fbar" style="margin-top:12px"><button class="primary" data-a="ckrun" style="flex:1;margin:0;white-space:nowrap">Xem kết quả</button><button class="ghost" data-a="ckhist" style="flex:1;margin:0;white-space:nowrap;padding:9px 12px;font-size:14px">Xem lịch sử'+((L.ck||[]).length?' ('+L.ck.length+')':'')+'</button></div></div>';
   if(s.view==='res')h+=ckResHTML();else if(s.view==='hist')h+=ckHistHTML();
   return h;
 }
 function pgPwList(){
-  var h='<div class="fbar" style="margin:0 0 10px"><span class="mut">Lịch cúp điện vẫn hiện trên tab Lịch (bóng đèn gạch chéo).</span><button class="ghost" data-a="pwadd" style="width:auto;margin:0;padding:7px 14px;font-size:14px;white-space:nowrap">＋ Thêm vị trí</button></div>';
+  var h='<div class="fbar" style="margin:0 0 10px"><span></span><button class="ghost" data-a="pwadd">＋ Thêm vị trí</button></div>';
   var locs=pwLocs(),idx=pwIdx(),t=today();
   h+='<div class="card">';
   if(!locs.length)h+='<div class="empty">Chưa có vị trí. Bấm Thêm vị trí.</div>';
@@ -697,7 +729,7 @@ function pgPwList(){
     h+='<div class="fbar"><span></span><button class="ghost" data-a="pwnow">'+(PWST.busy?'Đang lấy…':'↻ Cập nhật')+'</button></div><div class="mut" style="margin-top:10px;text-align:center">'+(L.pwErr?'<span class="chi nerr">'+esc(L.pwErr)+'</span>':pwAtTxt())+'</div>';
     h+='<div class="mut" style="margin-top:8px;font-size:12px">Dữ liệu tổng hợp từ lichcupdien.app (nguồn các công ty điện lực), chỉ để tham khảo. App khớp theo từ khóa trong chữ "Khu vực" nên có thể sót hoặc báo thừa; nếu không ghi số khu phố thì tính cả phường/xã đó.</div>';
   }
-  return h+'</div>';
+  return h+'</div><div class="mut" style="margin:4px 4px 0;font-size:13px">'+bulbI()+'Thông báo cúp điện sẽ được ghi chú tại phần <b>Lịch</b> bằng ký hiệu "bóng đèn gạch chéo" vào ngày có lịch cúp điện tại vị trí bạn đã thiết lập.</div>';
 }
 function pgPw(){
   var s=pwSt,sl=pwSlug(),pv=s.prov||pwProvOf(sl)||'an-giang',P=PW34.filter(function(x){return x[0]===pv})[0]||PW34[0],pq=sl==='thanh-pho-phu-quoc';

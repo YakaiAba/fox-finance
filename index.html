@@ -133,6 +133,8 @@ textarea.nt{display:block;width:100%;resize:vertical;line-height:1.35}
 .inp{width:100%;border:1px solid #cfd3da;border-radius:10px;padding:10px;background:#fff}
 label.l{display:block;font-weight:600;margin:12px 0 4px;font-size:14px}
 .chips{display:flex;gap:6px;margin:8px 0}
+.ckk{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}.ckk>div{background:var(--bg,#f4f4f6);border-radius:12px;padding:10px}.ckk small{display:block;color:var(--mut);font-size:12px}.ckk b{display:block;font-size:16px;margin-top:2px;word-break:break-word}
+.fr.ckm span{color:#555}.fr.ckm span:first-child{white-space:nowrap;font-weight:500}.fr.cky span:first-child{white-space:nowrap}.li .bli{width:22px;height:22px;vertical-align:middle;margin:0}
 .bli{display:inline-block;width:20px;height:20px;vertical-align:-4px;margin-right:4px}.bli svg{width:100%;height:100%;display:block}
 .chips button{padding:6px 12px;border-radius:999px;background:#e9ebf0;font-size:14px}
 .chips button.on{background:var(--navy);color:#fff}
@@ -233,7 +235,7 @@ svg text{font-family:inherit}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.59 (07/11/2026)';
+var APP_VER='1.60 (08/11/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -607,11 +609,81 @@ function fetchPw(){
       else errs.push(pwDist(sl)+': '+(j.err&&j.err.indexOf('power')<0?j.err:'Cần cập nhật GiaQuy.gs lên bản mới (Triển khai > Phiên bản mới)'));
     }).catch(function(){clearTimeout(to);errs.push(pwDist(sl)+': không kết nối được máy chủ')});
   })).then(function(){
-    if(okn)L.pwOk=Date.now();L.pwErr=errs.join(' · ');PWST.busy=false;saveL();if(tab==='cal'&&!pages.length)render()});
+    if(okn)L.pwOk=Date.now();L.pwErr=errs.join(' · ');PWST.busy=false;saveL();var tp=pages[pages.length-1];if((tab==='cal'&&!pages.length)||(tp&&tp.name==='pwlist'))render()});
 }
-function pwHTML(){
-  var o=V.pw.open,h='<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin:18px 2px 8px"><button class="sec tg" data-a="pwtoggle" style="margin:0;padding:0;flex:1;width:auto"><span>Lịch cúp điện</span><i>'+(o?'▴':'▾')+'</i></button>'+(o?'<button class="ghost" data-a="pwadd" style="width:auto;margin:0;padding:7px 14px;font-size:14px;white-space:nowrap">＋ Thêm vị trí</button>':'')+'</div>';
-  if(!o)return h;
+
+/* ---------- Lãi kép ---------- */
+var ckSt={amt:'',add:'',addU:'m',n:'',nU:'y',r:'',view:'',res:null,open:{}};
+function ckCalc(inp){
+  var N=inp.nU==='y'?inp.n*12:inp.n,i=inp.nU==='y'?Math.pow(1+inp.r/100,1/12)-1:inp.r/100,bal=inp.amt,ctb=inp.amt,rows=[],tInt=0;
+  for(var k=1;k<=N;k++){
+    var ad=0;
+    if(k>1&&inp.add>0&&(inp.addU==='m'||(k-1)%12===0)){ad=inp.add;bal+=ad;ctb+=ad}
+    var it=bal*i;bal+=it;tInt+=it;
+    rows.push({k:k,add:ad,it:it,bal:bal,ctb:ctb});
+  }
+  return {rows:rows,bal:bal,ctb:ctb,int:bal-ctb};
+}
+function ckInp(){
+  var s=ckSt;return {amt:parseNum(s.amt),add:parseNum(s.add),addU:s.addU,n:parseInt(String(s.n).replace(/\D/g,''),10)||0,nU:s.nU,r:parseNum(s.r),rRaw:String(s.r).trim()};
+}
+function ckDesc(x){return fmt(x.amt)+'đ · '+(x.add>0?'+'+fmt(x.add)+'đ/'+(x.addU==='m'?'tháng':'năm')+' · ':'')+x.n+' '+(x.nU==='y'?'năm':'tháng')+' · '+fmtQ(x.r)+'%/'+(x.nU==='y'?'năm':'tháng')}
+function ckChart(rows,amt){
+  var W=340,H=170,pl=8,pr=8,pt=12,pb=22,n=rows.length,mx=0;
+  rows.forEach(function(r){if(r.bal>mx)mx=r.bal});if(!mx)return '';
+  var X=function(k){return pl+(W-pl-pr)*(k/Math.max(n,1))},Y=function(v){return pt+(H-pt-pb)*(1-v/mx)};
+  var pts=[[0,amt,amt]].concat(rows.map(function(r){return [r.k,r.bal,r.ctb]}));
+  var step=Math.max(1,Math.floor(pts.length/160)),sel=pts.filter(function(p,j){return j%step===0||j===pts.length-1});
+  var lb=sel.map(function(p){return X(p[0]).toFixed(1)+','+Y(p[1]).toFixed(1)}).join(' '),lc=sel.map(function(p){return X(p[0]).toFixed(1)+','+Y(p[2]).toFixed(1)}).join(' ');
+  var unitY=ckSt.res&&ckSt.res.inp.nU==='y',endL=unitY?(n/12)+' năm':n+' tháng';
+  return '<div class="ckc"><div class="mut" style="font-size:13px;margin-bottom:4px">Số dư và vốn góp theo thời gian (đ)</div><svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto" role="img" aria-label="Biểu đồ số dư theo thời gian">'
+   +'<line x1="'+pl+'" y1="'+Y(0)+'" x2="'+(W-pr)+'" y2="'+Y(0)+'" stroke="#ddd"/><line x1="'+pl+'" y1="'+Y(mx)+'" x2="'+(W-pr)+'" y2="'+Y(mx)+'" stroke="#eee" stroke-dasharray="3 3"/>'
+   +'<polyline points="'+lc+'" fill="none" stroke="#9aa3b2" stroke-width="2" stroke-dasharray="5 4"/><polyline points="'+lb+'" fill="none" stroke="#2e7d32" stroke-width="2.5" stroke-linejoin="round"/>'
+   +'<text x="'+pl+'" y="'+(H-6)+'" font-size="11" fill="#777">Bắt đầu</text><text x="'+(W-pr)+'" y="'+(H-6)+'" font-size="11" fill="#777" text-anchor="end">'+endL+'</text><text x="'+(W-pr)+'" y="'+(Y(mx)-3)+'" font-size="11" fill="#777" text-anchor="end">'+fmt(mx)+'</text></svg>'
+   +'<div style="display:flex;gap:14px;font-size:12px;color:#666"><span><i style="display:inline-block;width:14px;height:3px;background:#2e7d32;vertical-align:middle"></i> Số dư</span><span><i style="display:inline-block;width:14px;height:0;border-top:2px dashed #9aa3b2;vertical-align:middle"></i> Vốn góp</span></div></div>';
+}
+function ckG(){return innerWidth<360?'grid-template-columns:minmax(0,.9fr) minmax(0,1.12fr) minmax(0,1.12fr) minmax(0,1.4fr);gap:2px;font-size:11px':'grid-template-columns:minmax(0,1.1fr) minmax(0,1.3fr) minmax(0,1.15fr) minmax(0,1.5fr);gap:4px;font-size:12px'}
+function ckML(k){return (innerWidth<360?'T':'Tháng ')+k}
+function ckRow(lb,ad,it,bal,cls,attr){return '<'+(attr?'button':'div')+' class="fr'+(cls||'')+'" style="'+ckG()+(attr?'':';cursor:default')+'"'+(attr||'')+'><span>'+lb+'</span><span>'+(ad?fmt(ad):'—')+'</span><span class="thu">'+(it?fmt(it):'0')+'</span><span><b>'+fmt(bal)+'</b></span></'+(attr?'button':'div')+'>'}
+function ckResHTML(){
+  var R=ckSt.res;if(!R)return '';
+  var x=R.inp,c=R.c,pc=c.ctb?c.int/c.ctb*100:0,h='<div class="card"><h3 style="margin:0 0 8px">Kết quả</h3><div class="mut" style="font-size:13px">'+esc(ckDesc(x))+'</div>'
+   +'<div class="ckk"><div><small>Số dư cuối kỳ</small><b>'+fmt(c.bal)+'đ</b></div><div><small>Tổng vốn góp</small><b>'+fmt(c.ctb)+'đ</b></div><div><small>Tổng lợi nhuận</small><b class="thu">'+(c.int>=0?'+':'')+fmt(c.int)+'đ</b></div><div><small>Lợi nhuận / vốn</small><b class="thu">'+(pc>=0?'+':'')+fmtN(pc,2)+'%</b></div></div>'
+   +ckChart(c.rows,x.amt)
+   +'<div class="fh" style="'+ckG()+';margin-top:10px"><span>'+(x.nU==='y'?'Năm / tháng':'Tháng')+'</span><span>Góp thêm</span><span>Lãi</span><span>Số dư</span></div>';
+  if(x.nU==='y'){
+    for(var y=0;y<x.n;y++){
+      var rs=c.rows.slice(y*12,y*12+12),ad=0,it=0;rs.forEach(function(r){ad+=r.add;it+=r.it});
+      var op=!!ckSt.open[y+1];
+      h+=ckRow('<b>Năm '+(y+1)+'</b><i class="ar">'+(op?'▴':'▾')+'</i>',ad,it,rs[rs.length-1].bal,' cky'+(op?' on':''),' data-a="ckyear" data-y="'+(y+1)+'"');
+      if(op)rs.forEach(function(r){h+=ckRow(ckML((r.k-1)%12+1),r.add,r.it,r.bal,' ckm')});
+    }
+    h+='<div class="mut" style="margin-top:6px;font-size:12px">Bấm vào từng năm để xem kết quả mỗi tháng. Dòng năm là tổng góp thêm và tổng lãi trong năm, số dư cuối năm.</div>';
+  }else c.rows.forEach(function(r){h+=ckRow(ckML(r.k),r.add,r.it,r.bal)});
+  h+='<div class="mut" style="margin-top:8px;font-size:12px">Cách tính: lãi '+(x.nU==='y'?'%/năm, quy đổi ra lãi tháng tương đương để cộng dồn mỗi tháng (cả năm đúng bằng '+fmtQ(x.r)+'%)':'%/tháng, cộng vào gốc mỗi tháng')+'; tiền bổ sung góp vào đầu mỗi kỳ kế tiếp (từ '+(x.addU==='m'?'tháng 2':'năm 2')+') và sinh lãi từ kỳ đó. Chỉ là ước tính theo mức lợi nhuận bạn nhập, không phải dự báo hay tư vấn đầu tư.</div></div>';
+  return h;
+}
+function ckHistHTML(){
+  var hs=L.ck||[],h='<div class="card"><h3 style="margin:0 0 8px">Lịch sử tính ('+hs.length+'/10)</h3>';
+  if(!hs.length)return h+'<div class="empty">Chưa có lịch sử</div></div>';
+  hs.forEach(function(e){
+    h+='<div class="pwr" style="display:flex;align-items:center;gap:8px"><button data-a="ckload" data-id="'+e.id+'" style="flex:1;text-align:left;min-width:0"><small style="margin:0">'+dtTxt(e.t)+'</small><span style="display:block;font-size:14px">'+esc(ckDesc(e.inp))+'</span><b style="display:block">→ '+fmt(e.bal)+'đ</b></button><button class="ghost red" data-a="ckdel" data-id="'+e.id+'" style="width:auto;margin:0;padding:6px 12px;font-size:14px">Xóa</button></div>';
+  });
+  return h+'</div>';
+}
+function dtTxt(t){var d=new Date(t),p=function(n){return ('0'+n).slice(-2)};return p(d.getHours())+':'+p(d.getMinutes())+' '+p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()}
+function pgCk(){
+  var s=ckSt,seg=function(k,v,t){return '<button data-a="ckseg" data-ck="'+k+'" data-v="'+v+'" class="'+(s[k]===v?'on':'')+'">'+t+'</button>'};
+  var h='<div class="card"><label class="l" style="margin-top:0" for="cka">Số tiền đầu tư (đ) <span class="chi">*</span></label><input class="inp" id="cka" inputmode="decimal" autocomplete="off" placeholder="Ví dụ: 100.000.000" value="'+esc(s.amt)+'"><small class="mut">Số tiền ban đầu bạn đầu tư.</small>'
+   +'<label class="l" for="ckb">Số tiền bổ sung (đ, không bắt buộc)</label><div style="display:flex;gap:8px;align-items:center"><input class="inp" id="ckb" inputmode="decimal" autocomplete="off" placeholder="Ví dụ: 5.000.000" value="'+esc(s.add)+'" style="flex:1;min-width:0"><div class="seg" style="margin:0;flex:none;width:140px">'+seg('addU','m','Tháng')+seg('addU','y','Năm')+'</div></div><small class="mut">Số tiền góp thêm sau mỗi tháng/năm (góp vào đầu kỳ kế tiếp).</small>'
+   +'<label class="l" for="ckn">Thời gian cần tính <span class="chi">*</span></label><div style="display:flex;gap:8px;align-items:center"><input class="inp" id="ckn" inputmode="numeric" autocomplete="off" placeholder="Ví dụ: 10" value="'+esc(s.n)+'" style="flex:1;min-width:0"><div class="seg" style="margin:0;flex:none;width:140px">'+seg('nU','m','Tháng')+seg('nU','y','Năm')+'</div></div>'
+   +'<label class="l" for="ckr">Lợi nhuận (%/'+(s.nU==='y'?'năm':'tháng')+') <span class="chi">*</span></label><input class="inp" id="ckr" inputmode="decimal" autocomplete="off" placeholder="Ví dụ: '+(s.nU==='y'?'10':'0,8')+'" value="'+esc(s.r)+'"><small class="mut">Mức lợi nhuận bạn kỳ vọng, tính theo đơn vị thời gian đã chọn.</small>'
+   +'<div class="fbar" style="margin-top:12px"><button class="primary" data-a="ckrun" style="flex:1;margin:0">Xem kết quả</button><button class="ghost" data-a="ckhist" style="flex:1;margin:0">Xem lịch sử'+((L.ck||[]).length?' ('+L.ck.length+')':'')+'</button></div></div>';
+  if(s.view==='res')h+=ckResHTML();else if(s.view==='hist')h+=ckHistHTML();
+  return h;
+}
+function pgPwList(){
+  var h='<div class="fbar" style="margin:0 0 10px"><span class="mut">Lịch cúp điện vẫn hiện trên tab Lịch (bóng đèn gạch chéo).</span><button class="ghost" data-a="pwadd" style="width:auto;margin:0;padding:7px 14px;font-size:14px;white-space:nowrap">＋ Thêm vị trí</button></div>';
   var locs=pwLocs(),idx=pwIdx(),t=today();
   h+='<div class="card">';
   if(!locs.length)h+='<div class="empty">Chưa có vị trí. Bấm Thêm vị trí.</div>';
@@ -700,7 +772,7 @@ function calHTML(){
   h+='</div>';
   var mp=c.y+'-'+pad(c.m),th=sumE(function(e){return e.type==='thu'&&e.date.slice(0,7)===mp}),ch=sumE(function(e){return e.type==='chi'&&e.date.slice(0,7)===mp});
   h+='<div class="sum" style="margin-top:10px"><div>Thu nhập<b class="thu">'+(th?'+':'')+money(th)+'</b></div><div>Chi tiêu<b class="chi">'+(ch?'-':'')+money(ch)+'</b></div></div><div class="card" style="padding:6px 12px"><div class="tot" style="padding:6px 0"><span>Tổng tiền mặt</span><b class="'+(th-ch>=0?'thu':'chi')+'">'+(th-ch>=0?'+':'-')+money(Math.abs(th-ch))+'</b></div></div>';
-  return h+cdHTML()+pwHTML();
+  return h+cdHTML();
 }
 
 /* Báo cáo */
@@ -1017,13 +1089,13 @@ function moreHTML(){
   var bk=backupInfo(),h='';
   h+='<div class="'+(bk.bad?'warn':'ok')+'">'+(bk.bad?'⚠ ':'✓ ')+bk.txt+'</div>';
   h+='<div class="card"><button class="li" data-a="pg" data-p="basic"><i>⚙️</i><span>Cài đặt</span></button><button class="li" data-a="pg" data-p="secu"><i>🔒</i><span>Bảo mật ứng dụng</span><em>'+(lkSet()?'Đã thiết lập':'Chưa thiết lập')+'</em></button></div>';
-  h+='<div class="card"><button class="li" data-a="pg" data-p="search"><i>🔍</i><span>Tìm kiếm giao dịch</span></button><button class="li" data-a="pg" data-p="balance"><i>📈</i><span>Báo cáo biến động số dư</span></button></div>';
+  h+='<div class="card"><button class="li" data-a="pg" data-p="pwlist"><i>'+bulbI()+'</i><span>Lịch cúp điện</span><em>'+pwLocs().length+' vị trí</em></button><button class="li" data-a="pg" data-p="ck"><i>💹</i><span>Lãi kép</span></button><button class="li" data-a="pg" data-p="search"><i>🔍</i><span>Tìm kiếm giao dịch</span></button><button class="li" data-a="pg" data-p="balance"><i>📈</i><span>Báo cáo biến động số dư</span></button></div>';
   h+='<div class="card"><button class="li" data-a="pg" data-p="sync"><i>☁️</i><span>Đồng bộ Google Sheets</span><em>'+(S.url?esc(SYN.msg||''):'Chưa bật')+'</em></button><button class="li" data-a="pg" data-p="backup"><i>💾</i><span>Sao lưu dữ liệu</span></button><button class="li" data-a="pg" data-p="help"><i>📖</i><span>Hướng dẫn sử dụng</span></button><button class="li" data-a="pg" data-p="about"><i>ℹ️</i><span>Thông tin ứng dụng</span></button></div>';
   return h;
 }
 
 /* ---------- trang riêng ---------- */
-var PTITLE={secu:'Bảo mật ứng dụng',inv:'Tài sản',edit:'Chỉnh sửa',cats:'Danh mục thu chi',basic:'Cài đặt',sync:'Đồng bộ Google Sheets',balance:'Báo cáo biến động số dư',search:'Tìm kiếm giao dịch',fundrep:'Báo cáo biến động chứng chỉ quỹ',backup:'Sao lưu dữ liệu',about:'Thông tin ứng dụng',catlist:'Chi tiết danh mục',fund:'Mã quỹ',watch:'Chờ đợi giá',pw:'Vị trí',cd:'Sự kiện',cdsug:'Ngày lễ gợi ý',help:'Hướng dẫn sử dụng'};
+var PTITLE={secu:'Bảo mật ứng dụng',inv:'Tài sản',edit:'Chỉnh sửa',cats:'Danh mục thu chi',basic:'Cài đặt',sync:'Đồng bộ Google Sheets',balance:'Báo cáo biến động số dư',search:'Tìm kiếm giao dịch',pwlist:'Lịch cúp điện',ck:'Lãi kép',fundrep:'Báo cáo biến động chứng chỉ quỹ',backup:'Sao lưu dữ liệu',about:'Thông tin ứng dụng',catlist:'Chi tiết danh mục',fund:'Mã quỹ',watch:'Chờ đợi giá',pw:'Vị trí',cd:'Sự kiện',cdsug:'Ngày lễ gợi ý',help:'Hướng dẫn sử dụng'};
 function openPage(name,arg){
   if(name==='edit'){
     var e=D.entries.find(function(x){return x.id===arg});if(!e)return;
@@ -1069,11 +1141,12 @@ function renderPage(){
   $('#ptt').textContent=p.name==='catlist'?cat(p.arg).name:p.name==='fund'?(fundSt.id?'Sửa mã quỹ':'Thêm mã quỹ'):p.name==='inv'?(invSt.cat==='saving'?(invSt.id?'Sửa khoản gửi':'Thêm khoản gửi'):(invSt.id?'Sửa tài sản':'Thêm tài sản')):p.name==='watch'?(watchSt.id?'Sửa mã chờ giá':'Thêm mã chờ giá'):p.name==='cd'?(cdSt.id?'Sửa sự kiện':'Thêm sự kiện'):p.name==='pw'?(pwSt.id?'Sửa vị trí':'Thêm vị trí'):PTITLE[p.name];
   $('#pexit').textContent=SETP[p.name]?'Lưu lại & Thoát':'Thoát';
   var b=$('#pbody'),top=b.scrollTop;
-  var fn={edit:pgEdit,cats:pgCats,basic:pgBasic,sync:pgSync,balance:pgBalance,search:pgSearch,fundrep:pgFundRep,inv:pgInv,secu:pgSecu,backup:pgBackup,about:pgAbout,catlist:pgCatList,fund:pgFund,watch:pgWatch,cd:pgCd,pw:pgPw,cdsug:pgCdSug,help:pgHelp}[p.name];
+  var fn={edit:pgEdit,cats:pgCats,basic:pgBasic,sync:pgSync,balance:pgBalance,search:pgSearch,fundrep:pgFundRep,inv:pgInv,secu:pgSecu,backup:pgBackup,about:pgAbout,catlist:pgCatList,fund:pgFund,watch:pgWatch,cd:pgCd,pw:pgPw,pwlist:pgPwList,ck:pgCk,cdsug:pgCdSug,help:pgHelp}[p.name];
   b.innerHTML=fn(p);
   b.scrollTop=top;
   if(p.name==='fundrep')fitCal();
-  if(p.name==='basic'||p.name==='sync'||p.name==='search'||p.name==='fund'||p.name==='watch'||p.name==='cd'||p.name==='inv'||p.name==='pw')bindPageInputs(p);
+  if(p.name==='basic'||p.name==='sync'||p.name==='search'||p.name==='fund'||p.name==='watch'||p.name==='cd'||p.name==='inv'||p.name==='pw'||p.name==='ck')bindPageInputs(p);
+  if(p.name==='pwlist')autoPw();
 }
 function pgEdit(p){
   if(!D.entries.find(function(x){return x.id===editSt.id&&!x.deleted})){setTimeout(closePage,0);return ''}
@@ -1500,6 +1573,7 @@ function pgHelp(){
   return sec('Ghi thu chi',['Tab <b>Thu chi</b>: bấm <b>Thu nhập</b> hoặc <b>Chi tiêu</b>, bấm ô số tiền để mở bàn phím tính (có + − × ÷, nút 000), chọn danh mục, ghi chú nếu cần rồi bấm Lưu.','Đổi ngày bằng ô ngày; chọn ngày/tháng/năm trong hộp hiện ra.','Sửa hoặc xóa: tab <b>Lịch</b> → bấm vào khoản.'])
   +sec('Xem lại',['<b>Lịch</b>: ô ngày hiện ⭐️ nếu có sự kiện, dòng đỏ là tổng chi, dòng xanh là tổng thu của ngày đó (rút gọn: 517.000đ = 517k, 1.008.000đ = 1,008tr). Bấm vào một ngày để mở khung chi tiết ngay dưới tuần đó (thu chi và sự kiện của ngày); bấm lại hoặc bấm Đóng để thu gọn.','<b>Danh sách sự kiện</b> (dưới lịch): bấm <b>+ Ngày lễ gợi ý</b> để thêm các ngày lễ còn lại trong năm (âm lịch tự quy đổi), hoặc <b>+ Tạo thủ công</b> cho sinh nhật, kỷ niệm… (chọn <b>Nhắc lại</b> mỗi tuần, tháng hoặc năm thì ứng dụng tự tính lần kế tiếp) “Còn lại” hiện số ngày, từ 1 tháng trở lên hiện dạng tháng + ngày. Bấm vào dòng để sửa hoặc xóa. Sự kiện đã qua: xóa khỏi danh sách thì vẫn còn trên lịch, xóa hẳn ở khung chi tiết của ngày đó.','<b>Báo cáo</b>: xem theo Tháng / Năm / Tất cả; bấm một danh mục để xem các khoản. Nút 📷 xuất ảnh báo cáo.','<b>Ngân sách</b>: bấm vào mục để đặt hạn mức mỗi tháng.','<b>Thu chi → Danh mục → Chỉnh sửa</b>: thêm, sửa, xóa, sắp xếp danh mục.'])
   +sec('Danh mục đầu tư (cuối tab Báo cáo)',['Bấm <b>Danh mục đầu tư</b> để mở. <b>Thêm danh mục</b> rồi chọn Vàng, Tiền điện tử, Cổ phiếu & trái phiếu, Chứng chỉ quỹ, Bất động sản hoặc Khác. Bấm tên danh mục để xem tài sản bên trong; <b>Thêm tài sản</b> gồm tên, ngày mua, số lượng, giá mua (của 1 đơn vị) và mô tả. Việc tính một danh mục vào <b>Biến động tài sản</b> được bật/tắt ngay trong mục Biến động tài sản (Danh sách danh mục tài sản): Chứng chỉ quỹ mặc định Bật, các danh mục khác mặc định Tắt. Tiền gửi tiết kiệm gồm ngân hàng, ngày gửi, kỳ hạn, số tiền, lãi suất (%/năm); app ước tính giá trị hiện tại, lãi và ngày đáo hạn theo lãi đơn 365 ngày/năm. Các danh mục khác tính theo giá mua.','<b>Chứng chỉ quỹ</b>: nhập mã, số lượng, giá mua, ngày mua. Bấm vào mã để xem lời/lỗ, thời gian giữ và nhật ký giao dịch.','<b>Chờ đợi giá</b> (dưới dòng giá cập nhật): thêm mã quỹ bạn quan tâm, nhập giá đối chiếu và kỳ vọng (giảm hoặc tăng, tính bằng đ hoặc %). Cột Hiện tại cho biết giá gần nhất và tỉ lệ % so với giá đối chiếu (âm hiện đỏ). Bấm vào dòng để xem thêm <b>Còn lại</b>: giá gần nhất còn cách điểm kỳ vọng bao nhiêu; 🔔 hiện khi đã chạm điểm kỳ vọng, và ứng dụng hiện hộp nhắc khi bạn mở ứng dụng (mỗi mã một lần mỗi ngày). iOS không cho web báo ngầm khi ứng dụng đóng.','Giá gần nhất tự lấy từ fmarket (khi mở ứng dụng hoặc bấm ↻ Cập nhật giá); chưa lấy được thì nhập giá tay khi sửa mã quỹ.','<b>Báo cáo biến động chứng chỉ quỹ</b> (dưới dòng giá cập nhật): lịch theo tháng, mỗi ô là giá trị quỹ cuối ngày và chênh lệch so với hôm trước; ngày không mở ứng dụng thì dùng giá trị ngày gần nhất. Kèm nhật ký mua bán tự ghi khi thêm, sửa, xóa mã quỹ.','<b>Biến động tài sản</b> (cuối tab Báo cáo, bấm tên để mở): Tổng tài sản = Giá trị đầu tư + Tiền mặt, biểu đồ theo ngày, xem theo Tháng hoặc Năm.'])
+  +sec('Lịch cúp điện và Lãi kép (tab Khác)',['<b>Lịch cúp điện</b>: bấm <b>＋ Thêm vị trí</b>, chọn tỉnh/thành, quận/huyện cũ trên lichcupdien.app, phường/xã, rồi số khu phố hoặc gõ tên khu phố/ấp (để trống thì báo cả phường/xã). Ngày có lịch hiện bóng đèn gạch chéo trên tab <b>Lịch</b>.','<b>Lãi kép</b>: nhập số tiền đầu tư, số tiền bổ sung (nếu có, theo tháng hoặc năm), thời gian và lợi nhuận % (theo đơn vị thời gian đã chọn), bấm <b>Xem kết quả</b>. Chọn năm thì có dòng tổng mỗi năm, bấm vào để xem từng tháng. Mỗi lần tính được tự lưu, <b>Xem lịch sử</b> giữ 10 lần gần nhất trên máy này.'])
   +sec('Sao lưu JSON là gì? (quan trọng)',['Là một file lưu <b>toàn bộ dữ liệu bạn đã nhập</b>: các khoản thu chi, danh mục, ngân sách, ghi chú vàng, mã chứng chỉ quỹ, nhật ký giao dịch danh sách chờ đợi giá và danh sách sự kiện.','Không gồm cài đặt tên ứng dụng, tên máy, địa chỉ và mã bí mật đồng bộ, giá quỹ tự lấy (ứng dụng lấy lại khi cần).','Dữ liệu nằm trong máy này. Mất máy, xóa Safari hoặc <b>xóa biểu tượng trên màn hình chính</b> là mất dữ liệu nếu chưa sao lưu.','<b>Khác → Sao lưu dữ liệu</b>: xuất file lưu vào Tệp/iCloud hoặc gửi cho chính mình. Nên làm ít nhất mỗi tuần; chọn Tự động để ứng dụng nhắc.','Nhập file vào lại sẽ <b>gộp</b> với dữ liệu hiện có, không xóa gì. Đổi sang máy mới thì nhập file này.'])
   +sec('Đồng bộ Google Sheets là gì?',['Là tự động gửi dữ liệu (cùng loại như file JSON) lên một bảng Google Sheets của bạn, và nhận lại thay đổi từ máy kia. Dùng để <b>iPhone và iPad luôn giống nhau</b>, không cần xuất nhập file.','Đồng thời bảng Sheets là nơi lưu dự phòng thứ hai: có các tab dễ đọc (Thu chi, Danh mục, Tài sản…) và bản sao lưu mỗi ngày giữ 30 ngày.','Cách bật: <b>Khác → Đồng bộ Google Sheets</b>, nhập địa chỉ Apps Script và mã bí mật, hai máy dùng giống nhau.','Góc trên phải báo tình trạng: ☁ Đã lưu, ⏳ Chờ gửi, ⚠ lỗi. Mất mạng thì ứng dụng tự gửi lại khi có mạng.','Đồng bộ cũng là cách để ứng dụng tự lấy giá chứng chỉ quỹ. Cập nhật Code.gs bằng <b>Phiên bản mới</b>, không chọn Triển khai mới.'])
   +sec('Sao lưu JSON và đồng bộ khác nhau thế nào?',['<b>Đồng bộ</b>: tự động, giữ hai máy khớp nhau, nhưng xóa nhầm ở máy này sẽ lan sang máy kia.','<b>File JSON</b>: bạn tự giữ, lùi lại được về một ngày cũ. Nên dùng cả hai.']);
@@ -1555,7 +1629,10 @@ function pgAbout(){
   return '<div class="card"><div>Phiên bản: <b>'+APP_VER+'</b></div><div>Tên máy: <b>'+(esc(L.dev)||'(chưa đặt)')+'</b></div><div>Số khoản lưu trong máy: <b>'+n+'</b> (đã xóa ẩn: '+del+')</div><div>Lưu trữ bền vững: <b id="pst">…</b></div></div><div class="mut">Không xóa biểu tượng trên màn hình chính để cập nhật: biểu tượng và Safari là hai kho dữ liệu riêng, xóa biểu tượng sẽ mất dữ liệu chưa sao lưu.</div>';
 }
 function bindPageInputs(p){
-  if(p.name==='pw'){
+  if(p.name==='ck'){
+    [['cka','amt'],['ckb','add'],['ckr','r']].forEach(function(x){var el=$('#'+x[0]);el.oninput=function(ev){el.value=liveFmt(el.value,ev);ckSt[x[1]]=el.value}});
+    $('#ckn').oninput=function(){this.value=this.value.replace(/\D/g,'').slice(0,4);ckSt.n=this.value};
+  }else if(p.name==='pw'){
     $('#pwd').oninput=function(){pwSt.ward=this.value;var pp=$('#pwprev');if(pp)pp.textContent=pwPrevName()};
     $('#pwk').oninput=function(){pwSt.kp=this.value.trim();[].forEach.call(document.querySelectorAll('[data-a=pwkp]'),function(b){b.classList.toggle('on',!pwSt.kp&&b.dataset.v==='')});var pp=$('#pwprev');if(pp)pp.textContent=pwPrevName()};var ps=$('#pws');if(ps)ps.oninput=function(){pwSt.own=this.value.trim();if(pwSt.own){pwSt.slug='';[].forEach.call(document.querySelectorAll('[data-a=pwdist].on'),function(b){b.classList.remove('on')})}};
     $('#pwp').onchange=function(){pwSt.prov=this.value;if(pwSt.slug&&pwProvOf(pwSt.slug)!==this.value)pwSt.slug='';renderPage()};
@@ -1785,7 +1862,6 @@ var ACT={
     V.inv.adding=false;V.inv.cat=c;V.inv.item=null;pruneInv(c);changed()},
   invcat:function(t){var c=t.dataset.c;V.inv.cat=V.inv.cat===c?null:c;V.inv.item=null;pruneInv(V.inv.cat);refreshAssets()},
   invitem:function(t){V.inv.item=V.inv.item===t.dataset.id?null:t.dataset.id;refreshAssets()},
-  pwtoggle:function(){V.pw.open=!V.pw.open;render();if(V.pw.open)autoPw()},
   pwadd:function(){openPage('pw',null)},
   pwedit:function(t){openPage('pw',t.dataset.id)},
   pwdist:function(t){pwSt.slug=t.dataset.v;pwSt.own='';pwSt.prov=pwProvOf(t.dataset.v)||pwSt.prov;renderPage()},
@@ -1834,6 +1910,24 @@ var ACT={
   frnext:function(){var f=V.fr;f.m++;if(f.m>12){f.m=1;f.y++}renderPage()},
   flogdel:function(t){var r=D.assets.find(function(x){return x.id===t.dataset.id});if(!r)return;r.deleted=true;touch(r);save();schedSync(1200);renderPage()},
   watchtoggle:function(t){V.rep.openW=V.rep.openW===t.dataset.id?null:t.dataset.id;refreshAssets()},
+  ckseg:function(t){ckSt[t.dataset.ck]=t.dataset.v;renderPage()},
+  ckyear:function(t){var y=t.dataset.y;ckSt.open[y]=!ckSt.open[y];renderPage()},
+  ckrun:function(){
+    var x=ckInp();
+    if(!x.amt){toast('Nhập số tiền đầu tư lớn hơn 0');return}
+    if(!x.n){toast('Nhập thời gian cần tính');return}
+    if(x.nU==='y'&&x.n>100||x.nU==='m'&&x.n>1200){toast('Thời gian tối đa 100 năm (1.200 tháng)');return}
+    if(!x.rRaw){toast('Nhập mức lợi nhuận (%)');return}
+    if(x.r>(x.nU==='y'?1000:100)){toast('Mức lợi nhuận quá lớn, kiểm tra lại dấu phẩy');return}
+    delete x.rRaw;var c=ckCalc(x);ckSt.res={inp:x,c:c};ckSt.view='res';ckSt.open={};if(x.n===1&&x.nU==='y')ckSt.open[1]=true;
+    var key=JSON.stringify(x),hs=(L.ck||[]).filter(function(e){return JSON.stringify(e.inp)!==key});
+    hs.unshift({id:'k'+uid(),t:Date.now(),inp:x,bal:Math.round(c.bal)});L.ck=hs.slice(0,10);saveL();
+    renderPage();setTimeout(function(){var el=document.querySelector('#pbody .ckk');if(el&&el.scrollIntoView)el.scrollIntoView({block:'center',behavior:'smooth'})},60)},
+  ckhist:function(){ckSt.view=ckSt.view==='hist'?'':'hist';renderPage()},
+  ckload:function(t){var e=(L.ck||[]).find(function(x){return x.id===t.dataset.id});if(!e)return;var x=e.inp;
+    ckSt.amt=fmtN(x.amt,0);ckSt.add=x.add?fmtN(x.add,0):'';ckSt.addU=x.addU;ckSt.n=String(x.n);ckSt.nU=x.nU;ckSt.r=fmtQ(x.r);ckSt.res={inp:x,c:ckCalc(x)};ckSt.view='res';ckSt.open={};renderPage();$('#pbody').scrollTop=0},
+  ckdel:function(t){var id=t.dataset.id,e=(L.ck||[]).find(function(x){return x.id===id});if(!e)return;
+    confirmBox('Xóa lịch sử?',esc(ckDesc(e.inp))+'<br>→ '+fmt(e.bal)+'đ','Xóa',true).then(function(ok){if(!ok)return;L.ck=(L.ck||[]).filter(function(x){return x.id!==id});saveL();toast('Đã xóa');renderPage()})},
   watchadd:function(t){watchNewM=t.dataset.m||'fund';openPage('watch',null)},
   watchedit:function(t){openPage('watch',t.dataset.id)},
   cdadd:function(){openPage('cd',null)},

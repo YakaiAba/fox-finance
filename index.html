@@ -47,7 +47,7 @@ nav button.on{background:var(--tint);color:var(--navy);font-weight:700}
 .pd select{width:100%;padding:10px 4px}
 button.lb{font:inherit}
 .cal .top{display:flex;align-items:center;justify-content:space-between;gap:2px}.cal .st{font-size:11px;line-height:1}
-.cal .ic{position:relative;display:inline-block;width:14px;height:14px;flex:none}.cal .ic .st{position:relative;z-index:1;display:block}.cal .ic .bl{position:absolute;z-index:0;left:-10px;top:0;width:18px;height:18px}.cal .ic .bl svg{width:100%;height:100%;display:block}
+.cal .ic{display:inline-flex;align-items:center;gap:1px;flex:none;margin-left:auto}.cal .ic .st{display:block;line-height:1}.cal .ic .bl{display:block;width:16px;height:16px;flex:none}.cal .ic .bl svg{width:100%;height:100%;display:block}.cal .ic .bl svg{width:100%;height:100%;display:block}
 .pwr{padding:8px 0;border-top:1px solid var(--line)}.pwr b{display:block}.pwr small{display:block;color:var(--mut);font-size:12px}
 .cal .nt2{font-size:9.5px;font-weight:600;margin-top:1px;white-space:nowrap;letter-spacing:-.3px;overflow:hidden}
 .row{display:flex;align-items:center;gap:4px;padding:8px 0;border-bottom:1px solid var(--line)}
@@ -106,7 +106,9 @@ textarea.nt{display:block;width:100%;resize:vertical;line-height:1.35}
 .cal>button.o{background:#f3f3f5;color:#aaa}
 .cal>button.sel{background:#fff6dc}
 .cal>button.td .d{color:#fff;background:var(--navy);border-radius:9px;padding:0 5px;align-self:flex-start}
-.cdp{grid-column:1/-1;margin:4px 4px 6px;border-radius:10px}
+.cdp,.frd{grid-column:1/-1;margin:4px 4px 6px;border-radius:10px}
+.frd .fr>span{white-space:normal;overflow:visible;text-overflow:clip}
+@media (max-width:359px){.cal .top{flex-wrap:wrap;row-gap:1px}.cal .ic .bl{width:14px;height:14px}.cal .ic .st{font-size:10px}}
 .evr{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line)}.evr .cdr{border:0;flex:1;width:auto}
 .evx{flex:none;padding:6px 12px;border-radius:999px;border:1px solid #e8b4b4;color:var(--chi);background:#fff;font-weight:600}
 .cal .d{font-size:13px}.cal .t{color:var(--thu)}.cal .c{color:var(--chi)}
@@ -133,6 +135,7 @@ textarea.nt{display:block;width:100%;resize:vertical;line-height:1.35}
 .inp{width:100%;border:1px solid #cfd3da;border-radius:10px;padding:10px;background:#fff}
 label.l{display:block;font-weight:600;margin:12px 0 4px;font-size:14px}
 .chips{display:flex;gap:6px;margin:8px 0}
+.frs{display:grid;grid-template-columns:1fr;gap:6px;margin:6px 0}.frs>div{display:flex;justify-content:space-between;align-items:baseline;gap:8px;background:#f7f7f9;border-radius:8px;padding:7px 10px}.frs small{color:var(--mut);font-size:12.5px}.frs b{font-size:14.5px;text-align:right}
 .ckk{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}.ckk>div{background:var(--bg,#f4f4f6);border-radius:12px;padding:10px}.ckk small{display:block;color:var(--mut);font-size:12px}.ckk b{display:block;font-size:16px;margin-top:2px;word-break:break-word}
 .fr.ckm span{color:#555}.fr.ckm span.chi{color:var(--chi)}.fr.ckm span:first-child{white-space:nowrap;font-weight:500}.fr.cky span:first-child{white-space:nowrap}.li .bli{width:22px;height:22px;vertical-align:middle;margin:0}
 .bli{display:inline-block;width:20px;height:20px;vertical-align:-4px;margin-right:4px}.bli svg{width:100%;height:100%;display:block}
@@ -267,7 +270,7 @@ h3,h4{font-size:14.5px}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.63 (08/11/2026)';
+var APP_VER='1.64 (11/11/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -617,12 +620,15 @@ function pwMatch(loc,area){
   var set=pwKps(area);
   return !Object.keys(set).length||!!set[+loc.kp];
 }
-function pwIdx(){
-  var idx={};
+function pwKey(loc,it){return loc.id+'|'+it.d+'|'+(it.a||'')+'|'+(it.b||'')+'|'+String(it.area||'').slice(0,80)}
+function pwHidden(){return L.pwHide||{}}
+function pwIdx(all){
+  var idx={},hd=pwHidden();
   pwLocs().forEach(function(loc){var c=L.pw&&L.pw[loc.slug];if(!c||!c.items)return;
-    c.items.forEach(function(it){if(pwMatch(loc,it.area))(idx[it.d]=idx[it.d]||[]).push({loc:loc,it:it})})});
+    c.items.forEach(function(it){if(pwMatch(loc,it.area)&&(all||!hd[pwKey(loc,it)]))(idx[it.d]=idx[it.d]||[]).push({loc:loc,it:it})})});
   return idx;
 }
+function pwHideCount(){var n=0,a=pwIdx(true),hd=pwHidden(),t=today();Object.keys(a).forEach(function(d){if(d>=t)a[d].forEach(function(x){if(hd[pwKey(x.loc,x.it)])n++})});return n}
 function pwTime(it){return it.a?it.a+'–'+it.b:'cả ngày'}
 function pwAtTxt(){return L.pwOk?'Cập nhật lúc '+hhmm(L.pwOk)+' '+dshort(ds(new Date(L.pwOk).getFullYear(),new Date(L.pwOk).getMonth()+1,new Date(L.pwOk).getDate()))+' từ lichcupdien.app':'Chưa lấy dữ liệu'}
 function autoPw(){
@@ -729,7 +735,8 @@ function pgPwList(){
     h+='<div class="fbar" style="justify-content:flex-start"><button class="ghost" data-a="pwedit" data-id="'+loc.id+'">Sửa</button><button class="ghost red" data-a="pwdel" data-id="'+loc.id+'">Xóa</button></div></div>';
   });
   if(locs.length){
-    h+='<div class="fbar"><span></span><button class="ghost" data-a="pwnow">'+(PWST.busy?'Đang lấy…':'↻ Cập nhật')+'</button></div><div class="mut" style="margin-top:10px;text-align:center">'+(L.pwErr?'<span class="chi nerr">'+esc(L.pwErr)+'</span>':pwAtTxt())+'</div>';
+    var hn=pwHideCount();
+    h+='<div class="fbar">'+(hn?'<button class="ghost" data-a="pwunhide">Hiện lại '+hn+' thông báo đã xóa</button>':'<span></span>')+'<button class="ghost" data-a="pwnow">'+(PWST.busy?'Đang lấy…':'↻ Cập nhật')+'</button></div><div class="mut" style="margin-top:10px;text-align:center">'+(L.pwErr?'<span class="chi nerr">'+esc(L.pwErr)+'</span>':pwAtTxt())+'</div>';
     h+='<div class="mut" style="margin-top:8px;font-size:12px">Dữ liệu tổng hợp từ lichcupdien.app (nguồn các công ty điện lực), chỉ để tham khảo. App khớp theo từ khóa trong chữ "Khu vực" nên có thể sót hoặc báo thừa; nếu không ghi số khu phố thì tính cả phường/xã đó.</div>';
   }
   return h+'</div><div class="mut" style="margin:4px 4px 0;font-size:13px">Thông báo cúp điện sẽ được ghi chú tại mục <b>Lịch</b>, ký hiệu '+bulbI()+' vào ngày có lịch cúp điện tại vị trí bạn đã thiết lập.</div>';
@@ -783,7 +790,7 @@ function dayPanel(c){
   var evs=D.assets.filter(function(a){return a.kind==='cd'&&!a.deleted&&cdOn(a,c.sel)});
   if(evs.length)h+='<div class="dh" style="margin-top:8px"><span>Sự kiện</span></div>'+evs.map(evRow).join('');
   var pws=pwIdx()[c.sel];
-  if(pws&&pws.length)h+='<div class="dh" style="margin-top:8px"><span>Lịch cúp điện</span></div>'+pws.map(function(x){return '<div class="pwr" style="padding:6px 0"><b>'+bulbI()+pwTime(x.it)+'</b><small>'+esc(pwName(x.loc))+'</small><small>'+esc(x.it.area)+'</small></div>'}).join('');
+  if(pws&&pws.length)h+='<div class="dh" style="margin-top:8px"><span>Lịch cúp điện</span></div>'+pws.map(function(x,j){return '<div class="pwr" style="padding:6px 0;display:flex;gap:8px;align-items:flex-start"><div style="flex:1;min-width:0"><b>'+bulbI()+pwTime(x.it)+'</b><small>'+esc(pwName(x.loc))+'</small><small>'+esc(x.it.area)+'</small></div><button class="evx" data-a="pwhide" data-d="'+c.sel+'" data-j="'+j+'">Xóa</button></div>'}).join('');
   return h+'<div class="bt2"><button data-a="addday">＋ Thêm khoản ngày này</button><button data-a="calclose">Đóng ▴</button></div></div>';
 }
 function calHTML(){
@@ -1324,6 +1331,31 @@ function fundDays(a,b){
   }
   return out;
 }
+function snapAt(d){var ss=snaps(),r=null;for(var i=0;i<ss.length&&ss[i].date<=d;i++)r=ss[i];return r}
+function dPrev(d){var p=parse(d),x=new Date(p.y,p.m-1,p.d-1);return ds(x.getFullYear(),x.getMonth()+1,x.getDate())}
+function sgn(v,u){return (v>0?'+':v<0?'−':'')+fmt(Math.abs(Math.round(v)))+(u||'')}
+function frDetail(d){
+  var cur=snapAt(d),pv=snapAt(dPrev(d)),h='<div class="fd frd"><div class="dh"><span>'+dlabel(d)+'</span></div>';
+  if(!cur)return h+'<div class="empty">Chưa có dữ liệu chứng chỉ quỹ ngày này</div></div>';
+  var exact=cur.date===d,diff=pv&&exact?cur.val-pv.val:0,pl=cur.val-cur.cost;
+  if(!exact)h+='<div class="mut" style="font-size:13px;margin:2px 0 6px">Ngày này không mở ứng dụng nên không có số liệu riêng; dưới đây là số liệu gần nhất trước đó ('+dshort(cur.date)+').</div>';
+  h+='<div class="frs"><div><small>Giá trị cuối ngày</small><b>'+fmt(cur.val)+'đ</b></div><div><small>Chênh so với ngày trước</small><b class="'+(diff>0?'thu':diff<0?'chi':'')+'">'+(pv&&exact?sgn(diff,'đ')+(pv.val?' ('+(diff>=0?'+':'−')+fmtN(Math.abs(diff/pv.val*100),2)+'%)':''):'—')+'</b></div><div><small>Lời/lỗ so với giá mua</small><b class="'+(pl>=0?'thu':'chi')+'">'+sgn(pl,'đ')+(cur.cost?' ('+(pl>=0?'+':'−')+fmtN(Math.abs(pl/cur.cost*100),2)+'%)':'')+'</b></div></div>';
+  var pm={};(pv&&exact?pv.items||[]:[]).forEach(function(x){pm[x.c]=x});
+  var rows=(cur.items||[]).map(function(x){var o=pm[x.c],v=x.q*x.p,ch=o&&exact?x.q*(x.p-o.p):0,pc=o&&exact&&o.p?(x.p/o.p-1)*100:null,fl=exact?v-(o?o.q*o.p:0)-ch:0;if(o)o.used=1;return {c:x.c,v:v,ch:ch,pc:pc,q:x.q,oq:o?o.q:null,p:x.p,fl:fl}});
+  Object.keys(pm).forEach(function(k){var o=pm[k];if(!o.used)rows.push({c:k,v:0,ch:0,pc:null,q:0,oq:o.q,p:o.p,fl:-o.q*o.p,gone:1})});
+  rows.sort(function(a,b){return b.v-a.v});
+  var G=innerWidth<360?'grid-template-columns:minmax(0,.85fr) minmax(0,1.6fr) minmax(0,1.55fr);gap:4px;font-size:11.5px':'grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) minmax(0,1.7fr);gap:6px;font-size:13px',tc=0,tf=0;
+  h+='<div class="fh" style="'+G+';margin-top:8px"><span>Mã</span><span>Giá trị</span><span>Tăng/giảm do giá</span></div>';
+  rows.forEach(function(r){tc+=r.ch;tf+=r.fl;
+    h+='<div class="fr" style="'+G+';cursor:default;align-items:start"><span><b>'+esc(r.c)+'</b><small class="mut" style="display:block;font-size:11px">'+(r.gone?'đã bán hết':fmtQ(r.q)+' × '+fmtN(r.p,2))+'</small></span><span>'+fmt(r.v)+'đ</span><span class="'+(r.ch>0?'thu':r.ch<0?'chi':'')+'">'+(r.pc===null?'<span class="mut">—</span>':sgn(r.ch,'đ')+'<small style="display:block;font-size:11px">('+(r.pc>=0?'+':'−')+fmtN(Math.abs(r.pc),2)+'%)</small>')+'</span></div>';
+    if(Math.abs(r.fl)>=1)h+='<div class="mut" style="font-size:12px;margin:-2px 0 4px">'+esc(r.c)+': '+(r.fl>0?'mua thêm':'bán bớt')+' '+(r.oq!==null?fmtQ(Math.abs(r.q-r.oq))+' chứng chỉ, ':'')+sgn(r.fl,'đ')+'</div>';
+  });
+  if(pv&&exact){
+    h+='<div class="fr" style="'+G+';cursor:default"><span><b>Tổng</b></span><span><b>'+fmt(cur.val)+'đ</b></span><span class="'+(tc>0?'thu':tc<0?'chi':'')+'"><b>'+sgn(tc,'đ')+'</b></span></div>';
+    if(Math.abs(tf)>=1)h+='<div class="mut" style="font-size:12px;margin-top:4px">Mua/bán trong ngày: '+sgn(tf,'đ')+'. Chênh so với ngày trước = tăng/giảm do giá + mua/bán.</div>';
+  }else h+='<div class="mut" style="font-size:12px;margin-top:4px">Không có số liệu ngày trước để so sánh.</div>';
+  return h+'<div class="bt2" style="grid-template-columns:1fr"><button data-a="frsel" data-d="'+d+'">Đóng ▴</button></div></div>';
+}
 function fundNow(){var v=0;funds().forEach(function(f){var p=priceOf(f);if(p)v+=f.qty*p});return v}
 function cashAt(){var es=E().slice().sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:0}),i=0,c=0;return function(d){while(i<es.length&&es[i].date<=d){c+=es[i].type==='thu'?es[i].amount:-es[i].amount;i++}return c}}
 function cashAll(){var c=0;E().forEach(function(e){c+=e.type==='thu'?e.amount:-e.amount});return c}
@@ -1383,9 +1415,10 @@ function pgFundRep(){
       body='<span class="nt2" style="'+(x.exact?'':'color:#9aa0aa;font-weight:500')+'" data-s="'+shortAmt(x.v)+'">'+calAmt(x.v)+'</span>'+(df?'<span class="nt2 '+(df>0?'t':'c')+'" data-s="'+(df>0?'+':'-')+shortAmt(Math.abs(df))+'">'+(df>0?'+':'-')+calAmt(Math.abs(df))+'</span>':'');
       pts.push({x:String(d),y:x.v});
     }
-    h+='<button type="button" class="'+(dd===t?'td':'')+'"><span class="top"><span class="d">'+d+'</span></span>'+body+'</button>';
+    h+='<button type="button" data-a="frsel" data-d="'+dd+'" class="'+(f.sel===dd?'sel ':'')+(dd===t?'td':'')+'"><span class="top"><span class="d">'+d+'</span></span>'+body+'</button>';
+    if(i%7===6&&f.sel&&f.sel.slice(0,7)===f.y+'-'+pad(f.m)&&Math.floor(i/7)===Math.floor((first+parse(f.sel).d-1)/7))h+=frDetail(f.sel);
   }
-  h+='</div><div class="mut" style="margin:6px 2px 10px">Dòng trên: giá trị chứng chỉ quỹ cuối ngày (màu xám nhạt: ngày không mở ứng dụng, dùng giá trị gần nhất trước đó). Dòng dưới: chênh so với ngày trước, gồm cả phần mua/bán trong ngày.'+(L.navOk?'<br>'+navAtTxt():'')+'</div>';
+  h+='</div><div class="mut" style="margin:6px 2px 10px">Dòng trên: giá trị chứng chỉ quỹ cuối ngày (màu xám nhạt: ngày không mở ứng dụng, dùng giá trị gần nhất trước đó). Dòng dưới: chênh so với ngày trước, gồm cả phần mua/bán trong ngày. Bấm vào một ngày để xem chi tiết từng mã.'+(L.navOk?'<br>'+navAtTxt():'')+'</div>';
   h+='<div class="card">'+lineChart(pts,'#12306B','Giá trị chứng chỉ quỹ theo ngày',true)+'</div>';
   var lg=flogs();
   h+='<div class="card"><div class="ct">Nhật ký mua bán</div>'+(lg.length?lg.map(function(x){return '<div style="display:flex;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line)"><div style="flex:1;min-width:0;font-size:14px"><div><b>'+esc(x.act)+' '+esc(x.code)+'</b> <span class="mut">'+dshort(x.date)+'</span></div><div class="mut">'+(x.qty?fmtQ(x.qty)+' chứng chỉ':'')+(x.price?' × '+fmtN(x.price,2):'')+(x.note?(x.qty?' · ':'')+esc(x.note):'')+'</div></div><button class="red" data-a="flogdel" data-id="'+x.id+'" style="padding:6px 12px;font-size:13px;border:1px solid #e3b5b5;border-radius:10px;color:var(--chi);background:#fff">Xóa</button></div>'}).join(''):'<div class="empty">Chưa có giao dịch. Thêm, sửa số lượng hoặc xóa mã quỹ thì ứng dụng tự ghi vào đây.</div>')+'</div>';
@@ -1945,6 +1978,11 @@ var ACT={
   frnext:function(){var f=V.fr;f.m++;if(f.m>12){f.m=1;f.y++}renderPage()},
   flogdel:function(t){var r=D.assets.find(function(x){return x.id===t.dataset.id});if(!r)return;r.deleted=true;touch(r);save();schedSync(1200);renderPage()},
   watchtoggle:function(t){V.rep.openW=V.rep.openW===t.dataset.id?null:t.dataset.id;refreshAssets()},
+  pwhide:function(t){var x=(pwIdx()[t.dataset.d]||[])[+t.dataset.j];if(!x)return;
+    confirmBox('Xóa thông báo cúp điện?',dlabel(x.it.d)+' · '+pwTime(x.it)+'<br>'+esc(pwName(x.loc))+'<br><small>Chỉ ẩn trên máy này, không còn hiện bóng đèn ở ngày này. Có thể hiện lại trong Khác › Lịch cúp điện.</small>','Xóa',true).then(function(ok){if(!ok)return;
+      var hd=L.pwHide||{},t0=today();Object.keys(hd).forEach(function(k){if(hd[k]<addM(t0,-1))delete hd[k]});hd[pwKey(x.loc,x.it)]=x.it.d;L.pwHide=hd;saveL();toast('Đã xóa thông báo');render()})},
+  pwunhide:function(){L.pwHide={};saveL();toast('Đã hiện lại các thông báo');render()},
+  frsel:function(t){var d=t.dataset.d,f=V.fr;f.sel=f.sel===d?'':d;renderPage();if(f.sel)setTimeout(function(){var el=document.querySelector('#pbody .frd');if(el&&el.scrollIntoView)el.scrollIntoView({block:'nearest',behavior:'smooth'})},60)},
   ckseg:function(t){ckSt[t.dataset.ck]=t.dataset.v;renderPage()},
   ckyear:function(t){var y=t.dataset.y;ckSt.open[y]=!ckSt.open[y];renderPage()},
   ckrun:function(){

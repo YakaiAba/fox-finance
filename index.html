@@ -287,7 +287,7 @@ h3,h4{font-size:14.5px}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.69 (18/11/2026)';
+var APP_VER='1.70 (21/11/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -326,6 +326,8 @@ LISTS.forEach(function(l){if(!Array.isArray(D[l]))D[l]=[]});
 var L=jget(LKEY,null)||{};
 if(!L.title||L.title==='Fox-finance')L.title='Fox-finance';
 if(L.dev===undefined)L.dev='';
+L.title='Fox-finance';
+function feat(k){return !L.feat||L.feat[k]!==false}
 var S=jget(SKEY,null)||{url:'',secret:'',cursor:0,sv:0};
 var memOnly=false;
 function save(){if(!jset(KEY,D)&&!memOnly){memOnly=true;toast('Không lưu được dữ liệu trên máy này! Hãy sao lưu JSON ngay.')}}
@@ -362,7 +364,7 @@ var pages=[];
 var watchNewM='fund',editSt=null,pwSt=null,invSt=null,fundSt=null,watchSt=null,cdSt=null,cdY=new Date().getFullYear();
 var BAG='<img src="data:image/png;base64,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" width="24" height="24" alt="" draggable="false">';
 var CALI='<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><rect x="2" y="3" width="20" height="19" rx="3" fill="#fff" stroke="#d32f2f" stroke-width="1.4"/><path d="M2 6a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v3.2H2z" fill="#e53935"/><text x="12" y="8" font-size="5" font-weight="700" fill="#fff" text-anchor="middle">June</text><text x="12" y="19.6" font-size="10.5" font-weight="800" fill="#222" text-anchor="middle">21</text></svg>';
-var TABS=[['nhap','<span class="pen">✏️</span>','Thu chi'],['cal',CALI,'Lịch'],['rep','📊','Báo cáo'],['bud',BAG,'Ngân sách'],['more','⋯','Khác']];
+var TABS=[['nhap','<span class="pen">✏️</span>','Thu chi'],['cal',CALI,'Lịch'],['rep','📊','Báo cáo'],['bud',BAG,'Ngân sách'],['more','⚙️','Cài đặt']];
 
 /* ---------- thông báo & hộp thoại ---------- */
 var toastT;
@@ -579,7 +581,8 @@ function render(){
   $('#ttl').textContent=L.title;
   document.title=L.title;
   renderSy();
-  var n=$('#nav');n.innerHTML=TABS.map(function(t){return '<button data-a="tab" data-t="'+t[0]+'" class="'+(tab===t[0]?'on':'')+'"><i>'+t[1]+'</i>'+t[2]+'</button>'}).join('');
+  if(tab==='bud'&&!feat('bud'))tab='nhap';
+  var n=$('#nav');n.innerHTML=TABS.filter(function(t){return t[0]!=='bud'||feat('bud')}).map(function(t){return '<button data-a="tab" data-t="'+t[0]+'" class="'+(tab===t[0]?'on':'')+'"><i>'+t[1]+'</i>'+t[2]+'</button>'}).join('');
   var m=$('#main');
   if(tab==='nhap'){m.innerHTML='<div class="card frm" data-form="nhap">'+formHTML(V.nhap,false,'nhap')+'</div>';if(KP.form==='nhap'){var el=m.querySelector('[data-f="amt"]');if(el)el.classList.add('act')}}
   else if(tab==='cal'){m.innerHTML=calHTML();fitCal()}
@@ -972,19 +975,19 @@ function donut(g){
 }
 function repHTML(){
   var r=V.rep,lb=periodLabel();
-  var h='<div style="display:flex;gap:8px;align-items:flex-start"><div class="seg" style="flex:1;margin:0 0 12px;max-width:none"><button data-a="repmode" data-v="m" class="'+(r.mode==='m'?'on':'')+'">Tháng</button><button data-a="repmode" data-v="y" class="'+(r.mode==='y'?'on':'')+'">Năm</button><button data-a="repmode" data-v="all" class="'+(r.mode==='all'?'on':'')+'">Tất cả</button></div><button class="arr" data-a="repimg" aria-label="Xuất ảnh báo cáo" style="font-size:22px">📷</button></div>';
+  var h='<div style="display:flex;gap:8px;align-items:flex-start"><div class="seg" style="flex:1;margin:0 0 12px;max-width:none"><button data-a="repmode" data-v="m" class="'+(r.mode==='m'?'on':'')+'">Tháng</button><button data-a="repmode" data-v="y" class="'+(r.mode==='y'?'on':'')+'">Năm</button><button data-a="repmode" data-v="all" class="'+(r.mode==='all'?'on':'')+'">Tất cả</button></div>'+(feat('shot')?'<button class="arr" data-a="repimg" aria-label="Xuất ảnh báo cáo" style="font-size:22px">📷</button>':'')+'</div>';
   if(r.mode!=='all')h+=navHTML(lb[0],lb[1],'repprev','repnext');
   var ch=groups('chi').total,th=groups('thu').total;
   var tt=th+ch,rt=[[th,'Thu nhập','#2e7d32','thu','+'],[ch,'Chi tiêu','#c62828','chi','-']];
   h+='<div class="card"><div class="ct">Tỷ lệ thu chi</div>'+donut({total:tt,cc:th-ch>=0?'#2e7d32':'#c62828',cv:(th-ch>=0?'+':'-')+fmtShort(Math.abs(th-ch)),list:rt.map(function(x){return {v:x[0],c:{color:x[2]}}})})
    +(tt?rt.map(function(x){return '<div class="lgr"><span><i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+x[2]+';margin-right:6px"></i>'+x[1]+'</span><span class="'+x[3]+'">'+x[4]+money(x[0])+' <small>'+(x[0]/tt*100).toFixed(1).replace('.',',')+'%</small></span></div>'}).join(''):'')
-   +'<div class="tot"><span>Tổng tiền mặt</span><b class="'+(th-ch>=0?'thu':'chi')+'">'+(th-ch>=0?'+':'-')+money(Math.abs(th-ch))+'</b></div></div>';
+   +'<div class="tot"><span>Còn lại</span><b class="'+(th-ch>=0?'thu':'chi')+'">'+(th-ch>=0?'+':'-')+money(Math.abs(th-ch))+'</b></div></div>';
   h+='<div class="seg"><button data-a="reptype" data-v="thu" class="thu'+(r.type==='thu'?' on':'')+'">Thu nhập</button><button data-a="reptype" data-v="chi" class="chi'+(r.type==='chi'?' on':'')+'">Chi tiêu</button></div>';
   var g=groups(r.type);
   h+='<div class="card">';
   h+=g.list.map(function(x){return '<button class="br" data-a="repcat" data-id="'+x.id+'"><div class="t1"><span>'+x.c.icon+' '+esc(x.c.name)+'</span><span>'+money(x.v)+' <small class="mut">'+(x.v/g.total*100).toFixed(1).replace('.',',')+'%</small></span></div><div class="bar"><i style="width:'+(x.v/g.total*100)+'%;background:'+x.c.color+'"></i></div></button>'}).join('')+'</div>';
   var se=series(r.type);
-  h+='<div class="card">'+lineChart(se.pts,r.type==='chi'?'#c62828':'#2e7d32',(r.type==='chi'?'Chi tiêu':'Thu nhập')+' theo '+se.by)+'</div>';
+  if(feat('daily'))h+='<div class="card">'+lineChart(se.pts,r.type==='chi'?'#c62828':'#2e7d32',(r.type==='chi'?'Chi tiêu':'Thu nhập')+' theo '+se.by)+'</div>';
   return h+'<div id="assets">'+assetsHTML()+'</div>';
 }
 
@@ -1234,14 +1237,14 @@ function backupInfo(){
 function moreHTML(){
   var bk=backupInfo(),h='';
   h+='<div class="'+(bk.bad?'warn':'ok')+'">'+(bk.bad?'⚠ ':'✓ ')+bk.txt+'</div>';
-  h+='<div class="card"><button class="li" data-a="pg" data-p="basic"><i>⚙️</i><span>Cài đặt</span></button><button class="li" data-a="pg" data-p="secu"><i>🔒</i><span>Bảo mật ứng dụng</span><em>'+(lkSet()?'Đã thiết lập':'Chưa thiết lập')+'</em></button></div>';
+  h+='<div class="card"><button class="li" data-a="pg" data-p="basic"><i>⚙️</i><span>Cài đặt chung</span><em>'+esc(L.dev||'')+'</em></button><button class="li" data-a="pg" data-p="adv"><i>🧩</i><span>Tính năng nâng cao</span></button><button class="li" data-a="pg" data-p="secu"><i>🔒</i><span>Bảo mật ứng dụng</span><em>'+(lkSet()?'Đã thiết lập':'Chưa thiết lập')+'</em></button></div>';
   h+='<div class="card"><button class="li" data-a="pg" data-p="pwlist"><i>'+bulbI()+'</i><span>Lịch cúp điện</span><em>'+pwLocs().length+' vị trí</em></button><button class="li" data-a="pg" data-p="ck"><i>💹</i><span>Lãi kép</span></button><button class="li" data-a="pg" data-p="search"><i>🔍</i><span>Tìm kiếm giao dịch</span></button><button class="li" data-a="pg" data-p="balance"><i>📈</i><span>Báo cáo biến động số dư</span></button></div>';
   h+='<div class="card"><button class="li" data-a="pg" data-p="sync"><i>☁️</i><span>Đồng bộ Google Sheets</span><em>'+(S.url?esc(SYN.msg||''):'Chưa bật')+'</em></button><button class="li" data-a="pg" data-p="backup"><i>💾</i><span>Sao lưu dữ liệu</span></button><button class="li" data-a="pg" data-p="help"><i>📖</i><span>Hướng dẫn sử dụng</span></button><button class="li" data-a="pg" data-p="about"><i>ℹ️</i><span>Thông tin ứng dụng</span></button></div>';
   return h;
 }
 
 /* ---------- trang riêng ---------- */
-var PTITLE={secu:'Bảo mật ứng dụng',inv:'Tài sản',edit:'Chỉnh sửa',cats:'Danh mục thu chi',basic:'Cài đặt',sync:'Đồng bộ Google Sheets',balance:'Báo cáo biến động số dư',search:'Tìm kiếm giao dịch',pwlist:'Lịch cúp điện',ck:'Lãi kép',fundrep:'Biến động theo ngày',backup:'Sao lưu dữ liệu',about:'Thông tin ứng dụng',catlist:'Chi tiết danh mục',fund:'Mã quỹ',watch:'Chờ đợi giá',pw:'Vị trí',cd:'Sự kiện',cdsug:'Ngày lễ gợi ý',help:'Hướng dẫn sử dụng'};
+var PTITLE={secu:'Bảo mật ứng dụng',inv:'Tài sản',edit:'Chỉnh sửa',cats:'Danh mục thu chi',basic:'Cài đặt chung',adv:'Tính năng nâng cao',sync:'Đồng bộ Google Sheets',balance:'Báo cáo biến động số dư',search:'Tìm kiếm giao dịch',pwlist:'Lịch cúp điện',ck:'Lãi kép',fundrep:'Biến động theo ngày',backup:'Sao lưu dữ liệu',about:'Thông tin ứng dụng',catlist:'Chi tiết danh mục',fund:'Mã quỹ',watch:'Chờ đợi giá',pw:'Vị trí',cd:'Sự kiện',cdsug:'Ngày lễ gợi ý',help:'Hướng dẫn sử dụng'};
 function openPage(name,arg){
   if(name==='edit'){
     var e=D.entries.find(function(x){return x.id===arg});if(!e)return;
@@ -1291,7 +1294,7 @@ function renderPage(){
   $('#ptt').textContent=p.name==='fundrep'?'Biến động theo ngày · '+({fund:'Chứng chỉ quỹ',stock:'Cổ phiếu & trái phiếu',ast:'Tài sản'}[p.arg||'fund']):p.name==='catlist'?cat(p.arg).name:p.name==='fund'?(fundSt.id?'Sửa mã quỹ':'Thêm mã quỹ'):p.name==='inv'?(invSt.cat==='saving'?(invSt.id?'Sửa khoản gửi':'Thêm khoản gửi'):(invSt.id?'Sửa tài sản':'Thêm tài sản')):p.name==='watch'?(watchSt.id?'Sửa mã chờ giá':'Thêm mã chờ giá'):p.name==='cd'?(cdSt.id?'Sửa sự kiện':'Thêm sự kiện'):p.name==='mem'?(memSt.id?'Sửa kỷ niệm':'Thêm kỷ niệm'):p.name==='daypic'?'Chọn hình nền cho ngày':p.name==='pw'?(pwSt.id?'Sửa vị trí':'Thêm vị trí'):PTITLE[p.name];
   $('#pexit').textContent=SETP[p.name]?'Lưu lại & Thoát':'Thoát';
   var b=$('#pbody'),top=b.scrollTop;
-  var fn={edit:pgEdit,cats:pgCats,basic:pgBasic,sync:pgSync,balance:pgBalance,search:pgSearch,fundrep:pgFundRep,inv:pgInv,secu:pgSecu,backup:pgBackup,about:pgAbout,catlist:pgCatList,fund:pgFund,watch:pgWatch,cd:pgCd,mem:pgMem,daypic:pgDayPic,pw:pgPw,pwlist:pgPwList,ck:pgCk,cdsug:pgCdSug,help:pgHelp}[p.name];
+  var fn={edit:pgEdit,cats:pgCats,basic:pgBasic,sync:pgSync,balance:pgBalance,search:pgSearch,fundrep:pgFundRep,inv:pgInv,secu:pgSecu,backup:pgBackup,about:pgAbout,catlist:pgCatList,fund:pgFund,watch:pgWatch,cd:pgCd,mem:pgMem,adv:pgAdv,daypic:pgDayPic,pw:pgPw,pwlist:pgPwList,ck:pgCk,cdsug:pgCdSug,help:pgHelp}[p.name];
   b.innerHTML=fn(p);
   b.scrollTop=top;
   if(p.name==='fundrep')fitCal();
@@ -1398,14 +1401,13 @@ function newPin(title){
 function onoff(a,on){return '<div class="seg" style="margin:0;max-width:150px;flex:none"><button data-a="'+a+'" data-v="1" class="'+(on?'on':'')+'">Bật</button><button data-a="'+a+'" data-v="0" class="'+(on?'':'on')+'">Tắt</button></div>'}
 function srow(title,sub,a,on,first){return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;'+(first?'':'margin-top:14px;padding-top:14px;border-top:1px solid var(--line)')+'"><div><b>'+title+'</b>'+(sub?'<div class="mut" style="margin:2px 0 0">'+sub+'</div>':'')+'</div>'+onoff(a,on)+'</div>'}
 function pgSecu(){
-  var c=lkSet(),ok=!!c,dis=ok?'':' style="opacity:.45;pointer-events:none"';
-  var h='<div class="card">'+srow('Thiết lập bảo mật','Tạo mã PIN 6 số. Cần thiết lập trước khi dùng các tính năng bên dưới','lkset',ok,true);
-  if(ok)h+='<button class="ghost" data-a="lkchg" style="margin-top:12px">Đổi mã PIN</button>';
+  var c=lkSet(),on=!!(c&&c.open);
+  var h='<div class="card">'+srow('Thiết lập bảo mật','Mở ứng dụng bằng mã PIN 6 số hoặc Face ID / Touch ID. Tự khóa lại khi để ứng dụng nền hơn 30 giây','lkall',on,true);
+  if(on){
+    h+='<div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px"><div><b>Face ID / Touch ID</b><div class="mut" style="margin:2px 0 0">Tự động quét khi mở, quét không được mới nhập mã PIN</div></div>'+onoff('lkbio',!!c.cred)+'</div>';
+    h+='<button class="ghost" data-a="lkchg" style="margin-top:14px">Đổi mã PIN</button>';
+  }
   h+='<div class="mut" style="margin-top:10px">Chỉ áp dụng trên máy này, không đồng bộ. Quên mã PIN thì phải xóa dữ liệu trang web của ứng dụng trong Cài đặt Safari, dữ liệu chưa sao lưu sẽ mất, nên hãy sao lưu trước.</div></div>';
-  h+='<div class="card"'+dis+'>'+srow('Mở ứng dụng','Dùng Face ID / Touch ID hoặc mã PIN. Khóa lại sau khi để ứng dụng nền hơn 30 giây','lkopen',!!(c&&c.open),true);
-  if(c&&c.open)h+='<div style="margin-top:12px;display:flex;align-items:center;justify-content:space-between;gap:10px"><div><div>Face ID / Touch ID</div><div class="mut" style="margin:2px 0 0">Tự động quét khi mở, quét không được mới nhập mã PIN</div></div>'+onoff('lkbio',!!c.cred)+'</div>';
-  h+=srow('Hiện danh mục đầu tư','Tắt: ẩn mục này trong tab Báo cáo','secinv',L.showInv!==false)+srow('Hiện biến động tài sản','Tắt: ẩn mục này trong tab Báo cáo','secast',L.showAst!==false)+'</div>';
-  if(!ok)h+='<div class="mut" style="margin:0 2px">Hãy bật Thiết lập bảo mật để dùng các tính năng trên. Ba tính năng này hoạt động riêng biệt với nhau.</div>';
   return h;
 }
 function lockSetBio(){
@@ -1718,7 +1720,7 @@ function invHTML(){
   if(!any&&!v.adding)h+='<div class="mut" style="text-align:center">Chưa có danh mục. Bấm Thêm danh mục.</div>';
   return h;
 }
-function assetsHTML(){return (L.showInv===false?'':invHTML())+(L.showAst===false?'':astHTML())}
+function assetsHTML(){return invHTML()+astHTML()}
 function pgInv(){
   var s=invSt,ph=IPH[s.cat]||IPH.other;
   if(s.cat==='saving')return '<div class="card"><div class="mut" style="margin-bottom:2px">Danh mục: <b>'+icName(s.cat)+'</b></div><label class="l" for="in">Ngân hàng</label><input class="inp" id="in" maxlength="60" autocomplete="off" placeholder="Ví dụ: '+esc(ph[0])+'" value="'+esc(s.name)+'">'
@@ -1746,8 +1748,11 @@ function pgInv(){
 }
 function invPrev(){if(invSt.cat==='saving'){var tm=parseInt(invSt.term,10)||0;return tm>0?'Đáo hạn vào ngày: '+dshort(addM(invSt.date,tm)):'Không kỳ hạn'}var q=parseNum(invSt.qty),b=parseNum(invSt.buy);return q&&b?'Thành tiền: '+fmt(q*b)+'đ':''}
 function pgBasic(){
-  return '<div class="card"><label class="l" for="bt">Tên ứng dụng</label><input class="inp" id="bt" maxlength="40" value="'+esc(L.title)+'">'
-   +'<label class="l" for="bd">Tên máy (ví dụ: iPhone, iPad)</label><input class="inp" id="bd" maxlength="20" value="'+esc(L.dev)+'" placeholder="Để phân biệt máy khi đồng bộ"></div><div class="mut">Tự lưu khi bạn gõ.</div>';
+  return '<div class="card"><label class="l" style="margin-top:0" for="bd">Tên người dùng</label><input class="inp" id="bd" maxlength="20" value="'+esc(L.dev)+'" placeholder="Ví dụ: Phú iPhone"><div class="mut" style="margin-top:6px">Hiện trong nhật ký khi đồng bộ để biết ai/máy nào đã nhập, và trên ảnh báo cáo. Mỗi máy đặt một tên riêng.</div></div><div class="mut">Tự lưu khi bạn gõ.</div>';
+}
+function pgAdv(){
+  var F=[['bud','Ngân sách','Tab Ngân sách ở thanh dưới'],['daily','Chi tiêu theo ngày','Biểu đồ thu/chi theo ngày trong tab Báo cáo'],['shot','Lưu nhanh hình ảnh báo cáo thu chi','Nút 📷 ở góc trên tab Báo cáo: tạo ảnh Thu – Chi – Còn lại']];
+  return '<div class="card">'+F.map(function(f,i){return srow(f[1],f[2],'feat" data-ft="'+f[0],feat(f[0]),i===0)}).join('')+'</div><div class="mut" style="margin:0 2px">Bật: hiện tính năng để sử dụng. Tắt: ẩn đi, dữ liệu vẫn giữ nguyên. Chỉ áp dụng trên máy này.</div>';
 }
 function pgSync(){
   return '<div class="card"><div id="sst" style="font-weight:700;margin-bottom:6px">'+(S.url?esc(SYN.msg||''):'Chưa bật đồng bộ')+'</div><div class="mut" style="margin-bottom:6px">Liên kết này không bắt buộc, bạn có thể bỏ qua. Chỉ cần khi muốn iPhone và iPad luôn có cùng dữ liệu, kèm một bản lưu dự phòng trên Google Sheets của bạn.</div>'
@@ -1789,8 +1794,9 @@ function pgHelp(){
   return sec('Ghi thu chi',['Tab <b>Thu chi</b>: bấm <b>Thu nhập</b> hoặc <b>Chi tiêu</b>, bấm ô số tiền để mở bàn phím tính (có + − × ÷, nút 000), chọn danh mục, ghi chú nếu cần rồi bấm Lưu.','Đổi ngày bằng ô ngày; chọn ngày/tháng/năm trong hộp hiện ra.','Sửa hoặc xóa: tab <b>Lịch</b> → bấm vào khoản.'])
   +sec('Xem lại',['<b>Lịch</b>: ô ngày hiện ⭐️ nếu có sự kiện, dòng đỏ là tổng chi, dòng xanh là tổng thu của ngày đó (rút gọn: 517.000đ = 517k, 1.008.000đ = 1,008tr). Bấm vào một ngày để mở khung chi tiết ngay dưới tuần đó (thu chi và sự kiện của ngày); bấm lại hoặc bấm Đóng để thu gọn.','<b>Danh sách sự kiện</b> (dưới lịch): bấm <b>+ Ngày lễ gợi ý</b> để thêm các ngày lễ còn lại trong năm (âm lịch tự quy đổi), hoặc <b>+ Tạo thủ công</b> cho sinh nhật, kỷ niệm… (chọn <b>Nhắc lại</b> mỗi tuần, tháng hoặc năm thì ứng dụng tự tính lần kế tiếp) “Còn lại” hiện số ngày, từ 1 tháng trở lên hiện dạng tháng + ngày. Bấm vào dòng để sửa hoặc xóa. Sự kiện đã qua: xóa khỏi danh sách thì vẫn còn trên lịch, xóa hẳn ở khung chi tiết của ngày đó.','<b>Báo cáo</b>: xem theo Tháng / Năm / Tất cả; bấm một danh mục để xem các khoản. Nút 📷 xuất ảnh báo cáo.','<b>Ngân sách</b>: bấm vào mục để đặt hạn mức mỗi tháng.','<b>Thu chi → Danh mục → Chỉnh sửa</b>: thêm, sửa, xóa, sắp xếp danh mục.'])
   +sec('Danh mục đầu tư (cuối tab Báo cáo)',['Bấm <b>Danh mục đầu tư</b> để mở. <b>Thêm danh mục</b> rồi chọn Vàng, Tiền điện tử, Cổ phiếu & trái phiếu, Chứng chỉ quỹ, Bất động sản hoặc Khác. Bấm tên danh mục để xem tài sản bên trong; <b>Thêm tài sản</b> gồm tên, ngày mua, số lượng, giá mua (của 1 đơn vị) và mô tả. Việc tính một danh mục vào <b>Biến động tài sản</b> được bật/tắt ngay trong mục Biến động tài sản (Danh sách danh mục tài sản): Chứng chỉ quỹ mặc định Bật, các danh mục khác mặc định Tắt. Tiền gửi tiết kiệm gồm ngân hàng, ngày gửi, kỳ hạn, số tiền, lãi suất (%/năm); app ước tính giá trị hiện tại, lãi và ngày đáo hạn theo lãi đơn 365 ngày/năm. Các danh mục khác tính theo giá mua.','<b>Chứng chỉ quỹ</b>: nhập mã, số lượng, giá mua, ngày mua. Bấm vào mã để xem lời/lỗ, thời gian giữ và nhật ký giao dịch.','<b>Chờ đợi giá</b> (dưới dòng giá cập nhật): thêm mã quỹ bạn quan tâm, nhập giá đối chiếu và kỳ vọng (giảm hoặc tăng, tính bằng đ hoặc %). Cột Hiện tại cho biết giá gần nhất và tỉ lệ % so với giá đối chiếu (âm hiện đỏ). Bấm vào dòng để xem thêm <b>Còn lại</b>: giá gần nhất còn cách điểm kỳ vọng bao nhiêu; 🔔 hiện khi đã chạm điểm kỳ vọng, và ứng dụng hiện hộp nhắc khi bạn mở ứng dụng (mỗi mã một lần mỗi ngày). iOS không cho web báo ngầm khi ứng dụng đóng.','Giá gần nhất tự lấy từ fmarket (khi mở ứng dụng hoặc bấm ↻ Cập nhật giá); chưa lấy được thì nhập giá tay khi sửa mã quỹ.','<b>📅 Biến động theo ngày</b> (có ở Chứng chỉ quỹ, Cổ phiếu & trái phiếu và Biến động tài sản): lịch theo tháng, mỗi ô là giá trị cuối ngày (từ 1 tỷ hiện dạng 1,468 tỷ) và chênh lệch so với hôm trước; bấm vào ngày để xem chi tiết từng mã/danh mục đến từng đồng. Ngày không mở ứng dụng thì dùng giá trị ngày gần nhất. Chứng chỉ quỹ kèm nhật ký mua bán tự ghi khi thêm, sửa, xóa mã quỹ. Cổ phiếu bắt đầu có số liệu từ ngày cập nhật bản này.','<b>Biến động tài sản</b> (cuối tab Báo cáo, bấm tên để mở): Tổng tài sản = Giá trị đầu tư + Tiền mặt, biểu đồ theo ngày, xem theo Tháng hoặc Năm.'])
+  +sec('Cài đặt chung, tính năng nâng cao, bảo mật',['<b>Cài đặt chung</b>: đặt <b>Tên người dùng</b> (hiện trong nhật ký đồng bộ và trên ảnh báo cáo).','<b>Tính năng nâng cao</b>: bật/tắt Ngân sách, Chi tiêu theo ngày (biểu đồ trong Báo cáo) và Lưu nhanh hình ảnh báo cáo thu chi (nút 📷 trong Báo cáo). Tắt chỉ ẩn đi, dữ liệu vẫn giữ.','<b>Bảo mật ứng dụng</b>: bật Thiết lập bảo mật để mở app bằng mã PIN hoặc Face ID / Touch ID.','Nút 📷 trong Báo cáo tạo ảnh: khoảng ngày (từ đầu kỳ đến ngày có thu chi cuối cùng), Thu nhập và từng danh mục, Chi tiêu và từng danh mục, Còn lại.'])
   +sec('Hình ảnh khoản thu chi',['Dưới <b>Ghi chú</b> có mục <b>Thêm hình ảnh</b>: bấm <b>📷 Chụp</b> để chụp bằng máy ảnh hoặc <b>🖼 Chọn ảnh</b> để lấy từ thư viện, rồi bấm Nhập/Chỉnh sửa khoản để lưu. Mỗi khoản tối đa 4 ảnh, ảnh được nén còn cạnh dài 1.600 px.','Ô ngày trên <b>Lịch</b> hiện ảnh mới nhất của ngày đó; bấm vào ngày thì mỗi khoản có ảnh nhỏ giữa tên danh mục và số tiền, bấm ảnh để xem cỡ lớn.','Ảnh chỉ lưu trên máy này (không đồng bộ qua Google Sheets), nhưng có trong file sao lưu JSON, nên file sao lưu sẽ nặng hơn.','<b>Kỷ niệm</b>: trên Lịch bấm vào ngày → <b>＋ Thêm kỷ niệm</b>, đặt tên, viết mô tả và thêm tối đa 4 ảnh (chụp hoặc chọn). Kỷ niệm hiện trong mục Kỷ niệm của ngày đó; ô ngày trên Lịch ưu tiên hiện ảnh kỷ niệm (nếu không có thì ảnh thu chi), ngày có kỷ niệm mà không có ảnh nào thì hiện ✨. Bấm <b>🖼 Chọn hình nền cho ngày</b> để chọn 1 ảnh bất kỳ trong ngày làm hình trên Lịch; bấm <b>Sửa</b> để sửa hoặc xóa.'])
-  +sec('Lịch cúp điện và Lãi kép (tab Khác)',['<b>Lịch cúp điện</b>: bấm <b>＋ Thêm vị trí</b>, chọn tỉnh/thành, quận/huyện cũ trên lichcupdien.app, phường/xã, rồi số khu phố hoặc gõ tên khu phố/ấp (để trống thì báo cả phường/xã). Ngày có lịch hiện bóng đèn gạch chéo trên tab <b>Lịch</b>.','<b>Lãi kép</b>: nhập số tiền đầu tư, số tiền bổ sung và tiền rút định kỳ (nếu có, theo tháng hoặc năm), thời gian và lợi nhuận % (theo đơn vị thời gian đã chọn), bấm <b>Xem kết quả</b>. Chọn năm thì có dòng tổng mỗi năm, bấm vào để xem từng tháng. Mỗi lần tính được tự lưu, <b>Xem lịch sử</b> giữ 10 lần gần nhất trên máy này.'])
+  +sec('Lịch cúp điện và Lãi kép (tab Cài đặt)',['<b>Lịch cúp điện</b>: bấm <b>＋ Thêm vị trí</b>, chọn tỉnh/thành, quận/huyện cũ trên lichcupdien.app, phường/xã, rồi số khu phố hoặc gõ tên khu phố/ấp (để trống thì báo cả phường/xã). Ngày có lịch hiện bóng đèn gạch chéo trên tab <b>Lịch</b>.','<b>Lãi kép</b>: nhập số tiền đầu tư, số tiền bổ sung và tiền rút định kỳ (nếu có, theo tháng hoặc năm), thời gian và lợi nhuận % (theo đơn vị thời gian đã chọn), bấm <b>Xem kết quả</b>. Chọn năm thì có dòng tổng mỗi năm, bấm vào để xem từng tháng. Mỗi lần tính được tự lưu, <b>Xem lịch sử</b> giữ 10 lần gần nhất trên máy này.'])
   +sec('Sao lưu JSON là gì? (quan trọng)',['Là một file lưu <b>toàn bộ dữ liệu bạn đã nhập</b>: các khoản thu chi, danh mục, ngân sách, ghi chú vàng, mã chứng chỉ quỹ, nhật ký giao dịch danh sách chờ đợi giá và danh sách sự kiện.','Không gồm cài đặt tên ứng dụng, tên máy, địa chỉ và mã bí mật đồng bộ, giá quỹ tự lấy (ứng dụng lấy lại khi cần).','Dữ liệu nằm trong máy này. Mất máy, xóa Safari hoặc <b>xóa biểu tượng trên màn hình chính</b> là mất dữ liệu nếu chưa sao lưu.','<b>Khác → Sao lưu dữ liệu</b>: xuất file lưu vào Tệp/iCloud hoặc gửi cho chính mình. Nên làm ít nhất mỗi tuần; chọn Tự động để ứng dụng nhắc.','Nhập file vào lại sẽ <b>gộp</b> với dữ liệu hiện có, không xóa gì. Đổi sang máy mới thì nhập file này.'])
   +sec('Đồng bộ Google Sheets là gì?',['Là tự động gửi dữ liệu (cùng loại như file JSON) lên một bảng Google Sheets của bạn, và nhận lại thay đổi từ máy kia. Dùng để <b>iPhone và iPad luôn giống nhau</b>, không cần xuất nhập file.','Đồng thời bảng Sheets là nơi lưu dự phòng thứ hai: có các tab dễ đọc (Thu chi, Danh mục, Tài sản…) và bản sao lưu mỗi ngày giữ 30 ngày.','Cách bật: <b>Khác → Đồng bộ Google Sheets</b>, nhập địa chỉ Apps Script và mã bí mật, hai máy dùng giống nhau.','Góc trên phải báo tình trạng: ☁ Đã lưu, ⏳ Chờ gửi, ⚠ lỗi. Mất mạng thì ứng dụng tự gửi lại khi có mạng.','Đồng bộ cũng là cách để ứng dụng tự lấy giá chứng chỉ quỹ. Cập nhật Code.gs bằng <b>Phiên bản mới</b>, không chọn Triển khai mới.'])
   +sec('Sao lưu JSON và đồng bộ khác nhau thế nào?',['<b>Đồng bộ</b>: tự động, giữ hai máy khớp nhau, nhưng xóa nhầm ở máy này sẽ lan sang máy kia.','<b>File JSON</b>: bạn tự giữ, lùi lại được về một ngày cũ. Nên dùng cả hai.']);
@@ -1843,7 +1849,7 @@ function pgCdSug(){
 }
 function pgAbout(){
   var n=D.entries.length,del=D.entries.filter(function(e){return e.deleted}).length;
-  return '<div class="card"><div>Phiên bản: <b>'+APP_VER+'</b></div><div>Tên máy: <b>'+(esc(L.dev)||'(chưa đặt)')+'</b></div><div>Số khoản lưu trong máy: <b>'+n+'</b> (đã xóa ẩn: '+del+')</div><div>Lưu trữ bền vững: <b id="pst">…</b></div></div><div class="mut">Không xóa biểu tượng trên màn hình chính để cập nhật: biểu tượng và Safari là hai kho dữ liệu riêng, xóa biểu tượng sẽ mất dữ liệu chưa sao lưu.</div>';
+  return '<div class="card"><div>Phiên bản: <b>'+APP_VER+'</b></div><div>Tên người dùng: <b>'+(esc(L.dev)||'(chưa đặt)')+'</b></div><div>Số khoản lưu trong máy: <b>'+n+'</b> (đã xóa ẩn: '+del+')</div><div>Lưu trữ bền vững: <b id="pst">…</b></div></div><div class="mut">Không xóa biểu tượng trên màn hình chính để cập nhật: biểu tượng và Safari là hai kho dữ liệu riêng, xóa biểu tượng sẽ mất dữ liệu chưa sao lưu.</div>';
 }
 function bindPageInputs(p){
   if(p.name==='ck'){
@@ -1872,7 +1878,6 @@ function bindPageInputs(p){
     $('#fc').oninput=function(){fundSt.code=this.value};
     [['fq','qty'],['fb','buy'],['fm','man']].forEach(function(x){var el=$('#'+x[0]);el.oninput=function(ev){el.value=liveFmt(el.value,ev);fundSt[x[1]]=el.value}});
   }else if(p.name==='basic'){
-    $('#bt').oninput=function(){L.title=this.value.trim()||'Fox-finance';saveL();$('#ttl').textContent=L.title;document.title=L.title};
     $('#bd').oninput=function(){L.dev=this.value.trim();saveL()};
   }else if(p.name==='search'){
     $('#sq').oninput=function(){p.q=this.value;p.pg=0;$('#sres').innerHTML=searchRes(p)};
@@ -1880,18 +1885,37 @@ function bindPageInputs(p){
 }
 
 /* ---------- xuất ảnh báo cáo ---------- */
+function repRange(){
+  var r=V.rep,es=E().filter(inP).map(function(e){return e.date}).sort(),from,to=es.length?es[es.length-1]:'';
+  if(r.mode==='m')from=ds(r.y,r.m,1);else if(r.mode==='y')from=r.y+'-01-01';else from=es[0]||'';
+  if(!to)to=from;return {from:from,to:to,n:from&&to?ddiff(from,to)+1:0};
+}
 function exportReport(){
-  var r=V.rep,g=groups(r.type),rows=Math.min(g.list.length,12),W=800,H=330+rows*50+60;
+  var rg=repRange(),G={thu:groups('thu'),chi:groups('chi')},MAX=25,W=800,lines=[];
+  lines.push({t:'Báo cáo: '+dshort(rg.from)+' - '+dshort(rg.to)+' ('+rg.n+' ngày)',k:'sub'});
+  [['thu','Thu nhập','#2e7d32'],['chi','Chi tiêu','#c62828']].forEach(function(x){var g=G[x[0]];
+    lines.push({t:x[1]+':',v:money(g.total),k:'h',c:x[2]});
+    g.list.slice(0,MAX).forEach(function(it){lines.push({t:'•  '+it.c.icon+' '+it.c.name+':',v:money(it.v),k:'i'})});
+    if(g.list.length>MAX)lines.push({t:'…  và '+(g.list.length-MAX)+' danh mục khác',k:'m'});
+    if(!g.list.length)lines.push({t:'Không có khoản nào',k:'m'});
+    lines.push({k:'gap'});
+  });
+  var rest=G.thu.total-G.chi.total;lines.push({t:'Còn lại:',v:(rest<0?'-':'')+money(Math.abs(rest)),k:'h',c:rest>=0?'#2e7d32':'#c62828'});
+  var H=110;lines.forEach(function(l){H+=l.k==='gap'?14:l.k==='h'?52:l.k==='sub'?44:40});H+=40;
   var cv=document.createElement('canvas');cv.width=W;cv.height=H;var x=cv.getContext('2d');
   x.fillStyle='#fff';x.fillRect(0,0,W,H);
-  x.fillStyle='#12306B';x.font='bold 34px -apple-system,Arial';x.fillText(L.title,30,56);
-  x.fillStyle='#6b7280';x.font='24px -apple-system,Arial';x.fillText('Báo cáo '+periodLabel().join(' ')+' · '+(r.type==='chi'?'Chi tiêu':'Thu nhập'),30,92);
-  var ch=groups('chi').total,th=groups('thu').total;
-  x.font='bold 26px -apple-system,Arial';x.fillStyle='#c62828';x.fillText('Chi: '+money(ch),30,140);x.fillStyle='#2e7d32';x.fillText('Thu: '+money(th),290,140);x.fillStyle='#111';x.fillText('Tổng: '+(th-ch>=0?'+':'-')+money(Math.abs(th-ch)),540,140);
-  if(g.total){var a=-Math.PI/2;g.list.forEach(function(it){var s=it.v/g.total*Math.PI*2;x.beginPath();x.arc(400,260,90,a,a+s);x.lineWidth=44;x.strokeStyle=it.c.color;x.stroke();a+=s})}
-  var y=400;g.list.slice(0,rows).forEach(function(it){x.fillStyle=it.c.color;x.fillRect(30,y-22,18,18);x.fillStyle='#111';x.font='24px -apple-system,Arial';x.fillText(it.c.name,60,y-6);x.textAlign='right';x.fillText(money(it.v)+'  '+(it.v/g.total*100).toFixed(1).replace('.',',')+'%',W-30,y-6);x.textAlign='left';y+=50});
-  if(g.list.length>rows){x.fillStyle='#6b7280';x.font='20px -apple-system,Arial';x.fillText('… và '+(g.list.length-rows)+' danh mục khác',60,y-6)}
-  cv.toBlob(function(b){shareFile(new File([b],'bao-cao.png',{type:'image/png'}),b)},'image/png');
+  x.fillStyle='#12306B';x.font='bold 34px -apple-system,Arial';x.textBaseline='alphabetic';x.fillText('Fox-finance'+(L.dev?' · '+L.dev:''),36,60);
+  var y=100;
+  lines.forEach(function(l){
+    if(l.k==='gap'){y+=14;return}
+    if(l.k==='sub'){y+=30;x.fillStyle='#555';x.font='26px -apple-system,Arial';x.textAlign='left';x.fillText(l.t,36,y);y+=14;x.fillStyle='#e3e5ea';x.fillRect(36,y,W-72,2);return}
+    if(l.k==='h'){y+=46;x.fillStyle=l.c;x.font='bold 30px -apple-system,Arial';x.textAlign='left';x.fillText(l.t,36,y);x.textAlign='right';x.fillText(l.v,W-36,y);y+=6;return}
+    y+=40;x.font=(l.k==='m'?'italic ':'')+'26px -apple-system,Arial';x.fillStyle=l.k==='m'?'#888':'#222';x.textAlign='left';
+    var t=l.t,maxw=W-36-90-(l.v?x.measureText(l.v).width+30:0);while(x.measureText(t).width>maxw&&t.length>4)t=t.slice(0,-2)+'…';
+    x.fillText(t,70,y);if(l.v){x.textAlign='right';x.fillText(l.v,W-36,y)}
+  });
+  x.textAlign='left';
+  cv.toBlob(function(b){shareFile(new File([b],'bao-cao_'+rg.from+'_'+rg.to+'.png',{type:'image/png'}),b)},'image/png');
 }
 function shareFile(file,blob){
   if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file]}).then(function(){fileDone(file)}).catch(function(){})}
@@ -1980,6 +2004,13 @@ function doSync(manual){
 
 /* ---------- xử lý bấm ---------- */
 var ACT={
+  lkall:function(t){
+    var want=t.dataset.v==='1',c=lkSet();if(want===!!(c&&c.open))return;
+    if(want){
+      var go=function(cc){cc.open=true;saveL();renderPage();toast('Đã bật bảo mật');if(bioOK()&&!cc.cred)confirmBox('Dùng Face ID / Touch ID?','Ứng dụng sẽ tự quét khi mở; quét không được thì nhập mã PIN.','Bật').then(function(ok){if(ok)lockSetBio().then(renderPage)})};
+      if(c)go(c);else newPin('Tạo mã PIN').then(function(pin){if(!pin)return;var salt=b64(rnd(12));pinHash(pin,salt).then(function(h){L.lock={set:1,open:false,salt:salt,h:h,cred:''};go(L.lock)})});
+    }else askPin('Nhập mã PIN','Để tắt thiết lập bảo mật').then(function(ok){if(!ok)return;delete L.lock;saveL();renderPage();toast('Đã tắt thiết lập bảo mật')});
+  },
   lkset:function(t){
     var want=t.dataset.v==='1',c=lkSet();if(want===!!c)return;
     if(want){newPin('Tạo mã PIN').then(function(pin){if(!pin)return;var salt=b64(rnd(12));pinHash(pin,salt).then(function(h){
@@ -2005,6 +2036,7 @@ var ACT={
   calsel:function(t){var c=V.cal,d=t.dataset.d;if(c.open&&c.sel===d)c.open=false;else{c.sel=d;c.open=true}render();if(c.open)setTimeout(function(){var el=$('.cdp');if(el&&el.scrollIntoView)el.scrollIntoView({block:'nearest',behavior:'smooth'})},60)},
   calclose:function(){V.cal.open=false;render()},
   calpick:function(){pickDate(V.cal.sel,function(v){var p=parse(v);V.cal.y=p.y;V.cal.m=p.m;V.cal.sel=v;V.cal.open=true;render()})},
+  feat:function(t){var m=L.feat||{};m[t.dataset.ft]=t.dataset.v==='1';L.feat=m;saveL();render()},
   memadd:function(){openPage('mem',null)},
   memedit:function(t){openPage('mem',t.dataset.id)},
   memdate:function(){pickDate(memSt.date,function(v){memSt.date=v;renderPage()})},

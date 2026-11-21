@@ -250,11 +250,11 @@ html,body{font-size:15px}
 .fbar .ghost{padding:7px 12px;font-size:13.5px}
 .pf{padding:6px 14px calc(env(safe-area-inset-bottom) + 6px)}
 .pf button{padding:9px;font-size:15px}
-.pf{display:flex;gap:10px}
+
 .bdg{color:#5B6B8C;font-weight:600;white-space:nowrap}
 .pic{width:20px;height:20px;vertical-align:-4px;margin-right:6px}
 .drg{flex:none;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;margin-left:2px;border-radius:9px;font-size:20px;font-weight:700;color:var(--navy);background:repeating-linear-gradient(0deg,#eef2fb 0 3px,#e3e8f4 3px 4px);border:1px dashed #b8c2d8;touch-action:none;cursor:grab;-webkit-user-select:none;user-select:none}
-.er.dragging{background:#eef2fb;box-shadow:0 6px 16px rgba(0,0,0,.18);position:relative;z-index:2;border-radius:10px}.er.dragging .drg{cursor:grabbing;background:var(--navy);color:#fff;border-style:solid}.pf button{flex:1}.pf .pdel{background:#fff;color:var(--chi);border:1px solid #e0a0a0}.pf .pdel[hidden]{display:none}
+.er.dragging{background:#eef2fb;box-shadow:0 6px 16px rgba(0,0,0,.18);position:relative;z-index:2;border-radius:10px}.er.dragging .drg{cursor:grabbing;background:var(--navy);color:#fff;border-style:solid}.ch .dbtn{flex:none;margin-left:8px;padding:7px 12px;border-radius:999px;background:#fff;color:var(--chi);border:1px solid #e0a0a0;font-weight:700;font-size:14px;white-space:nowrap}.ch h4,.ch .primary.sm{white-space:nowrap}.frm[data-form=edit] .ch .primary.sm{margin-left:auto;padding:7px 10px;font-size:14px}.ch .dbtn{padding:7px 10px}.frm[data-form=edit] .ch{gap:0}@media (max-width:374px){.frm[data-form=edit] .ch h4{display:none}.frm[data-form=edit] .ch .primary.sm,.ch .dbtn{padding:7px 11px;font-size:13.5px}}
 .ph{padding:calc(env(safe-area-inset-top) + 4px) 8px 4px}
 .ph button{font-size:26px;height:32px}
 #ptt{font-size:16px}
@@ -276,7 +276,7 @@ h3,h4{font-size:14.5px}
   <main id="main"></main>
   <nav id="nav"></nav>
 </div>
-<div id="page"><div class="ph"><button id="pback" aria-label="Quay lại">‹</button><div id="ptt"></div></div><div class="pb" id="pbody"></div><div class="pf"><button id="pdel" class="pdel" data-a="delentry" hidden>Xóa khoản này</button><button id="pexit">Thoát</button></div></div>
+<div id="page"><div class="ph"><button id="pback" aria-label="Quay lại">‹</button><div id="ptt"></div></div><div class="pb" id="pbody"></div><div class="pf"><button id="pexit">Thoát</button></div></div>
 <div id="kp">
   <div class="kpt"><button data-k="hide" aria-label="Ẩn bàn phím">⌄</button><button data-k="ok" aria-label="Xong" style="color:var(--navy);font-weight:700">✓</button></div>
   <div class="kg">
@@ -292,7 +292,7 @@ h3,h4{font-size:14.5px}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.71 (21/11/2026)';
+var APP_VER='1.72 (21/11/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -536,7 +536,7 @@ function formHTML(st,edit,form){
   var ims=stImgs(st),fi=function(cap,t){return '<label class="imbtn">'+t+'<input type="file" accept="image/*"'+(cap?' capture="environment"':' multiple')+' data-imf="'+form+'"></label>'};
   h+='<div class="row imr">'+(ims.length<4?'<span class="imb">'+fi(true,'Chụp ảnh')+fi(false,'Chọn ảnh')+'</span>':'<span class="mut" style="font-size:13px">Đã đủ ảnh</span>')+'<span class="imn">('+ims.length+'/4)</span></div>'
    +(ims.length?'<div class="mgr" style="margin:2px 0 8px">'+ims.map(function(x,i){return '<div class="mgi"><button type="button" data-f="eimgview" data-i="'+i+'"><img src="'+x.t+'" alt="Ảnh '+(i+1)+'"></button><button type="button" class="mgx" data-f="eimgrm" data-i="'+i+'" aria-label="Bỏ ảnh">✕</button></div>'}).join('')+'</div>':'');
-  h+='<div class="ch"><h4>Danh mục</h4><button class="primary sm '+st.type+'" data-f="ok">'+(edit?(chi?'Sửa khoản chi':'Sửa khoản thu'):(chi?'Nhập khoản chi':'Nhập khoản thu'))+'</button></div><div class="grid">';
+  h+='<div class="ch"><h4>Danh mục</h4><button class="primary sm '+st.type+'" data-f="ok">'+(edit?(chi?'Sửa khoản chi':'Sửa khoản thu'):(chi?'Nhập khoản chi':'Nhập khoản thu'))+'</button>'+(edit?'<button class="dbtn" data-a="delentry">'+(chi?'Xóa khoản chi':'Xóa khoản thu')+'</button>':'')+'</div><div class="grid">';
   cs.forEach(function(c){h+='<button class="cb'+(c.id===st.cat?' on':'')+'" data-f="cat" data-v="'+c.id+'"><span class="e">'+c.icon+'</span><small>'+esc(c.name)+'</small></button>'});
   h+='<button class="cb" data-a="pg" data-p="cats" data-arg="'+st.type+'"><span class="e">＋</span><small>Chỉnh sửa ›</small></button></div>';
   return h;
@@ -854,7 +854,7 @@ function pgPwList(){
 function pgPw(){
   var s=pwSt,sl=pwSlug(),pv=s.prov||pwProvOf(sl)||'an-giang',P=PW34.filter(function(x){return x[0]===pv})[0]||PW34[0],pq=sl==='thanh-pho-phu-quoc';
   var h='<div class="card"><label class="l" for="pwp">1. Tỉnh/thành</label><select class="inp" id="pwp">'+PW34.map(function(x){return '<option value="'+x[0]+'"'+(x[0]===P[0]?' selected':'')+'>'+x[1]+'</option>'}).join('')+'</select>'
-   +'<label class="l" for="pwq">2. Quận/huyện (theo địa giới cũ trên lichcupdien.app)</label><input class="inp" id="pwq" autocomplete="off" placeholder="Tìm nhanh, ví dụ: Thủ Đức">';
+   +'<label class="l" for="pwq">2. Quận/huyện (theo địa giới cũ trên lichcupdien.app)</label><input class="inp" id="pwq" autocomplete="off" placeholder="Tìm nhanh, ví dụ: Quận 1">';
   P[2].split(',').forEach(function(op){
     var ds=Object.keys(PWDIST).filter(function(k){return PWDIST[k].p===op});
     if(op==='kien-giang')ds.sort(function(x,y){return x==='thanh-pho-phu-quoc'?-1:y==='thanh-pho-phu-quoc'?1:0});
@@ -864,9 +864,9 @@ function pgPw(){
    +'<label class="l" for="pws">Hoặc dán đường dẫn trang huyện trên lichcupdien.app</label><input class="inp" id="pws" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off" placeholder="https://lichcupdien.app/ten-huyen/" value="'+esc(s.own)+'">';
   h+='<label class="l" for="pwd">3. Phường / xã</label>';
   if(pq)h+='<div class="chips" style="flex-wrap:wrap;margin:0 0 6px">'+PWW.map(function(w){return '<button data-a="pwward" data-v="'+w[0]+'" class="'+(norm(s.ward)===norm(w[0])?'on':'')+'">'+w[1]+' '+w[0]+'</button>'}).join('')+'</div>';
-  h+='<input class="inp" id="pwd" maxlength="40" autocomplete="off" placeholder="'+(pq?'Hoặc gõ tên khác':'Gõ tên phường/xã, ví dụ: Bến Nghé')+'" value="'+esc(s.ward)+'">'
+  h+='<input class="inp" id="pwd" maxlength="40" autocomplete="off" placeholder="'+(pq?'Hoặc gõ tên khác':'Gõ tên phường/xã, ví dụ: Bến Thành')+'" value="'+esc(s.ward)+'">'
    +'<label class="l">4. Khu phố (không bắt buộc)</label><div class="chips" style="flex-wrap:wrap;margin:0"><button data-a="pwkp" data-v="" class="'+(s.kp===''?'on':'')+'">Cả phường/xã</button>'+[1,2,3,4,5,6,7,8,9,10,11,12].map(function(k){return '<button data-a="pwkp" data-v="'+k+'" class="'+(s.kp===String(k)?'on':'')+'">KP'+k+'</button>'}).join('')+'</div>'
-   +'<input class="inp" id="pwk" maxlength="40" autocomplete="off" style="margin-top:8px" placeholder="Hoặc gõ tên khu phố/ấp, ví dụ: Ấp Tân Hòa" value="'+esc(/^\d+$/.test(s.kp)?'':s.kp)+'">'
+   +'<input class="inp" id="pwk" maxlength="40" autocomplete="off" style="margin-top:8px" placeholder="Hoặc gõ tên khu phố/ấp, ví dụ: Khu phố 3" value="'+esc(/^\d+$/.test(s.kp)?'':s.kp)+'">'
    +'<div class="mut" style="margin-top:8px">Hiển thị: <b id="pwprev">'+esc(pwPrevName())+'</b></div><div class="mut" style="margin-top:4px;font-size:12px">lichcupdien.app vẫn chia lịch theo quận/huyện cũ (trước sáp nhập 2025), nên bạn chọn huyện cũ chứa phường/xã của mình. Gõ tên khu phố/ấp thì chỉ báo lịch có đúng tên đó; chọn số KP thì báo lịch của phường/xã có số khu phố đó; để "Cả phường/xã" thì báo mọi lịch có tên phường/xã.</div></div><button class="primary" data-a="pwsave">Lưu</button>';
   return h;
 }
@@ -1297,7 +1297,7 @@ var SETP={basic:1,sync:1,cats:1,catlist:0,backup:1};
 function renderPage(){
   var p=pages[pages.length-1];if(!p)return;
   $('#ptt').textContent=p.name==='edit'?(editSt&&editSt.type==='thu'?'Sửa khoản thu':'Sửa khoản chi'):p.name==='fundrep'?'Biến động theo ngày · '+({fund:'Chứng chỉ quỹ',stock:'Cổ phiếu & trái phiếu',ast:'Tài sản'}[p.arg||'fund']):p.name==='catlist'?cat(p.arg).name:p.name==='fund'?(fundSt.id?'Sửa mã quỹ':'Thêm mã quỹ'):p.name==='inv'?(invSt.cat==='saving'?(invSt.id?'Sửa khoản gửi':'Thêm khoản gửi'):(invSt.id?'Sửa tài sản':'Thêm tài sản')):p.name==='watch'?(watchSt.id?'Sửa mã chờ giá':'Thêm mã chờ giá'):p.name==='cd'?(cdSt.id?'Sửa sự kiện':'Thêm sự kiện'):p.name==='mem'?(memSt.id?'Sửa kỷ niệm':'Thêm kỷ niệm'):p.name==='daypic'?'Chọn hình nền cho ngày':p.name==='pw'?(pwSt.id?'Sửa vị trí':'Thêm vị trí'):PTITLE[p.name];
-  $('#pexit').textContent=SETP[p.name]?'Lưu lại & Thoát':'Thoát';$('#pdel').hidden=p.name!=='edit';
+  $('#pexit').textContent=SETP[p.name]?'Lưu lại & Thoát':'Thoát';
   var b=$('#pbody'),top=b.scrollTop;
   var fn={edit:pgEdit,cats:pgCats,basic:pgBasic,sync:pgSync,balance:pgBalance,search:pgSearch,fundrep:pgFundRep,inv:pgInv,secu:pgSecu,backup:pgBackup,about:pgAbout,catlist:pgCatList,fund:pgFund,watch:pgWatch,cd:pgCd,mem:pgMem,adv:pgAdv,budset:pgBudSet,daypic:pgDayPic,pw:pgPw,pwlist:pgPwList,ck:pgCk,cdsug:pgCdSug,help:pgHelp}[p.name];
   b.innerHTML=fn(p);
@@ -1312,7 +1312,7 @@ function pgEdit(p){
 }
 function pgFund(){
   var s=fundSt;
-  return '<div class="card"><label class="l" style="margin-top:0" for="fc">Mã quỹ</label><input class="inp" id="fc" maxlength="16" autocapitalize="characters" autocomplete="off" placeholder="Ví dụ: ABCD" value="'+esc(s.code)+'">'
+  return '<div class="card"><label class="l" style="margin-top:0" for="fc">Mã quỹ</label><input class="inp" id="fc" maxlength="16" autocapitalize="characters" autocomplete="off" placeholder="Ví dụ: SSISCA" value="'+esc(s.code)+'">'
    +'<label class="l" for="fq">Số lượng chứng chỉ quỹ</label><input class="inp" id="fq" inputmode="decimal" autocomplete="off" placeholder="12.900" value="'+esc(s.qty)+'">'
    +'<label class="l" for="fb">Giá mua (đ / chứng chỉ)</label><input class="inp" id="fb" inputmode="decimal" autocomplete="off" placeholder="15.000,00" value="'+esc(s.buy)+'">'
    +'<label class="l">Ngày mua</label><button class="fld" data-a="fdate" style="width:100%;padding:11px">'+dlabel(s.date)+' ▾</button>'
@@ -1579,7 +1579,7 @@ function pgFundRep(pg){
 }
 /* ---------- Danh mục đầu tư ---------- */
 var ICATS=[['gold','Vàng'],['crypto','Tiền điện tử'],['stock','Cổ phiếu & trái phiếu'],['fund','Chứng chỉ quỹ'],['realty','Bất động sản'],['saving','Tiền gửi tiết kiệm'],['other','Khác']];
-var IPH={gold:['Vàng nhẫn','1','lượng','Mua trực tiếp tại tiệm vàng ABC…'],crypto:['Bitcoin','0,05','BTC','Mua trên sàn…'],stock:['Cổ phiếu XYZ','100','cổ phiếu','Mua qua công ty chứng khoán…'],fund:['','','',''],realty:['Căn hộ…','1','căn','Địa chỉ, tình trạng pháp lý…'],saving:['Ngân hàng ABC','','','Kỳ hạn, hình thức gửi, ghi chú…'],other:['Tên tài sản','1','','Ghi chú thêm…']};
+var IPH={gold:['Vàng nhẫn','1','lượng','Mua trực tiếp tại tiệm vàng ABC…'],crypto:['Bitcoin','0,05','BTC','Mua trên sàn…'],stock:['Cổ phiếu VCB','100','cổ phiếu','Mua qua công ty chứng khoán…'],fund:['','','',''],realty:['Căn hộ…','1','căn','Địa chỉ, tình trạng pháp lý…'],saving:['Ngân hàng ABC','','','Kỳ hạn, hình thức gửi, ghi chú…'],other:['Tên tài sản','1','','Ghi chú thêm…']};
 function icName(c){return ICATS.filter(function(x){return x[0]===c})[0][1]}
 function invItems(c){return D.assets.filter(function(a){return a.kind==='inv'&&a.cat===c&&!a.deleted}).sort(function(a,b){return a.date<b.date?-1:a.date>b.date?1:(a.id<b.id?-1:1)})}
 function goldNote(){var g=D.assets.find(function(a){return a.id==='gold'&&!a.deleted});return g&&g.note&&g.note.trim()?g:null}
@@ -1618,7 +1618,7 @@ function autoPx(){
   if(Date.now()-(L.pxAt||0)>(L.pxErr?5:30)*60000)fetchPx(false);
 }
 function fetchPx(manual){
-  var codes=pxCodes();if(PX.busy)return;if(!codes.length){L.pxErr='Chưa có mã giao dịch. Bấm Sửa để nhập mã (ví dụ XYZ).';saveL();refreshAssets();return}
+  var codes=pxCodes();if(PX.busy)return;if(!codes.length){L.pxErr='Chưa có mã giao dịch. Bấm Sửa để nhập mã (ví dụ VCB).';saveL();refreshAssets();return}
   PX.busy=true;L.pxAt=Date.now();saveL();refreshAssets();
   var ctl=typeof AbortController!=='undefined'?new AbortController():null,to=setTimeout(function(){ctl&&ctl.abort()},30000),u=priceUrl();
   fetch(u+(u.indexOf('?')<0?'?':'&')+'stocks='+encodeURIComponent(codes.join(',')),{signal:ctl?ctl.signal:undefined}).then(function(r){return r.json()}).then(function(j){
@@ -1672,7 +1672,7 @@ function stockBlock(){
     if(cost>0){var to=V.rep.openTotal2;h+='<button class="fr'+(to?' on':'')+'" data-a="totaltoggle2" style="grid-template-columns:auto 1fr;font-size:14px"><span>Tổng lời/lỗ<i class="ar">'+(to?'▴':'▾')+'</i></span><span style="text-align:right">'+plHTML(val-cost,(val/cost-1)*100)+'</span></button>'+(to?'<div class="fd">'+tl+'</div>':'')}
   }
   h+='<div class="fbar"><button class="ghost" data-a="invnew" data-c="stock">＋ Thêm tài sản</button>'+((it.length||ws.length)?'<button class="ghost" data-a="pxnow">'+(PX.busy?'Đang lấy giá…':'↻ Cập nhật giá')+'</button>':'')+'</div>';
-  if(it.length&&!pxCodes().length)h+='<div class="mut" style="margin-top:10px;text-align:center">Chưa có mã giao dịch nên không tự lấy giá. Bấm Sửa để nhập mã (ví dụ XYZ) hoặc nhập giá tay.</div>';
+  if(it.length&&!pxCodes().length)h+='<div class="mut" style="margin-top:10px;text-align:center">Chưa có mã giao dịch nên không tự lấy giá. Bấm Sửa để nhập mã (ví dụ VCB) hoặc nhập giá tay.</div>';
   else if(it.length||ws.length)h+='<div class="mut" style="margin-top:10px;text-align:center">'+(L.pxErr?'<span class="chi nerr">'+esc(L.pxErr)+'</span>':(L.pxOk?pxAtTxt():'Chưa lấy giá'))+'</div>';
   if(it.length)h+='<button class="ghost" data-a="pg" data-p="fundrep" data-arg="stock" style="margin-top:8px">📅 Biến động theo ngày</button>';
   h+=watchHTML(ws,'stock');
@@ -1734,8 +1734,8 @@ function pgInv(){
    +'<label class="l" for="ir">Lãi suất (%/năm, không bắt buộc)</label><input class="inp" id="ir" inputmode="decimal" autocomplete="off" placeholder="5,2" value="'+esc(s.rate)+'">'
    +'<label class="l" for="id">Ghi chú</label><textarea class="nt" id="id" rows="3" style="width:100%" placeholder="'+esc(ph[3])+'">'+esc(s.note)+'</textarea></div>'
    +'<button class="primary" data-a="invsave">Lưu</button>';
-  if(s.cat==='stock')return '<div class="card"><div class="mut" style="margin-bottom:2px">Danh mục: <b>'+icName(s.cat)+'</b></div><label class="l" for="ic">Mã giao dịch (để trống nếu không có, ví dụ trái phiếu)</label><input class="inp" id="ic" maxlength="16" autocapitalize="characters" autocorrect="off" spellcheck="false" autocomplete="off" placeholder="XYZ" value="'+esc(s.code)+'">'
-   +'<label class="l" for="in">Tên (không bắt buộc nếu đã có mã)</label><input class="inp" id="in" maxlength="60" autocomplete="off" placeholder="Ví dụ: Công ty XYZ / Trái phiếu ABC" value="'+esc(s.name)+'">'
+  if(s.cat==='stock')return '<div class="card"><div class="mut" style="margin-bottom:2px">Danh mục: <b>'+icName(s.cat)+'</b></div><label class="l" for="ic">Mã giao dịch (để trống nếu không có, ví dụ trái phiếu)</label><input class="inp" id="ic" maxlength="16" autocapitalize="characters" autocorrect="off" spellcheck="false" autocomplete="off" placeholder="VCB" value="'+esc(s.code)+'">'
+   +'<label class="l" for="in">Tên (không bắt buộc nếu đã có mã)</label><input class="inp" id="in" maxlength="60" autocomplete="off" placeholder="Ví dụ: Vietcombank / Trái phiếu ABC" value="'+esc(s.name)+'">'
    +'<label class="l">Ngày mua</label><button class="fld" data-a="idate" style="width:100%;padding:11px">'+dlabel(s.date)+' ▾</button>'
    +'<label class="l" for="iq">Số lượng</label><input class="inp" id="iq" inputmode="decimal" autocomplete="off" placeholder="100" value="'+esc(s.qty)+'">'
    +'<label class="l" for="ib">Giá mua (đ / 1 đơn vị)</label><input class="inp" id="ib" inputmode="decimal" autocomplete="off" placeholder="62.000" value="'+esc(s.buy)+'"><div class="mut" id="it" style="margin-top:4px">'+invPrev()+'</div>'
@@ -1752,7 +1752,7 @@ function pgInv(){
 }
 function invPrev(){if(invSt.cat==='saving'){var tm=parseInt(invSt.term,10)||0;return tm>0?'Đáo hạn vào ngày: '+dshort(addM(invSt.date,tm)):'Không kỳ hạn'}var q=parseNum(invSt.qty),b=parseNum(invSt.buy);return q&&b?'Thành tiền: '+fmt(q*b)+'đ':''}
 function pgBasic(){
-  return '<div class="card"><label class="l" style="margin-top:0" for="bd">Tên người dùng</label><input class="inp" id="bd" maxlength="20" value="'+esc(L.dev)+'" placeholder="Ví dụ: Lan iPhone"><div class="mut" style="margin-top:6px">Hiện trong nhật ký khi đồng bộ để biết ai/máy nào đã nhập, và trên ảnh báo cáo. Mỗi máy đặt một tên riêng.</div></div><div class="mut">Tự lưu khi bạn gõ.</div>';
+  return '<div class="card"><label class="l" style="margin-top:0" for="bd">Tên người dùng</label><input class="inp" id="bd" maxlength="20" value="'+esc(L.dev)+'"><div class="mut" style="margin-top:6px">Hiện trong nhật ký khi đồng bộ để biết ai/máy nào đã nhập, và trên ảnh báo cáo. Mỗi máy đặt một tên riêng.</div></div><div class="mut">Tự lưu khi bạn gõ.</div>';
 }
 function pgBudSet(){
   var h='<div class="mut" style="margin:0 2px 10px">Ngân sách áp dụng cho mọi tháng. Thứ tự theo danh mục chi tiêu đã tạo ở Thu chi. Bấm vào dòng để đặt, đổi hoặc xóa mức.</div><div class="card">';
@@ -1830,8 +1830,8 @@ function wPrev(){
   return 'Điểm kỳ vọng '+fmtQ(t)+'đ · '+pctS((t/ref-1)*100)+' so với giá đối chiếu';
 }
 function pgWatch(){
-  var s=watchSt,st=s.m==='stock',cp=wPrice({m:s.m,code:s.code.trim().toUpperCase()}),ph=cp?fmtQ(cp):(st?'25.000':'16.250,50');
-  return '<div class="card"><label class="l" style="margin-top:0" for="wc">'+(st?'Mã cổ phiếu / trái phiếu':'Mã quỹ')+'</label><input class="inp" id="wc" maxlength="16" autocapitalize="characters" autocomplete="off" placeholder="Ví dụ: '+(st?'XYZ':'ABCD')+'" value="'+esc(s.code)+'">'
+  var s=watchSt,st=s.m==='stock',cp=wPrice({m:s.m,code:s.code.trim().toUpperCase()}),ph=cp?fmtQ(cp):(st?'60.000':'16.250,50');
+  return '<div class="card"><label class="l" style="margin-top:0" for="wc">'+(st?'Mã cổ phiếu / trái phiếu':'Mã quỹ')+'</label><input class="inp" id="wc" maxlength="16" autocapitalize="characters" autocomplete="off" placeholder="Ví dụ: '+(st?'VCB':'SSISCA')+'" value="'+esc(s.code)+'">'
    +'<label class="l" for="wr">Giá đối chiếu (đ / '+(st?'cổ phiếu':'chứng chỉ')+')</label><input class="inp" id="wr" inputmode="decimal" autocomplete="off" placeholder="'+ph+'" value="'+esc(s.ref)+'"><div class="wh">Nhập giá bất kỳ làm mốc, ví dụ giá bạn đang theo dõi.</div>'
    +'<label class="l">Kỳ vọng</label><div class="seg" style="max-width:none;margin:0 0 8px"><button class="chi'+(s.dir==='dn'?' on':'')+'" data-a="wdir" data-d="dn">Kỳ vọng giảm</button><button class="thu'+(s.dir==='up'?' on':'')+'" data-a="wdir" data-d="up">Kỳ vọng tăng</button></div>'
    +'<div class="wrow"><input class="inp" id="wv" inputmode="decimal" autocomplete="off" placeholder="'+(s.unit==='p'?'50':ph)+'" value="'+esc(s.val)+'" aria-label="Giá trị kỳ vọng"><div class="uni"><button class="'+(s.unit==='d'?'on':'')+'" data-a="wunit" data-u="d">đ</button><button class="'+(s.unit==='p'?'on':'')+'" data-a="wunit" data-u="p">%</button></div></div><div class="wh" id="wh">'+wPrev()+'</div>'

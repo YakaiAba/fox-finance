@@ -1,5 +1,5 @@
 // Lấy từ mạng trước (chờ 4 giây), lỗi thì dùng bản đã lưu.
-var CACHE = 'chitieu-v180';
+var CACHE = 'chitieu-v181';
 self.addEventListener('install', function () { self.skipWaiting(); });
 self.addEventListener('activate', function (e) { e.waitUntil(self.clients.claim()); });
 self.addEventListener('fetch', function (e) {

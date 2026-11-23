@@ -104,7 +104,11 @@ h3,h4{margin:12px 0 8px;font-size:15px;color:var(--navy)}
 .cal.fl>button{min-height:64px}
 .fpl{margin:6px 0 0;padding-left:18px;font-size:14px;line-height:1.45}.fpl li{margin:4px 0}
 .mkw{margin-top:10px;border:1px solid var(--line);border-radius:10px;padding:8px;background:#fafbfc}.mkl{font-size:12px;color:var(--mut);font-weight:700;margin-bottom:6px}
-.cal.mk>button{min-height:44px;cursor:default}.cal.mk .h{font-size:10px;padding:2px 0}.cal.mk .d{font-size:11px}.cal.mk .nt2{font-size:8.5px}
+.cal.mk>button{min-height:44px;cursor:default}
+.cal.mk2>button{cursor:default;min-height:54px}.mkw .nav{margin-bottom:6px}.mkw .nav .arr{pointer-events:none}.mkw .seg button{pointer-events:none}
+.mkdim{background:rgba(0,0,0,.35);border-radius:10px;padding:14px 10px}.mkd{background:#fff;border-radius:14px;padding:14px}.mkd .mkbt{display:flex;gap:10px;margin-top:12px}.mkd .mkbt button{flex:1;padding:10px;border-radius:999px;background:var(--tint);color:var(--navy);font-weight:700;pointer-events:none}.mkd .mkbt button.pr{background:var(--navy);color:#fff}
+.mkimg{background:#fff;border-radius:6px;box-shadow:0 1px 6px rgba(0,0,0,.18);padding:12px 12px 14px;font-size:12px}.mkimg .mt{font-weight:700;font-size:15px;color:#12306B}.mkimg .ms{color:#555;margin:6px 0 4px;padding-bottom:5px;border-bottom:1px solid #e3e5ea}
+.mkimg .mh{display:flex;justify-content:space-between;font-weight:700;font-size:13.5px;margin-top:9px}.mkimg .mi{display:flex;justify-content:space-between;gap:6px;color:#222;margin:4px 0 0 12px}.cal.mk .h{font-size:10px;padding:2px 0}.cal.mk .d{font-size:11px}.cal.mk .nt2{font-size:8.5px}
 .mkn{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.12);padding:10px;font-size:13px;line-height:1.35}.mkn .mkh{display:flex;justify-content:space-between;color:var(--mut);font-size:11px;margin-bottom:4px}.mkn .mkh b{color:var(--navy)}
 .mkb{display:flex;gap:8px;margin-top:8px}.mkb span{flex:1;text-align:center;padding:6px;border-radius:8px;background:#e9ebf0;font-weight:700;font-size:12px}.mkb .pr{background:var(--navy);color:#fff}
 .mkr{background:#fff;border-radius:10px;padding:8px;font-size:13px}.mkr .t1{display:flex;justify-content:space-between;gap:6px;font-weight:600}
@@ -197,7 +201,7 @@ body.kp .pb,body.kp main{padding-bottom:330px}
 #dl{position:fixed;inset:0;z-index:40;display:none;background:rgba(0,0,0,.4);align-items:center;justify-content:center;padding:20px}
 #dl.show{display:flex}
 .dlg{background:#fff;border-radius:16px;padding:16px;width:100%;max-width:360px;max-height:88dvh;overflow-y:auto}
-.dlg h2{margin:0 0 8px;font-size:18px;color:var(--navy)}
+.dlg h2{margin:0 0 8px;font-size:18px;color:#111}
 .dlg .bt{display:flex;gap:10px;margin-top:14px}
 .dlg .bt button{flex:1;padding:11px;border-radius:12px;background:#e9ebf0;font-weight:700}
 .dlg .bt button.pr{background:var(--navy);color:#fff}.dlg .bt button.dg{background:var(--chi);color:#fff}
@@ -323,7 +327,7 @@ select.inp{font-size:16px;background:#fff;width:100%}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.79 (23/11/2026)';
+var APP_VER='1.80 (23/11/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -1810,22 +1814,45 @@ function mkChart(ys,color){
   var pl=pts.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1)}).join(' ');
   return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="display:block;margin-top:6px" aria-hidden="true"><line x1="8" y1="'+(H-10)+'" x2="'+(W-8)+'" y2="'+(H-10)+'" stroke="#d5d9e2"/><polygon points="8,'+(H-10)+' '+pl+' '+(W-8)+','+(H-10)+'" fill="'+color+'" opacity=".12"/><polyline points="'+pl+'" fill="none" stroke="'+color+'" stroke-width="2.2" stroke-linejoin="round"/>'+pts.map(function(p){return '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="2.6" fill="'+color+'"/>'}).join('')+'</svg>';
 }
+function mkPrev(){var t=new Date(),y=t.getFullYear(),m=t.getMonth();if(m<1){m=12;y--}return {y:y,m:m,n:dim(y,m)}}
+function prng(i){var x=Math.sin(i*12.9898)*43758.5453;return x-Math.floor(x)}
+function mkN(v,cls,pre,par){v=Math.abs(v);var t=(pre||'')+calAmt(v),u=(pre||'')+shortAmt(v);return '<span class="nt2 '+(cls||'')+'" data-s="'+(par?'('+u+')':u)+'">'+(par?'('+t+')':t)+'</span>'}
+function mkCalFull(M,cell,sel){
+  var first=(new Date(M.y,M.m-1,1).getDay()-WS+7)%7,rows=Math.ceil((first+M.n)/7),h=navHTML(fmy(M.y,M.m),monthSub(M.y,M.m),'nop','nop')+'<div class="cal mk2">'+wkHead();
+  for(var i=0;i<rows*7;i++){var d=i-first+1;if(d<1||d>M.n){var o=new Date(M.y,M.m-1,d);h+='<button class="o" type="button"><span class="d">'+o.getDate()+'</span></button>';continue}
+    h+='<button type="button" class="'+(d===sel?'sel':'')+'"><span class="top"><span class="d">'+d+'</span></span>'+cell(d)+'</button>'}
+  return h+'</div>';
+}
+function mkCat(list,type){var c=(type==='thu'?DEF_THU:DEF_CHI).filter(function(x){return x[0]===list})[0];return c?c[1]:'•'}
+function mkInvDays(M,base,cashOn){
+  var out=[];for(var d=1;d<=M.n;d++){var f=base*(1+0.006*Math.sin(d/2.6)+0.0012*d+0.002*(prng(d)-.5)),c=cashOn?exV(2000+(d>=5?1000:0)-26*d):0;out.push(Math.round(exV(f)/100)*100+c)}return out}
 function fpMock(k){
-  if(k==='remind')return '<div class="mkn"><div class="mkh"><b>🦊 Fox-finance</b><span>21:30</span></div><b>Nhắc nhập chi tiêu</b><div>Hôm nay bạn chưa nhập khoản thu chi nào.</div><div class="mkb"><span class="pr">Nhập ngay</span><span>Để sau</span></div></div>';
-  if(k==='bud')return '<div class="mkr"><div class="t1"><span>🍽️ <span>Ăn uống</span> <small class="bdg">(🎯'+exA(500)+')</small></span><span class="chi">'+exA(530)+'</span></div><div class="bar"><i style="width:100%;background:#c62828"></i></div><div class="t1"><span>🛍️ <span>Mua sắm</span> <small class="bdg">(🎯'+exA(300)+')</small></span><span>'+exA(120)+'</span></div><div class="bar"><i style="width:40%;background:#5B6B8C"></i></div></div>';
-  if(k==='shot')return '<div class="mks"><span class="mkbtn">📝</span><span class="mka">→</span><div class="mki"><b><span>Báo cáo</span> '+fmy(new Date().getFullYear(),new Date().getMonth()+1)+'</b><div><span>Thu nhập</span><span class="thu">+'+exA(1200)+'</span></div><div><span>Chi tiêu</span><span class="chi">-'+exA(800)+'</span></div><div class="mkt"><span>Còn lại</span><span class="thu">+'+exA(400)+'</span></div></div></div>';
-  if(k==='daily'){var c=[[12,mkL(15,'c','-')],[13,''],[14,mkL(8,'c','-')],[15,mkL(1000,'t','+')+mkL(40,'c','-')+mkL(960,'t','+',1),'sel'],[16,mkL(12,'c','-')],[17,mkL(50,'t','+')],[18,mkL(25,'c','-')]];
-    return mkCal(c)+mkChart([-15,0,-8,960,-12,50,-25],'#12306B')}
-  if(k==='invrep'){var v=[9950,9980,10000,10100,10060,10060,10120],h=[];v.forEach(function(x,i){var d=i?x-v[i-1]:0;h.push([12+i,mkL(x,'')+(d?mkL(d,d>0?'t':'c',d>0?'+':'-'):''),i===3?'sel':''])});
-    return mkCal(h)+mkChart(v,'#12306B')}
-  if(k==='ast'){var a=[9900,9910,10000,10050,10030,10030,10080],g=[];a.forEach(function(x,i){var d=i?x-a[i-1]:0;g.push([12+i,mkL(x,'')+(d?mkL(d,d>0?'t':'c',d>0?'+':'-'):''),i===3?'sel':''])});
-    return mkCal(g)+mkChart(a,'#12306B')}
+  if(k==='remind')return '<div class="mkdim"><div class="mkd"><h2>Nhắc nhập chi tiêu</h2><div>Hôm nay bạn chưa nhập khoản thu chi nào.</div><div class="mkbt"><button type="button" class="pr">Nhập ngay</button><button type="button">Để sau</button></div></div></div>';
+  if(k==='bud'){var R=[['Ăn uống',530,500,'#e8833a'],['Quần áo',240,300,'#5B6B8C'],['Đi lại',90,100,'#2e9d8f'],['Tiền điện',60,0,'#c9a227']],tot=0;R.forEach(function(r){tot+=r[1]});
+    return '<div class="seg" style="margin:0 0 8px"><button type="button" class="thu">Thu nhập</button><button type="button" class="chi on">Chi tiêu</button></div><div class="card" style="margin:0">'+R.map(function(r){var ov=r[2]&&r[1]>r[2];return '<div class="br"><div class="t1"><span>'+mkCat(r[0],'chi')+' <span>'+r[0]+'</span>'+(r[2]?' <small class="bdg">(🎯'+exA(r[2])+')</small>':'')+'</span><span'+(ov?' class="chi"':'')+'>'+exA(r[1])+' <small class="mut">'+(r[1]/tot*100).toFixed(1).replace('.',DS)+'%</small></span></div><div class="bar"><i style="width:'+(r[1]/tot*100)+'%;background:'+r[3]+'"></i></div></div>'}).join('')+'</div>';}
+  if(k==='shot'){var M=mkPrev(),T=[['Tiền lương',1000],['Thưởng, quà tặng',200]],C=[['Ăn uống',530],['Quần áo',240],['Đi lại',90],['Tiền điện',60]],th=1200,ch=920,ln=function(r,t){return '<div class="mi"><span>• '+mkCat(r[0],t)+' <span>'+r[0]+'</span>:</span><span>'+exA(r[1])+'</span></div>'};
+    return '<div class="mkimg"><div class="mt">Fox-finance'+(L.dev?' · '+esc(L.dev):'')+'</div><div class="ms"><span>Báo cáo</span>: '+dshort(ds(M.y,M.m,1))+' - '+dshort(ds(M.y,M.m,M.n))+' (<span>'+M.n+' ngày</span>)</div>'
+      +'<div class="mh" style="color:#2e7d32"><span><span>Thu nhập</span>:</span><span>'+exA(th)+'</span></div>'+T.map(function(r){return ln(r,'thu')}).join('')
+      +'<div class="mh" style="color:#c62828"><span><span>Chi tiêu</span>:</span><span>'+exA(ch)+'</span></div>'+C.map(function(r){return ln(r,'chi')}).join('')
+      +'<div class="mh" style="color:#2e7d32"><span><span>Còn lại</span>:</span><span>'+exA(th-ch)+'</span></div></div>';}
+  if(k==='daily'){var M=mkPrev(),D2={},th=0,ch=0;
+    for(var d=1;d<=M.n;d++){var o={thu:0,chi:0};if(prng(d+50)>.15)o.chi=exV(Math.round(6+prng(d)*38));if(d===5)o.thu=exV(1000);if(d===20)o.thu=exV(150);if(d===5)o.chi+=exV(120);D2[d]=o;th+=o.thu;ch+=o.chi}
+    var h=mkCalFull(M,function(d){var x=D2[d],b='';if(x.thu)b+=mkN(x.thu,'t','+');if(x.chi)b+=mkN(x.chi,'c','-');if(x.thu&&x.chi){var nt=x.thu-x.chi;b+=mkN(nt,nt>=0?'t':'c',nt>=0?'+':'-',1)}return b},5);
+    h+='<div class="sum" style="margin-top:8px"><div>Thu nhập<b class="thu">+'+money(th)+'</b></div><div>Chi tiêu<b class="chi">-'+money(ch)+'</b></div></div><div class="card" style="padding:4px 10px;margin:8px 0"><div class="tot" style="padding:4px 0"><span>Còn lại</span><b class="'+(th-ch>=0?'thu':'chi')+'">'+(th-ch>=0?'+':'-')+money(Math.abs(th-ch))+'</b></div></div>';
+    h+='<div class="seg"><button type="button" class="thu">Thu nhập</button><button type="button" class="chi on">Chi tiêu</button><button type="button">Gộp</button></div>';
+    var pts=[];for(var j=1;j<=M.n;j++)pts.push({x:String(j),y:D2[j].chi});
+    return h+'<div class="card" style="margin:0">'+lineChart(pts,'#c62828','Chi tiêu theo ngày')+'</div>';}
+  if(k==='invrep'||k==='ast'){var M=mkPrev(),A=k==='ast',v=mkInvDays(M,A?8000:10000,A),last=v[v.length-1];
+    var h='<div class="card" style="margin:0 0 8px"><div class="tot" style="padding:0"><span>'+(A?'Tổng tài sản hiện tại':'Tổng giá trị hiện tại')+'</span><b'+(A?' class="thu"':'')+'>'+money(last)+'</b></div>'+(A?'':'<div class="tr" style="display:flex;justify-content:space-between;padding:6px 0 0;border-top:1px solid var(--line);margin-top:6px"><span>Lời/lỗ hiện tại (tiền mặt)</span><b class="thu">+'+money(last-exV(10000))+'</b></div>')+'</div>';
+    h+=mkCalFull(M,function(d){var x=v[d-1],p=d>1?v[d-2]:null,df=p===null?0:x-p;return mkN(x,'')+(df?mkN(df,df>0?'t':'c',df>0?'+':'-'):'')},15);
+    var pts=v.map(function(y,i){return {x:String(i+1),y:y}});
+    return h+'<div class="card" style="margin:8px 0 0">'+lineChart(pts,'#12306B',A?'Tổng tài sản theo ngày':'Giá trị theo ngày',true)+'</div>';}
   return '';
 }
 function exA(n){return money(n*({VND:10000,JPY:100,KRW:1000,IDR:10000,TWD:30,THB:30,INR:80,TRY:30,SEK:10,PLN:4,MYR:4,CNY:7,BRL:5,SAR:4}[LOC.cur]||1))}
 function fpInfo(k){
   var x=FPI[k];if(!x)return;
-  dlg('<h2>👑 '+esc(x[0])+'</h2><ul class="fpl">'+x[1].map(function(t){return '<li>'+esc(t)+'</li>'}).join('')+'</ul><div class="mkw"><div class="mkl">Ví dụ minh họa</div>'+fpMock(k)+'</div>',[{t:'Đóng'}],function(d){d.querySelectorAll('.cal.mk .nt2[data-s]').forEach(function(e){if(e.scrollWidth>e.clientWidth+0.5)e.textContent=e.dataset.s;if(e.scrollWidth>e.clientWidth+0.5)e.style.fontSize='7.5px'})});
+  dlg('<h2>👑 '+esc(x[0])+'</h2><ul class="fpl">'+x[1].map(function(t){return '<li>'+esc(t)+'</li>'}).join('')+'</ul><div class="mkw"><div class="mkl">Ví dụ minh họa</div>'+fpMock(k)+'</div>',[{t:'Đóng'}],function(d){d.querySelectorAll('.cal .nt2[data-s]').forEach(function(e){if(e.scrollWidth>e.clientWidth+0.5)e.textContent=e.dataset.s;if(e.scrollWidth>e.clientWidth+0.5)e.style.fontSize='7.5px'})});
 }
 function srow(title,sub,a,on,first){return '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;'+(first?'':'margin-top:14px;padding-top:14px;border-top:1px solid var(--line)')+'"><div><b>'+title+'</b>'+(sub?'<div class="mut" style="margin:2px 0 0">'+sub+'</div>':'')+'</div>'+onoff(a,on)+'</div>'}
 function pgSecu(){

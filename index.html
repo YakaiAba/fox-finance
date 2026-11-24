@@ -7,12 +7,12 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Fox-finance">
-<meta name="theme-color" content="#12306B">
+<meta name="theme-color" content="#5B6B8C">
 <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <title>Fox-finance</title>
 <style>
-:root{--navy:#12306B;--bg:#f4f4f6;--thu:#2e7d32;--chi:#c62828;--line:#e3e5ea;--mut:#6b7280;--tint:#eef2fb;--warn:#ef8a17}
+:root{--navy:#5B6B8C;--bg:#f4f4f6;--thu:#2e7d32;--chi:#c62828;--line:#e3e5ea;--mut:#6b7280;--tint:#eef2fb;--warn:#ef8a17}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 input,textarea{-webkit-user-select:text;user-select:text}
 html,body{touch-action:manipulation}
@@ -109,7 +109,7 @@ h3,h4{margin:12px 0 8px;font-size:15px;color:var(--navy)}
 #nav button{touch-action:manipulation}
 .cal.mk2>button{cursor:default;min-height:54px}.mkw .nav{margin-bottom:6px}.mkw .nav .arr{pointer-events:none}.mkw .seg button{pointer-events:none}
 .mkdim{background:rgba(0,0,0,.35);border-radius:10px;padding:14px 10px}.mkd{background:#fff;border-radius:14px;padding:14px}.mkd .mkbt{display:flex;gap:10px;margin-top:12px}.mkd .mkbt button{flex:1;padding:10px;border-radius:999px;background:var(--tint);color:var(--navy);font-weight:700;pointer-events:none}.mkd .mkbt button.pr{background:var(--navy);color:#fff}
-.mkimg{background:#fff;border-radius:6px;box-shadow:0 1px 6px rgba(0,0,0,.18);padding:12px 12px 14px;font-size:12px}.mkimg .mt{font-weight:700;font-size:15px;color:#12306B}.mkimg .ms{color:#555;margin:6px 0 4px;padding-bottom:5px;border-bottom:1px solid #e3e5ea}
+.mkimg{background:#fff;border-radius:6px;box-shadow:0 1px 6px rgba(0,0,0,.18);padding:12px 12px 14px;font-size:12px}.mkimg .mt{font-weight:700;font-size:15px;color:#5B6B8C}.mkimg .ms{color:#555;margin:6px 0 4px;padding-bottom:5px;border-bottom:1px solid #e3e5ea}
 .mkimg .mh{display:flex;justify-content:space-between;font-weight:700;font-size:13.5px;margin-top:9px}.mkimg .mi{display:flex;justify-content:space-between;gap:6px;color:#222;margin:4px 0 0 12px}.cal.mk .h{font-size:10px;padding:2px 0}.cal.mk .d{font-size:11px}.cal.mk .nt2{font-size:8.5px}
 .mkn{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.12);padding:10px;font-size:13px;line-height:1.35}.mkn .mkh{display:flex;justify-content:space-between;color:var(--mut);font-size:11px;margin-bottom:4px}.mkn .mkh b{color:var(--navy)}
 .mkb{display:flex;gap:8px;margin-top:8px}.mkb span{flex:1;text-align:center;padding:6px;border-radius:8px;background:#e9ebf0;font-weight:700;font-size:12px}.mkb .pr{background:var(--navy);color:#fff}
@@ -340,7 +340,7 @@ select.inp{font-size:16px;background:#fff;width:100%}
 <script>
 (function(){
 'use strict';
-var APP_VER='1.83 (24/11/2026)';
+var APP_VER='1.84 (24/11/2026)';
 var KEY='chitieu.v1',LKEY='chitieu.local',SKEY='chitieu.sync';
 var LISTS=['entries','cats','budgets','assets'];
 function SL(){return S.sv>=2?LISTS:LISTS.slice(0,3)}
@@ -902,7 +902,7 @@ function render(){
   else if(tab==='bud')m.innerHTML=budHTML();
   else m.innerHTML=moreHTML();
   if(pages.length)renderPage();
-  if(tab==='rep'){autoNav();autoPx()}
+  if(tab==='rep'){autoNav();autoPx();autoMk()}
   if(tab==='cal')autoPw();
 }
 function sumE(f){var s=0;E().forEach(function(e){if(f(e))s+=e.amount});return s}
@@ -1474,8 +1474,9 @@ function refreshAssets(){
 var NAV={busy:false};
 var DEFAULT_PRICE_URL='https://script.google.com/macros/s/AKfycbxSazXJQDlCi5Ed54bmyDSpIkdHs7STCyIgWUOq_-C9T-TXC4upMuRW3_Ximydat61R/exec';
 function priceUrl(){return DEFAULT_PRICE_URL}
-function ccQ(){return isVN()?'':'&cc='+LOC.cc+(L.pxTpl?'&tpl='+encodeURIComponent(L.pxTpl):'')}
-function priceReqUrl(codes){var u=priceUrl();return u+(u.indexOf('?')<0?'?':'&')+'codes='+encodeURIComponent(codes.join(','))+ccQ()}
+function srcOf(k){var s=L.src;if(!s&&L.pxTpl&&(k==='fund'||k==='stock'))return L.pxTpl;return (s&&s[k])||''}
+function ccQ(k){var t=srcOf(k||'fund');return (isVN()?'':'&cc='+LOC.cc)+(t?'&tpl='+encodeURIComponent(t):'')}
+function priceReqUrl(codes){var u=priceUrl();return u+(u.indexOf('?')<0?'?':'&')+'codes='+encodeURIComponent(codes.join(','))+ccQ('fund')}
 function autoNav(){
   if(NAV.busy||!(funds().length||watches().length)||!(priceUrl()||(S.url&&S.secret)))return;
   if(Date.now()-(L.navAt||0)>(L.navErr?5:30)*60000)fetchNav(false);
@@ -1555,7 +1556,7 @@ function moreHTML(){
   var bk=backupInfo(),h='';
   h+='<div class="'+(bk.bad?'warn':'ok')+'">'+(bk.bad?'⚠ ':'✓ ')+bk.txt+'</div>';
   h+='<div class="card"><button class="li" data-a="pg" data-p="basic"><i>⚙️</i><span>Cài đặt chung</span><em>'+esc((L.dev?L.dev+' · ':'')+LOC.cur)+'</em></button><button class="li" data-a="pg" data-p="adv"><i>👑</i><span>Fox Premium</span></button><button class="li" data-a="pg" data-p="secu"><i>🔒</i><span>Bảo mật ứng dụng</span><em>'+(lkSet()?'Đã thiết lập':'Chưa thiết lập')+'</em></button></div>';
-  h+='<div class="card">'+(isVN()?'<button class="li" data-a="pg" data-p="pwlist"><i>'+bulbI()+'</i><span>Lịch cúp điện</span><em>'+pwLocs().length+' vị trí</em></button>':'<button class="li" data-a="pg" data-p="pxsrc"><i>🔗</i><span>Nguồn dữ liệu giá</span><em>'+(L.pxTpl?'Link riêng':'Yahoo')+'</em></button>')+'<button class="li" data-a="pg" data-p="ck"><i>💹</i><span>Lãi kép</span></button><button class="li" data-a="pg" data-p="search"><i>🔍</i><span>Tìm kiếm giao dịch</span></button></div>';
+  h+='<div class="card">'+(isVN()?'<button class="li" data-a="pg" data-p="pwlist"><i>'+bulbI()+'</i><span>Lịch cúp điện</span><em>'+pwLocs().length+' vị trí</em></button>':'')+'<button class="li" data-a="pg" data-p="pxsrc"><i>🔗</i><span>Nguồn dữ liệu giá</span><em>'+(SRCN.some(function(x){return srcOf(x[0])})?'Có link riêng':'Mặc định')+'</em></button>'+'<button class="li" data-a="pg" data-p="ck"><i>💹</i><span>Lãi kép</span></button><button class="li" data-a="pg" data-p="search"><i>🔍</i><span>Tìm kiếm giao dịch</span></button></div>';
   h+='<div class="card"><button class="li" data-a="pg" data-p="sync"><i>☁️</i><span>Đồng bộ Google Sheets</span><em>'+(S.url?esc(SYN.msg||''):'Chưa bật')+'</em></button><button class="li" data-a="pg" data-p="backup"><i>💾</i><span>Sao lưu dữ liệu</span></button><button class="li" data-a="pg" data-p="help"><i>📖</i><span>Hướng dẫn sử dụng</span></button><button class="li" data-a="pg" data-p="about"><i>ℹ️</i><span>Thông tin ứng dụng</span></button></div>';
   return h;
 }
@@ -1569,7 +1570,7 @@ function openPage(name,arg){
   }
   if(name==='inv'){
     var io=arg&&arg.indexOf('new:')!==0&&D.assets.find(function(x){return x.id===arg});
-    invSt=io?{id:io.id,cat:io.cat,code:io.cat==='stock'?stCode(io):(io.code||''),man:io.man?liveFmt(numStr(io.man)):'',term:io.term>0?String(io.term):'',rate:io.rate?liveFmt(numStr(io.rate)):'',name:io.name,qty:liveFmt(numStr(io.qty)),unit:io.unit||'',buy:liveFmt(numStr(io.buy)),date:io.date,note:io.note||''}:{id:null,cat:String(arg).slice(4),code:'',man:'',term:'',rate:'',name:'',qty:'',unit:'',buy:'',date:today(),note:''};
+    invSt=io?{id:io.id,gk:io.gk||'bar',cat:io.cat,code:io.cat==='stock'?stCode(io):(io.code||''),man:io.man?liveFmt(numStr(io.man)):'',term:io.term>0?String(io.term):'',rate:io.rate?liveFmt(numStr(io.rate)):'',name:io.name,qty:liveFmt(numStr(io.qty)),unit:io.unit||'',buy:liveFmt(numStr(io.buy)),date:io.date,note:io.note||''}:{id:null,gk:'bar',cat:String(arg).slice(4),code:'',man:'',term:'',rate:'',name:'',qty:'',unit:'',buy:'',date:today(),note:''};
   }
   if(name==='fund'){
     var fo=arg&&D.assets.find(function(x){return x.id===arg});
@@ -1634,7 +1635,7 @@ function txCfg(c){
   return {acts:[['buy','Mua'],['sell','Bán'],['conv','Chuyển đổi']],ql:c==='fund'?'Số lượng chứng chỉ quỹ':'Số lượng',note:'Lưu ý: tính năng này chỉ giúp thay đổi số lượng tài sản của bạn và tự động cập nhật thống kê mới. Phí giao dịch, thuế… hệ thống không nắm được nên không liệt kê. Sau khi Bán hoặc Chuyển đổi, số tiền hoặc giá trị bạn thật sự nhận được, bạn tự nhập lại vào Thu nhập hoặc Danh mục đầu tư.'};
 }
 function txHave(it){return txCat(it)==='saving'?it.qty*it.buy:it.qty}
-function txPx(it){var c=txCat(it);return c==='fund'?(priceOf(it)||it.buy):c==='stock'?(stPrice(it)||it.buy):it.buy}
+function txPx(it){var c=txCat(it);return c==='fund'?(priceOf(it)||it.buy):c==='stock'?(stPrice(it)||it.buy):(c==='gold'||c==='crypto')?(mkPrice(it)||it.buy):it.buy}
 function txName(it){var c=txCat(it);return c==='fund'?it.code:c==='stock'?(stCode(it)||it.name):it.name}
 function txU(it){return it.unit?' '+esc(it.unit):''}
 function txPrev(){
@@ -1747,7 +1748,7 @@ function pgFlow(){
   var pts=[];for(var k=1;k<=n;k++){var z=tot[ds(f.y,f.m,k)]||{thu:0,chi:0};pts.push({x:String(k),y:f.t==='thu'?z.thu:f.t==='chi'?z.chi:z.thu-z.chi})}
   if(V.chm!=='m')pts=flowPts(f);
   var hasNet=pts.some(function(p){return p.y!==0}),byM=V.chm!=='m';
-  h+='<div class="card">'+chSeg()+(f.t==='net'?(hasNet?lineChart(pts,'#12306B',byM?'Thu chi gộp theo tháng (thu − chi)':'Thu chi gộp theo ngày (thu − chi)',true):'<div class="empty">Chưa có dữ liệu</div>'):lineChart(pts,f.t==='chi'?'#c62828':'#2e7d32',f.t==='chi'?(byM?'Chi tiêu theo tháng':'Chi tiêu theo ngày'):(byM?'Thu nhập theo tháng':'Thu nhập theo ngày')))+'</div>';
+  h+='<div class="card">'+chSeg()+(f.t==='net'?(hasNet?lineChart(pts,'#5B6B8C',byM?'Thu chi gộp theo tháng (thu − chi)':'Thu chi gộp theo ngày (thu − chi)',true):'<div class="empty">Chưa có dữ liệu</div>'):lineChart(pts,f.t==='chi'?'#c62828':'#2e7d32',f.t==='chi'?(byM?'Chi tiêu theo tháng':'Chi tiêu theo ngày'):(byM?'Thu nhập theo tháng':'Thu nhập theo ngày')))+'</div>';
   return h+'<div class="mut" style="margin:0 2px">Mỗi ô: dòng xanh là tổng thu, dòng đỏ là tổng chi, số trong ngoặc là phần gộp (thu − chi) khi ngày đó có cả thu và chi. Bấm vào một ngày để xem các khoản.</div>';
 }
 function pgFund(){
@@ -1892,7 +1893,7 @@ function fpMock(k){
     var h='<div class="card" style="margin:0 0 8px"><div class="tot" style="padding:0"><span>'+(A?'Tổng tài sản hiện tại':'Tổng giá trị hiện tại')+'</span><b'+(A?' class="thu"':'')+'>'+money(last)+'</b></div>'+(A?'':'<div class="tr" style="display:flex;justify-content:space-between;padding:6px 0 0;border-top:1px solid var(--line);margin-top:6px"><span>Lời/lỗ hiện tại</span><b class="thu">+'+money(last-exV(10000))+'</b></div>')+'</div>';
     h+=mkCalFull(M,function(d){var x=v[d-1],p=d>1?v[d-2]:null,df=p===null?0:x-p;return mkN(x,'')+(df?mkN(df,df>0?'t':'c',df>0?'+':'-'):'')},15);
     var pts=v.map(function(y,i){return {x:String(i+1),y:y}});
-    return h+'<div class="card" style="margin:8px 0 0">'+'<div class="seg" style="margin:0 0 10px"><button type="button" class="on">Tháng</button><button type="button">Năm</button><button type="button">Tất cả</button></div>'+lineChart(pts,'#12306B',A?'Tổng tài sản theo ngày':'Giá trị theo ngày',true)+'</div>';}
+    return h+'<div class="card" style="margin:8px 0 0">'+'<div class="seg" style="margin:0 0 10px"><button type="button" class="on">Tháng</button><button type="button">Năm</button><button type="button">Tất cả</button></div>'+lineChart(pts,'#5B6B8C',A?'Tổng tài sản theo ngày':'Giá trị theo ngày',true)+'</div>';}
   return '';
 }
 function exA(n){return money(n*({VND:10000,JPY:100,KRW:1000,IDR:10000,TWD:30,THB:30,INR:80,TRY:30,SEK:10,PLN:4,MYR:4,CNY:7,BRL:5,SAR:4}[LOC.cur]||1))}
@@ -2026,7 +2027,7 @@ function astList(){
 function astHTML(){return '<button class="sec tg" data-a="pg" data-p="fundrep" data-arg="ast"><span>Biến động tài sản</span><i>›</i></button>'}
 function isGen(m){return m!=='fund'&&m!=='ast'&&!(m==='stock'&&snaps('stock').length)}
 function genDays(c,a,b){var out={},t=new Date(parse(a).y,parse(a).m-1,parse(a).d),d=a;for(;d<=b;){out[d]={v:catVal(c,d),exact:true};t.setDate(t.getDate()+1);d=ds(t.getFullYear(),t.getMonth()+1,t.getDate())}return out}
-function itemVal(a,d){var c=a.cat;return d<a.date?0:c==='saving'?svVal(a,d):c==='stock'?stNow(a,d):qtyAt(a,d)*a.buy}
+function itemVal(a,d){var c=a.cat;if(d<a.date)return 0;if(c==='gold'||c==='crypto'){var p=mkUnitP(a,d)||(d>=today()&&a.man>0?a.man:0);return qtyAt(a,d)*(p||a.buy)}return c==='saving'?svVal(a,d):c==='stock'?stNow(a,d):qtyAt(a,d)*a.buy}
 function genDetail(c,d){
   var p=dPrev(d),cur=catVal(c,d),pv=catVal(c,p),diff=cur-pv,h='<div class="fd frd"><div class="dh"><span>'+dlabel(d)+'</span></div>';
   h+='<div class="frs"><div><small>Giá trị cuối ngày</small><b>'+fmt(cur)+'đ</b></div><div><small>Chênh so với ngày trước</small><b class="'+(diff>0?'thu':diff<0?'chi':'')+'">'+sgn(diff,'đ')+(pv>0?' ('+(diff>=0?'+':'−')+fmtN(Math.abs(diff/pv*100),2)+'%)':'')+'</b></div></div>';
@@ -2072,7 +2073,7 @@ function pgFundRep(pg){
   }
   if(GEN)h+='</div><div class="mut" style="margin:6px 2px 10px"><span>Dòng trên: giá trị cuối ngày. Dòng dưới: chênh so với ngày trước, gồm cả phần mua/bán trong ngày. Bấm vào một ngày để xem chi tiết từng tài sản.</span><br><span>'+(mk==='saving'?'Tiền gửi tính theo tiền gốc cộng lãi ước tính.':mk==='stock'?'Cổ phiếu & trái phiếu chưa có giá đã lưu nên tạm tính theo giá mua.':'Danh mục này tính theo giá mua (không có giá thị trường), nên giá trị chỉ thay đổi khi mua, bán hoặc chuyển đổi.')+'</span></div>';
   else h+='</div><div class="mut" style="margin:6px 2px 10px">Dòng trên: giá trị '+NM+' cuối ngày'+(mk==='ast'?'':' (màu xám nhạt: ngày không mở ứng dụng, dùng giá trị gần nhất trước đó)')+'. '+(mk==='ast'?'Dòng dưới: chênh so với ngày trước. Bấm vào một ngày để xem chi tiết từng danh mục.':'Dòng dưới: chênh so với ngày trước, gồm cả phần mua/bán trong ngày. Bấm vào một ngày để xem chi tiết từng mã.')+(mk==='fund'&&L.navOk?'<br>'+navAtTxt():mk==='stock'&&L.pxOk?'<br>'+pxAtTxt():'')+'</div>';
-  h+='<div class="card">'+chSeg()+lineChart(V.chm==='m'?pts:rangePts(mk,f.y),'#12306B',mk==='ast'?'Tổng tài sản theo ngày':GEN?'Giá trị theo ngày':'Giá trị '+NM+' theo ngày',true)+'</div>';
+  h+='<div class="card">'+chSeg()+lineChart(V.chm==='m'?pts:rangePts(mk,f.y),'#5B6B8C',mk==='ast'?'Tổng tài sản theo ngày':GEN?'Giá trị theo ngày':'Giá trị '+NM+' theo ngày',true)+'</div>';
   if(mk==='ast'){
     h+='<div class="mut" style="margin:0 2px 10px">Tổng tài sản = Giá trị đầu tư + Tiền mặt. Ngày không mở ứng dụng thì hệ thống sử dụng giá trị ngày gần nhất.<br>Giá trị đầu tư gồm các danh mục đang bật trong Danh sách danh mục tài sản. Chứng chỉ quỹ tính theo giá thị trường, tiền gửi tiết kiệm theo giá trị hiện tại ước tính, các danh mục còn lại theo giá mua vì không rõ giá trị hiện tại.</div>'}
   return h;
@@ -2111,7 +2112,52 @@ function pruneInv(keep){
 }
 function icRec(c){return D.assets.find(function(a){return a.kind==='icat'&&a.cat===c&&!a.deleted})}
 function icHas(c){return !!icRec(c)||invItems(c).length>0||(c==='stock'&&watches('stock').length>0)||(c==='fund'&&(funds().length>0||watches().length>0||flogs('fund').length>0))||(c==='gold'&&!!goldNote())}
-function invTot(c){var t=0,d=today();invItems(c).forEach(function(a){t+=c==='saving'?svVal(a,d):c==='stock'?stNow(a,d):a.qty*a.buy});return t}
+function invTot(c){var t=0,d=today();invItems(c).forEach(function(a){t+=c==='saving'?svVal(a,d):c==='stock'?stNow(a,d):(c==='gold'||c==='crypto')?a.qty*(mkPrice(a)||a.buy):a.qty*a.buy});return t}
+/* ---------- Giá vàng & tiền điện tử (GiaQuy.gs v6: SJC / CoinGecko) ---------- */
+var MK={busy:false},PHC={};
+var CRN={bitcoin:'BTC',ethereum:'ETH',tether:'USDT','usd coin':'USDC',bnb:'BNB',solana:'SOL',xrp:'XRP',ripple:'XRP',dogecoin:'DOGE',cardano:'ADA',tron:'TRX',toncoin:'TON',polkadot:'DOT',litecoin:'LTC',chainlink:'LINK',avalanche:'AVAX','shiba inu':'SHIB',polygon:'POL',stellar:'XLM'};
+function gGrams(u){u=String(u||'').toLowerCase().trim();if(/^(lượng|luong|cây|cay|tael)$/.test(u))return 37.5;if(/^(chỉ|chi)$/.test(u))return 3.75;if(/^(g|gr|gram|grams|gam)$/.test(u))return 1;if(/^(kg|kilogram)$/.test(u))return 1000;if(/^(oz|ozt|ounce|ounces|troy oz)$/.test(u))return 31.1034768;return 0}
+function gKey(a){return isVN()?(a.gk==='ring'?'ring':'bar'):'w'}
+function crCode(a){if(a.code)return String(a.code).toUpperCase();var u=String(a.unit||'').trim().toUpperCase();if(/^[A-Z0-9]{2,10}$/.test(u))return u;var n=String(a.name||'').trim().toLowerCase();return CRN[n]||(/^[a-z0-9]{2,10}$/i.test(n)?n.toUpperCase():'')}
+function phPut(k,d,v){L.ph=L.ph||{};var h=L.ph[k]||(L.ph[k]={});h[d]=v;var ks=Object.keys(h);if(ks.length>1100){ks.sort();ks.slice(0,ks.length-1100).forEach(function(x){delete h[x]})}delete PHC[k]}
+function phAt(k,d){var h=L.ph&&L.ph[k];if(!h)return 0;var c=PHC[k];if(!c||c.n!==Object.keys(h).length){var ks=Object.keys(h).sort();c=PHC[k]={n:ks.length,ks:ks}}var lo=0,hi=c.ks.length-1,r=-1;while(lo<=hi){var m=(lo+hi)>>1;if(c.ks[m]<=d){r=m;lo=m+1}else hi=m-1}return r<0?0:h[c.ks[r]]}
+function mkUnitP(a,d){
+  var c=a.cat,t=today(),now=!d||d>=t;
+  if(c==='gold'){var g=gGrams(a.unit);if(!g)return 0;var k='gold:'+gKey(a),pg=now?((L.mk&&L.mk[k]||{}).pg||0):phAt(k,d);return pg?pg*g:0}
+  if(c==='crypto'){var cd=crCode(a);if(!cd)return 0;var k2='crypto:'+cd;return now?((L.mk&&L.mk[k2]||{}).p||0):phAt(k2,d)}
+  return 0;
+}
+function mkPrice(a){var p=mkUnitP(a);return p>0?p:(a.man>0?a.man:0)}
+function gKeys(){var k=[];invItems('gold').forEach(function(a){if(!gGrams(a.unit))return;var g=gKey(a);if(k.indexOf(g)<0)k.push(g)});return k}
+function crCodes(){var c=[];invItems('crypto').forEach(function(a){var k=crCode(a);if(k&&c.indexOf(k)<0)c.push(k)});return c}
+function fetchMk(manual){
+  var gk=gKeys(),cs=crCodes();if(MK.busy||(!gk.length&&!cs.length))return;
+  MK.busy=true;L.mkAt=Date.now();saveL();refreshAssets();
+  var u=priceUrl(),ctl=typeof AbortController!=='undefined'?new AbortController():null,to=setTimeout(function(){ctl&&ctl.abort()},30000);
+  var q='mk=1&cur='+LOC.cur+'&cc='+LOC.cc+(gk.length?'&gold='+gk.join(','):'')+(cs.length?'&crypto='+encodeURIComponent(cs.join(',')):'')+(srcOf('gold')?'&gtpl='+encodeURIComponent(srcOf('gold')):'')+(srcOf('crypto')?'&ctpl='+encodeURIComponent(srcOf('crypto')):'')+(manual?'&nc=1':'');
+  fetch(u+(u.indexOf('?')<0?'?':'&')+q,{signal:ctl?ctl.signal:undefined}).then(function(r){return r.json()}).then(function(j){
+    clearTimeout(to);var err='',n=0,t=today(),bad=[],badC=[];
+    if(!j.ok)err='Máy chủ báo lỗi';
+    else if(!(j.sv>=6)||!j.gold)err='Cần cập nhật GiaQuy.gs lên bản 6 để lấy giá vàng và tiền điện tử (Triển khai > Phiên bản mới)';
+    else{
+      L.mk=L.mk||{};
+      gk.forEach(function(k){var x=j.gold[k];if(x&&x.p>0){var pg=x.p/(k==='w'?31.1034768:37.5);L.mk['gold:'+k]={pg:pg,src:x.src||'',date:x.date||t,at:Date.now()};phPut('gold:'+k,t,pg);n++}else bad.push((k==='w'?'Vàng':k==='ring'?'Vàng nhẫn':'Vàng miếng')+(j.errs&&j.errs['gold:'+k]?' ('+j.errs['gold:'+k]+')':''))});
+      cs.forEach(function(c){var x=j.crypto&&j.crypto[c];if(x&&x.p>0){L.mk['crypto:'+c]={p:x.p,src:x.src||'',date:x.date||t,at:Date.now()};phPut('crypto:'+c,t,x.p);n++}else badC.push(c+(j.errs&&j.errs['crypto:'+c]?' ('+j.errs['crypto:'+c]+')':''))});
+      var perm=/external_request|quyền|permission/i.test(bad.join(' ')+badC.join(' '));
+      if(perm)err='Apps Script chưa được cấp quyền gọi ra ngoài. Mở GiaQuy.gs, chạy hàm capQuyenVang và bấm Cho phép, rồi Triển khai > Phiên bản mới.';
+    }
+    if(n)L.mkOk=Date.now();L.mkErr={gold:err||(bad.length?'Không lấy được giá: '+bad.join(', '):''),crypto:err||(badC.length?'Không lấy được giá: '+badC.join(', '):'')};MK.busy=false;saveL();refreshAssets();if(manual)toast(err?'Có mục chưa lấy được giá':'Đã cập nhật giá');
+  }).catch(function(){clearTimeout(to);L.mkErr={gold:'Không kết nối được máy chủ giá',crypto:'Không kết nối được máy chủ giá'};MK.busy=false;saveL();refreshAssets()});
+}
+function autoMk(){if(MK.busy||!(gKeys().length||crCodes().length))return;var me=L.mkErr||{};if(Date.now()-(L.mkAt||0)>((me.gold||me.crypto)?5:30)*60000)fetchMk(false)}
+function mkSrc(c){var s='';Object.keys(L.mk||{}).forEach(function(k){if(k.indexOf(c+':')===0&&L.mk[k].src)s=L.mk[k].src});return s||SRCDEF[c][isVN()?0:1]}
+function mkStat(c){
+  var bad=invItems(c).filter(function(a){return c==='gold'?!gGrams(a.unit):!crCode(a)}),d=new Date(L.mkOk||0);
+  var h='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px"><span class="mut" style="font-size:12px">'+(L.mkOk?'Giá cập nhật lúc '+hhmm(L.mkOk)+' '+dshort(ds(d.getFullYear(),d.getMonth()+1,d.getDate()))+' từ '+esc(mkSrc(c)):'Chưa lấy được giá thị trường')+'</span><button class="ghost" data-a="mkupd" style="margin:0;flex:none">'+(MK.busy?'Đang cập nhật…':'↻ Cập nhật giá')+'</button></div>';
+  var me=(L.mkErr&&L.mkErr[c])||'';if(me)h+='<div class="chi" style="font-size:12px;margin-top:4px">'+esc(me)+'</div>';
+  if(bad.length)h+='<div class="mut" style="font-size:12px;margin-top:4px">'+(c==='gold'?'Chưa quy đổi được đơn vị của: ':'Chưa có mã của: ')+bad.map(function(a){return esc(a.name)}).join(', ')+'. '+(c==='gold'?'Dùng đơn vị chỉ, lượng, gram hoặc oz (bấm Sửa).':'Bấm Sửa để nhập mã, ví dụ BTC.')+' Các tài sản này tính theo giá nhập tay hoặc giá mua.</div>';
+  return h;
+}
 /* ---------- Cổ phiếu & trái phiếu: giá lấy qua GiaQuy.gs (VNDirect, dự phòng TCBS) hoặc nhập tay ---------- */
 var PX={busy:false};
 function stCode(a){if(a.code)return a.code;var n=String(a.name||'').trim().toUpperCase();return /^[A-Z][A-Z0-9]{1,4}$/.test(n)?n:''}
@@ -2125,7 +2171,7 @@ function fetchPx(manual){
   var codes=pxCodes();if(PX.busy)return;if(!codes.length){L.pxErr='Chưa có mã giao dịch. Bấm Sửa để nhập mã (ví dụ '+CX()[5]+').';saveL();refreshAssets();return}
   PX.busy=true;L.pxAt=Date.now();saveL();refreshAssets();
   var ctl=typeof AbortController!=='undefined'?new AbortController():null,to=setTimeout(function(){ctl&&ctl.abort()},30000),u=priceUrl();
-  fetch(u+(u.indexOf('?')<0?'?':'&')+'stocks='+encodeURIComponent(codes.join(','))+ccQ(),{signal:ctl?ctl.signal:undefined}).then(function(r){return r.json()}).then(function(j){
+  fetch(u+(u.indexOf('?')<0?'?':'&')+'stocks='+encodeURIComponent(codes.join(','))+ccQ('stock'),{signal:ctl?ctl.signal:undefined}).then(function(r){return r.json()}).then(function(j){
     clearTimeout(to);var err='',n=0;
     if(!j.ok)err='Máy chủ báo lỗi';
     else if(!j.stocks||(!isVN()&&!(j.sv>=4)))err='Cần cập nhật GiaQuy.gs lên bản mới (Triển khai > Phiên bản mới)';
@@ -2168,7 +2214,7 @@ function stockBlock(){
           +'<div>Giá trị hiện tại: '+(p?'<b>'+fmt(cv)+'đ</b>':'<span class="mut">chưa có giá</span>')+'</div>'
           +'<div>Lời/lỗ hiện tại: '+(p?plHTML(pl,pc):'<span class="mut">chưa có giá</span>')+'</div>'
           +'<div style="margin-top:8px">Ghi chú:</div><textarea class="nt" rows="3" data-g="log" data-id="'+a.id+'" placeholder="Ghi chú thêm về tài sản này..." autocomplete="off" style="background:#fff">'+esc(a.log||'')+'</textarea>'
-          +(a.note?'<div>Ghi chú: '+esc(a.note)+'</div>':'')+'<div class="bt2"><button class="gd" data-a="txopen" data-id="'+a.id+'">Giao dịch</button><button data-a="invedit" data-id="'+a.id+'">Sửa</button><button class="red" data-a="invdel" data-id="'+a.id+'">Xóa</button></div></div>';
+          +(a.note?'<div>Mô tả: '+esc(a.note)+'</div>':'')+'<div class="bt2"><button class="gd" data-a="txopen" data-id="'+a.id+'">Giao dịch</button><button data-a="invedit" data-id="'+a.id+'">Sửa</button><button class="red" data-a="invdel" data-id="'+a.id+'">Xóa</button></div></div>';
       }
     });
     if(val>0)h+='<div class="fr" style="'+GS+';cursor:default"><span><b>Tổng</b></span><span style="grid-column:2/5"><b>'+fmt(val)+'đ</b></span></div>';
@@ -2208,20 +2254,21 @@ function invHTML(){
           +'<div>Giá trị hiện tại: <b>'+fmt(cv)+'đ</b></div><div>Lãi hiện tại: '+(a.rate?plHTML(ci,ci/am*100):'<span class="mut">chưa có lãi suất</span>')+'</div>'
           +'<div>Đáo hạn vào ngày: '+(mt?'<b>'+dshort(mt)+'</b> <span class="mut">('+(mt>dn?'còn '+ddiff(dn,mt)+' ngày':'đã đáo hạn')+')</span>':'<span class="mut">không kỳ hạn</span>')+'</div>'
           +'<div style="margin-top:8px">Ghi chú:</div><textarea class="nt" rows="3" data-g="log" data-id="'+a.id+'" placeholder="Ghi lại gửi thêm, rút, tái tục…" autocomplete="off" style="background:#fff">'+esc(a.log||'')+'</textarea>'
-          +(a.note?'<div>Ghi chú: '+esc(a.note)+'</div>':'')+'<div class="mut" style="font-size:12px">Lãi ước tính theo lãi đơn, 365 ngày/năm, dừng khi đáo hạn; thực tế ngân hàng có thể tính khác.</div><div class="bt2"><button class="gd" data-a="txopen" data-id="'+a.id+'">Giao dịch</button><button data-a="invedit" data-id="'+a.id+'">Sửa</button><button class="red" data-a="invdel" data-id="'+a.id+'">Xóa</button></div></div>';
+          +(a.note?'<div>Mô tả: '+esc(a.note)+'</div>':'')+'<div class="mut" style="font-size:12px">Lãi ước tính theo lãi đơn, 365 ngày/năm, dừng khi đáo hạn; thực tế ngân hàng có thể tính khác.</div><div class="bt2"><button class="gd" data-a="txopen" data-id="'+a.id+'">Giao dịch</button><button data-a="invedit" data-id="'+a.id+'">Sửa</button><button class="red" data-a="invdel" data-id="'+a.id+'">Xóa</button></div></div>';
       });
       h+='<div class="fr" style="'+GS+';cursor:default"><span><b>Tổng</b></span><span><b>'+fmt(ti)+'đ</b></span><span></span><span><b>'+fmt(tv)+'đ</b></span></div>';
     }else if(it.length){
-      h+='<div class="ig ih"><span>Tên</span><span>Số lượng</span><span>Thành tiền</span></div>';
+      h+='<div class="ig ih"><span>Tên</span><span>Số lượng</span><span>'+((c==='gold'||c==='crypto')?'Giá trị':'Thành tiền')+'</span></div>';
       it.forEach(function(a){
-        var op=v.item===a.id,tt=a.qty*a.buy;
+        var op=v.item===a.id,mp=(c==='gold'||c==='crypto')?mkPrice(a):0,tt=a.qty*(mp||a.buy);
         h+='<button class="ig ir" data-a="invitem" data-id="'+a.id+'"><span>'+esc(a.name)+'<i class="ar">'+(op?'▴':'▾')+'</i></span><span>'+fmtQ(a.qty)+(a.unit?' '+esc(a.unit):'')+'</span><span>'+fmt(tt)+'đ</span></button>';
-        if(op)h+='<div class="fd"><div>Ngày mua: <b>'+dshort(a.date)+'</b></div><div>Thời gian nắm giữ: <b>'+holdStr(a.date)+'</b></div><div>Số lượng: <b>'+fmtQ(a.qty)+(a.unit?' '+esc(a.unit):'')+'</b></div><div>Giá mua: <b>'+fmtN(a.buy,2).replace(/,00$/,'')+'đ'+(a.unit?' / '+esc(a.unit):'')+'</b></div><div>Thành tiền: <b>'+fmt(tt)+'đ</b></div>'
+        if(op)h+='<div class="fd"><div>Ngày mua: <b>'+dshort(a.date)+'</b></div><div>Thời gian nắm giữ: <b>'+holdStr(a.date)+'</b></div><div>Số lượng: <b>'+fmtQ(a.qty)+(a.unit?' '+esc(a.unit):'')+'</b></div><div>Giá mua: <b>'+fmtN(a.buy,2).replace(/,00$/,'')+'đ'+(a.unit?' / '+esc(a.unit):'')+'</b></div>'+(mp?'<div>Giá gần nhất: <b>'+fmtP(mp)+'đ'+(a.unit?' / '+esc(a.unit):'')+'</b>'+(mkUnitP(a)?'':' <span class="mut">(nhập tay)</span>')+'</div><div>Giá trị hiện tại: <b>'+fmt(tt)+'đ</b></div><div>Lời/lỗ hiện tại: '+plHTML(tt-a.qty*a.buy,a.buy?(mp/a.buy-1)*100:0)+'</div>':'<div>Thành tiền: <b>'+fmt(tt)+'đ</b></div>')
           +'<div style="margin-top:8px">Ghi chú:</div><textarea class="nt" rows="3" data-g="log" data-id="'+a.id+'" placeholder="Ghi chú thêm về tài sản này..." autocomplete="off" style="background:#fff">'+esc(a.log||'')+'</textarea>'
-          +(a.note?'<div>Ghi chú: '+esc(a.note)+'</div>':'')+'<div class="bt2"><button class="gd" data-a="txopen" data-id="'+a.id+'">Giao dịch</button><button data-a="invedit" data-id="'+a.id+'">Sửa</button><button class="red" data-a="invdel" data-id="'+a.id+'">Xóa</button></div></div>';
+          +(a.note?'<div>Mô tả: '+esc(a.note)+'</div>':'')+'<div class="bt2"><button class="gd" data-a="txopen" data-id="'+a.id+'">Giao dịch</button><button data-a="invedit" data-id="'+a.id+'">Sửa</button><button class="red" data-a="invdel" data-id="'+a.id+'">Xóa</button></div></div>';
       });
-      h+='<div class="ig" style="padding:10px 0 2px;font-weight:700"><span>Tổng giá mua</span><span></span><span>'+fmt(invTot(c))+'đ</span></div>';
+      h+='<div class="ig" style="padding:10px 0 2px;font-weight:700"><span>'+((c==='gold'||c==='crypto')?'Tổng giá trị hiện tại':'Tổng giá mua')+'</span><span></span><span>'+fmt(invTot(c))+'đ</span></div>';
     }else h+='<div class="empty">Chưa có tài sản</div>';
+    if((c==='gold'||c==='crypto')&&it.length)h+=mkStat(c);
     if(c==='gold'&&gn)h+='<div class="mut" style="margin-top:8px">Ghi chú vàng cũ:</div><textarea class="nt" rows="3" data-g="gold" autocomplete="off" style="width:100%">'+esc(gn.note)+'</textarea>';
     h+='<button class="ghost" data-a="invnew" data-c="'+c+'">＋ '+(c==='saving'?'Thêm khoản gửi':'Thêm tài sản')+'</button>'+(feat('invrep')&&invAll(c).length?'<button class="ghost" data-a="pg" data-p="fundrep" data-arg="'+c+'" style="margin-top:8px">Biến động đầu tư</button>':'')+'<button class="ghost red" data-a="invdelcat" data-c="'+c+'">Xóa danh mục này</button></div></div>';
   });
@@ -2237,7 +2284,7 @@ function pgInv(){
    +'<label class="l" for="ik">Kỳ hạn (tháng)</label><div class="chips" style="flex-wrap:wrap;margin:0 0 6px">'+[['','Không kỳ hạn'],['1','1'],['3','3'],['6','6'],['9','9'],['12','12'],['18','18'],['24','24'],['36','36']].map(function(x){return '<button data-a="termpick" data-v="'+x[0]+'" class="'+(String(s.term)===x[0]?'on':'')+'">'+x[1]+'</button>'}).join('')+'</div><input class="inp" id="ik" inputmode="numeric" autocomplete="off" placeholder="Hoặc nhập số tháng khác" value="'+esc(s.term)+'"><div class="mut" id="it" style="margin-top:4px">'+invPrev()+'</div>'
    +'<label class="l" for="ib">Số tiền (đ)</label><input class="inp" id="ib" inputmode="decimal" autocomplete="off" placeholder="100.000.000" value="'+esc(s.buy)+'">'
    +'<label class="l" for="ir">Lãi suất (%/năm, không bắt buộc)</label><input class="inp" id="ir" inputmode="decimal" autocomplete="off" placeholder="5,2" value="'+esc(s.rate)+'">'
-   +'<label class="l" for="id">Ghi chú</label><textarea class="nt" id="id" rows="3" style="width:100%" placeholder="'+esc(ph[3])+'">'+esc(s.note)+'</textarea></div>'
+   +'<label class="l" for="id">Mô tả</label><textarea class="nt" id="id" rows="3" style="width:100%" placeholder="'+esc(ph[3])+'">'+esc(s.note)+'</textarea></div>'
    +'<button class="primary" data-a="invsave">Lưu</button>';
   if(s.cat==='stock')return '<div class="card"><div class="mut" style="margin-bottom:2px">Danh mục: <b>'+icName(s.cat)+'</b></div><label class="l" for="ic">Mã giao dịch (để trống nếu không có, ví dụ trái phiếu)</label><input class="inp" id="ic" maxlength="16" autocapitalize="characters" autocorrect="off" spellcheck="false" autocomplete="off" placeholder="'+CX()[5]+'" value="'+esc(s.code)+'">'
    +'<label class="l" for="in">Tên (không bắt buộc nếu đã có mã)</label><input class="inp" id="in" maxlength="60" autocomplete="off" placeholder="Ví dụ: '+esc(CX()[7])+' / Trái phiếu ABC" value="'+esc(s.name)+'">'
@@ -2245,14 +2292,17 @@ function pgInv(){
    +'<label class="l" for="iq">Số lượng</label><input class="inp" id="iq" inputmode="decimal" autocomplete="off" placeholder="100" value="'+esc(s.qty)+'">'
    +'<label class="l" for="ib">Giá mua (đ / 1 đơn vị)</label><input class="inp" id="ib" inputmode="decimal" autocomplete="off" placeholder="62.000" value="'+esc(s.buy)+'"><div class="mut" id="it" style="margin-top:4px">'+invPrev()+'</div>'
    +'<label class="l" for="im">Giá hiện tại nhập tay (không bắt buộc)</label><input class="inp" id="im" inputmode="decimal" autocomplete="off" placeholder="Dùng khi không có mã hoặc không lấy được giá" value="'+esc(s.man)+'">'
-   +'<label class="l" for="id">Ghi chú</label><textarea class="nt" id="id" rows="3" style="width:100%" placeholder="'+esc(ph[3])+'">'+esc(s.note)+'</textarea></div>'
+   +'<label class="l" for="id">Mô tả</label><textarea class="nt" id="id" rows="3" style="width:100%" placeholder="'+esc(ph[3])+'">'+esc(s.note)+'</textarea></div>'
    +'<button class="primary" data-a="invsave">Lưu</button>';
   return '<div class="card"><div class="mut" style="margin-bottom:2px">Danh mục: <b>'+icName(s.cat)+'</b></div><label class="l" for="in">Tên tài sản</label><input class="inp" id="in" maxlength="60" autocomplete="off" placeholder="Ví dụ: '+esc(ph[0])+'" value="'+esc(s.name)+'">'
+   +(s.cat==='crypto'?'<label class="l" for="ic">Mã tiền điện tử (để lấy giá)</label><input class="inp" id="ic" maxlength="10" autocapitalize="characters" autocorrect="off" spellcheck="false" autocomplete="off" placeholder="BTC" value="'+esc(s.code)+'">':'')
+   +(s.cat==='gold'&&isVN()?'<label class="l">Loại vàng (để lấy giá SJC)</label><div class="seg" style="max-width:none;margin:0 0 4px"><button data-a="gkpick" data-v="bar" class="'+(s.gk!=='ring'?'on':'')+'">Vàng miếng SJC</button><button data-a="gkpick" data-v="ring" class="'+(s.gk==='ring'?'on':'')+'">Vàng nhẫn 99,99</button></div>':'')
    +'<label class="l">Ngày mua</label><button class="fld" data-a="idate" style="width:100%;padding:11px">'+dlabel(s.date)+' ▾</button>'
    +'<label class="l" for="iq">Số lượng</label><input class="inp" id="iq" inputmode="decimal" autocomplete="off" placeholder="'+esc(ph[1])+'" value="'+esc(s.qty)+'">'
-   +'<label class="l" for="iu">Đơn vị (không bắt buộc)</label><input class="inp" id="iu" maxlength="20" autocomplete="off" placeholder="'+esc(ph[2]||'lượng, cây, căn…')+'" value="'+esc(s.unit)+'">'
+   +'<label class="l" for="iu">Đơn vị (không bắt buộc)</label><input class="inp" id="iu" maxlength="20" autocomplete="off" placeholder="'+esc(ph[2]||'lượng, cây, căn…')+'" value="'+esc(s.unit)+'">'+(s.cat==='gold'?'<div class="chips" style="margin:6px 0 0">'+['chỉ','lượng','gram','oz'].map(function(u){return '<button data-a="unitpick" data-v="'+u+'" class="'+(s.unit===u?'on':'')+'">'+u+'</button>'}).join('')+'</div>':'')
    +'<label class="l" for="ib">Giá mua (đ / 1 đơn vị)</label><input class="inp" id="ib" inputmode="decimal" autocomplete="off" placeholder="160.000.000" value="'+esc(s.buy)+'"><div class="mut" id="it" style="margin-top:4px">'+invPrev()+'</div>'
-   +'<label class="l" for="id">Ghi chú</label><textarea class="nt" id="id" rows="3" style="width:100%" placeholder="'+esc(ph[3])+'">'+esc(s.note)+'</textarea></div>'
+   +((s.cat==='gold'||s.cat==='crypto')?'<label class="l" for="im">Giá hiện tại nhập tay (không bắt buộc)</label><input class="inp" id="im" inputmode="decimal" autocomplete="off" placeholder="Dùng khi không lấy được giá" value="'+esc(s.man)+'">':'')
+   +'<label class="l" for="id">Mô tả</label><textarea class="nt" id="id" rows="3" style="width:100%" placeholder="'+esc(ph[3])+'">'+esc(s.note)+'</textarea></div>'
    +'<button class="primary" data-a="invsave">Lưu</button>';
 }
 function invPrev(){if(invSt.cat==='saving'){var tm=parseInt(invSt.term,10)||0;return tm>0?'Đáo hạn vào ngày: '+dshort(addM(invSt.date,tm)):'Không kỳ hạn'}var q=parseNum(invSt.qty),b=parseNum(invSt.buy);return q&&b?'Thành tiền: '+fmt(q*b)+'đ':''}
@@ -2267,13 +2317,19 @@ function pgBudSet(){
   catsOf('chi').forEach(function(c){h+=row('b_'+c.id,c.name,c.icon)});
   return h+'</div>';
 }
+var SRCDEF={fund:['Fmarket','Yahoo Finance'],stock:['VNDirect','Yahoo Finance'],gold:['SJC (giá mua vào)','Giá vàng thế giới (CoinGecko)'],crypto:['CoinGecko','CoinGecko']};
+var SRCN=[['fund','Chứng chỉ quỹ'],['stock','Cổ phiếu & trái phiếu'],['gold','Vàng'],['crypto','Tiền điện tử']];
+function srcTest(k){return k==='fund'?(isVN()?'SSISCA':CX()[6]):k==='stock'?CX()[5]:k==='gold'?(isVN()?'SJC':'XAU'):'BTC'}
 function pgPxSrc(){
-  return '<div class="card"><div class="mut" style="margin:0 0 8px">Giá cổ phiếu và quỹ tự lấy từ Yahoo Finance. Muốn dùng nguồn khác thì dán link mẫu, đặt {MA} ở chỗ mã giao dịch; ứng dụng thay {MA} bằng từng mã để lấy giá.</div>'
-   +'<label class="l" for="xt">Link nguồn giá (không bắt buộc)</label><input class="inp" id="xt" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="https://…{MA}…" value="'+esc(L.pxTpl||'')+'">'
-   +'<div class="mut" style="margin-top:6px">Trang phải trả về giá dạng JSON hoặc CSV, như Stooq, Twelve Data, Alpha Vantage. Trang web thông thường có thể không đọc được. Viết {ma} nếu nguồn cần mã chữ thường.</div>'
-   +'<div class="mut" style="margin-top:6px">Mẫu Stooq (Mỹ):</div><code style="display:block;font-size:12px;word-break:break-all;background:#f4f4f6;padding:6px 8px;border-radius:8px">https://stooq.com/q/l/?s={ma}.us&amp;f=sd2t2ohlcv&amp;h&amp;e=csv</code>'
-   +'<label class="l" for="xc">Mã thử</label><div style="display:flex;gap:8px;align-items:center"><input class="inp" id="xc" maxlength="16" autocapitalize="characters" autocomplete="off" value="'+esc(CX()[5])+'"><button class="ghost" data-a="pxtest" style="width:auto;margin:0;padding:8px 12px;white-space:nowrap">Thử lấy giá</button></div><div id="xr" class="mut" style="margin-top:6px"></div></div>'
-   +'<button class="primary" data-a="pxsave">Lưu nguồn giá</button>';
+  var h='<div class="mut" style="margin:0 2px 10px">Ứng dụng tự lấy giá từ nguồn mặc định theo quốc gia. Muốn dùng nơi khác thì dán link mẫu, đặt {MA} ở chỗ mã (viết {ma} nếu cần chữ thường). Link phải trả về giá dạng JSON hoặc CSV; trang web thông thường có thể không đọc được.</div>';
+  SRCN.forEach(function(x){var k=x[0],t=srcOf(k);
+    h+='<div class="card"><div class="ct">'+x[1]+'</div><div class="mut">Mặc định: <b>'+SRCDEF[k][isVN()?0:1]+'</b>'+(t?' · <b class="thu">đang dùng link riêng</b>':'')+'</div>'
+     +'<label class="l" for="xt_'+k+'">Link riêng (không bắt buộc)</label><input class="inp" id="xt_'+k+'" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="https://…{MA}…" value="'+esc(t)+'">'
+     +(k==='gold'?'<div class="mut" style="margin-top:4px">Link vàng phải trả về giá của 1 '+(isVN()?'lượng (37,5 g), {MA} là SJC':'ounce (31,1 g), {MA} là XAU')+'.</div>':'')
+     +'<div style="display:flex;gap:8px;align-items:center;margin-top:8px"><input class="inp" id="xc_'+k+'" style="flex:1;min-width:0;margin:0" maxlength="16" autocapitalize="characters" autocomplete="off" value="'+esc(srcTest(k))+'"><button class="ghost" data-a="pxtest" data-src="'+k+'" style="margin:0">Thử lấy giá</button>'+(t?'<button class="ghost red" data-a="pxdef" data-src="'+k+'" style="margin:0">Về mặc định</button>':'')+'</div><div id="xr_'+k+'" class="mut" style="margin-top:6px"></div></div>';
+  });
+  h+='<div class="mut" style="margin:0 2px 4px">Mẫu Stooq (cổ phiếu Mỹ):</div><code style="display:block;font-size:12px;word-break:break-all;background:#fff;padding:6px 8px;border-radius:8px;margin:0 2px 10px">https://stooq.com/q/l/?s={ma}.us&amp;f=sd2t2ohlcv&amp;h&amp;e=csv</code>';
+  return h+'<button class="primary" data-a="pxsave">Lưu nguồn giá</button>';
 }
 function pgAdv(){
   var nb=D.budgets.filter(function(b){return !b.deleted&&b.id!=='b_total'&&b.amount>0}).length;
@@ -2295,7 +2351,7 @@ function pgBalance(){
   var ks=Object.keys(by).sort();if(!ks.length)return '<div class="empty">Chưa có dữ liệu</div>';
   var acc=0,rows=ks.map(function(k){acc+=by[k].thu-by[k].chi;return {k:k,thu:by[k].thu,chi:by[k].chi,bal:acc}});
   var pts=rows.map(function(r){return {x:r.k.slice(5)+'/'+r.k.slice(2,4),y:Math.max(0,r.bal)}});
-  var h='<div class="card">'+lineChart(pts,'#12306B','Số dư cuối tháng (thu − chi cộng dồn)')+'</div><div class="card"><div class="t2 br" style="display:flex;font-weight:700"><span style="flex:1">Tháng</span><span style="flex:1;text-align:right">Thu</span><span style="flex:1;text-align:right">Chi</span><span style="flex:1.2;text-align:right">Số dư</span></div>';
+  var h='<div class="card">'+lineChart(pts,'#5B6B8C','Số dư cuối tháng (thu − chi cộng dồn)')+'</div><div class="card"><div class="t2 br" style="display:flex;font-weight:700"><span style="flex:1">Tháng</span><span style="flex:1;text-align:right">Thu</span><span style="flex:1;text-align:right">Chi</span><span style="flex:1.2;text-align:right">Số dư</span></div>';
   h+=rows.slice().reverse().map(function(r){return '<div class="br" style="display:flex;font-size:13px"><span style="flex:1">'+fmy(r.k.slice(0,4),+r.k.slice(5))+'</span><span class="thu" style="flex:1;text-align:right">'+fmt(r.thu)+'</span><span class="chi" style="flex:1;text-align:right">'+fmt(r.chi)+'</span><span style="flex:1.2;text-align:right;font-weight:700;color:'+(r.bal<0?'#c62828':'inherit')+'">'+fmt(r.bal)+'</span></div>'}).join('');
   return h+'</div><div class="mut">Số dư chỉ tính từ các khoản đã nhập trong ứng dụng (không gồm số dư ban đầu). Biểu đồ không vẽ phần số dư âm.</div>';
 }
@@ -2327,6 +2383,7 @@ function pgHelp(){
   +sec('Xem lại',['<b>Lịch</b>: ô ngày hiện ⭐️ nếu có sự kiện, dòng đỏ là tổng chi, dòng xanh là tổng thu của ngày đó (rút gọn: 517.000đ = 517k, 1.008.000đ = 1,008tr). Bấm vào một ngày để mở khung chi tiết ngay dưới tuần đó (thu chi và sự kiện của ngày); bấm lại hoặc bấm Đóng để thu gọn.','<b>Danh sách sự kiện</b> (dưới lịch): bấm <b>+ Ngày lễ gợi ý</b> để thêm các ngày lễ còn lại trong năm (âm lịch tự quy đổi), hoặc <b>+ Tạo thủ công</b> cho sinh nhật, kỷ niệm… (chọn <b>Nhắc lại</b> mỗi tuần, tháng hoặc năm thì ứng dụng tự tính lần kế tiếp) “Còn lại” hiện số ngày, từ 1 tháng trở lên hiện dạng tháng + ngày. Bấm vào dòng để sửa hoặc xóa. Sự kiện đã qua: xóa khỏi danh sách thì vẫn còn trên lịch, xóa hẳn ở khung chi tiết của ngày đó.','<b>Biến động thu chi</b>: trong tab Báo cáo, bấm dòng Biến động thu chi để xem lịch tháng (mỗi ô: thu, chi và phần gộp trong ngoặc) và biểu đồ theo Thu nhập, Chi tiêu hoặc Gộp.','<b>Báo cáo</b>: xem theo Tháng / Năm / Tất cả; bấm một danh mục để xem các khoản. Nút 📝 xuất ảnh báo cáo.','<b>Ngân sách chi tiêu</b>: Cài đặt › Fox Premium › Thiết lập để đặt hạn mức mỗi tháng; Báo cáo hiện 🎯 sau tên danh mục.','<b>Thu chi → Danh mục → Chỉnh sửa</b>: thêm, sửa, xóa, sắp xếp danh mục.'])
   +sec('Danh mục đầu tư (cuối tab Báo cáo)',['Bấm <b>Danh mục đầu tư</b> để mở. <b>Thêm danh mục</b> rồi chọn Vàng, Tiền điện tử, Cổ phiếu & trái phiếu, Chứng chỉ quỹ, Bất động sản hoặc Khác. Bấm tên danh mục để xem tài sản bên trong; <b>Thêm tài sản</b> gồm tên, ngày mua, số lượng, giá mua (của 1 đơn vị) và mô tả. Việc tính một danh mục vào <b>Biến động tài sản</b> được bật/tắt ngay trong mục Biến động tài sản (Danh sách danh mục tài sản): Chứng chỉ quỹ mặc định Bật, các danh mục khác mặc định Tắt. Tiền gửi tiết kiệm gồm ngân hàng, ngày gửi, kỳ hạn, số tiền, lãi suất (%/năm); app ước tính giá trị hiện tại, lãi và ngày đáo hạn theo lãi đơn 365 ngày/năm. Các danh mục khác tính theo giá mua.','<b>Chứng chỉ quỹ</b>: nhập mã, số lượng, giá mua, ngày mua. Bấm vào mã để xem lời/lỗ, thời gian giữ và ghi chú.','<b>Giao dịch</b>: bấm vào một tài sản rồi bấm Giao dịch, chọn Mua (mở trang thêm mới), Bán hoặc Chuyển đổi và nhập số lượng (hoặc bấm Tất cả). Ứng dụng chỉ đổi số lượng và cập nhật thống kê; phí, thuế và số tiền thực nhận bạn tự nhập vào Thu nhập hoặc Danh mục đầu tư. Tiền gửi tiết kiệm có Gửi thêm, Rút tiền, Tất toán; bất động sản có Mua, Bán, Chuyển nhượng.','<b>Lịch sử đầu tư</b>: ở cuối Danh mục đầu tư, ghi lại mọi lần mua, bán, chuyển đổi, sửa, xóa của tất cả danh mục. Xóa được từng dòng nhưng không sửa được; xóa dòng không làm đổi số lượng tài sản.','<b>Chờ đợi giá</b> (dưới dòng giá cập nhật): thêm mã quỹ bạn quan tâm, nhập giá đối chiếu và kỳ vọng (giảm hoặc tăng, tính bằng đ hoặc %). Cột Hiện tại cho biết giá gần nhất và tỉ lệ % so với giá đối chiếu (âm hiện đỏ). Bấm vào dòng để xem thêm <b>Còn lại</b>: giá gần nhất còn cách điểm kỳ vọng bao nhiêu; 🔔 hiện khi đã chạm điểm kỳ vọng, và ứng dụng hiện hộp nhắc khi bạn mở ứng dụng (mỗi mã một lần mỗi ngày). iOS không cho web báo ngầm khi ứng dụng đóng.','Giá gần nhất tự lấy từ fmarket (khi mở ứng dụng hoặc bấm ↻ Cập nhật giá); chưa lấy được thì nhập giá tay khi sửa mã quỹ.','<b>Biến động đầu tư</b> (có ở Chứng chỉ quỹ, Cổ phiếu & trái phiếu và Biến động tài sản): lịch theo tháng, mỗi ô là giá trị cuối ngày (từ 1 tỷ hiện dạng 1,468 tỷ) và chênh lệch so với hôm trước; bấm vào ngày để xem chi tiết từng mã/danh mục đến từng đồng. Ngày không mở ứng dụng thì dùng giá trị ngày gần nhất. Chứng chỉ quỹ kèm nhật ký mua bán tự ghi khi thêm, sửa, xóa mã quỹ. Cổ phiếu bắt đầu có số liệu từ ngày cập nhật bản này.','<b>Biến động tài sản</b> (cuối tab Báo cáo, bấm tên để mở): Tổng tài sản = Giá trị đầu tư + Tiền mặt, biểu đồ theo ngày, xem theo Tháng hoặc Năm.'])
   +sec('Cài đặt chung, Fox Premium, bảo mật',['<b>Cài đặt chung</b>: đặt <b>Tên người dùng</b> (hiện ở cột Người nhập trên Google Sheets và trên ảnh báo cáo). Đổi tên thì ứng dụng hỏi có cập nhật tên cho các khoản cũ không.','<b>Fox Premium</b>: bấm ⓘ cạnh mỗi tính năng để xem mô tả và ví dụ minh họa; bật/tắt bằng công tắc. Tắt chỉ ẩn đi, dữ liệu vẫn giữ.','<b>Bảo mật ứng dụng</b>: bật Thiết lập bảo mật để mở app bằng mã PIN hoặc Face ID / Touch ID.','Nút 📝 trong Báo cáo tạo ảnh báo cáo của kỳ đang xem; ảnh hiện ra để xem trước, bấm <b>Lưu lại</b> để lưu vào Ảnh hoặc gửi đi.'])
+  +sec('Nguồn giá tài sản',['<b>Cài đặt → Nguồn dữ liệu giá</b>: ứng dụng tự lấy giá Chứng chỉ quỹ, Cổ phiếu, Vàng và Tiền điện tử từ nguồn mặc định theo quốc gia (Việt Nam: Fmarket, VNDirect, SJC, CoinGecko; nước khác: Yahoo Finance, giá vàng thế giới, CoinGecko). Muốn dùng nơi khác thì dán link mẫu có {MA}, bấm Thử lấy giá rồi Lưu nguồn giá.','Vàng tính theo đơn vị chỉ, lượng, gram hoặc oz (Việt Nam chọn thêm vàng miếng SJC hoặc vàng nhẫn 99,99, lấy giá mua vào). Tiền điện tử cần mã (ví dụ BTC). Không lấy được giá thì dùng giá nhập tay, không có thì dùng giá mua.','Giá vàng và tiền điện tử được lưu mỗi ngày mở ứng dụng để vẽ Biến động đầu tư; các ngày trước đó tính theo giá mua.'])
   +sec('Ảnh khoản thu chi',['Dưới <b>Ghi chú</b> có mục <b>Ảnh</b>: bấm <b>Chụp ảnh</b> để chụp bằng máy ảnh hoặc <b>Chọn ảnh</b> để lấy từ thư viện, rồi bấm Nhập/Chỉnh sửa khoản để lưu. Mỗi khoản tối đa 4 ảnh, ảnh được nén còn cạnh dài 1.600 px.','Ô ngày trên <b>Lịch</b> hiện ảnh mới nhất của ngày đó; bấm vào ngày thì mỗi khoản có ảnh nhỏ giữa tên danh mục và số tiền, bấm ảnh để xem cỡ lớn.','Ảnh chỉ lưu trên máy này (không đồng bộ qua Google Sheets), nhưng có trong file sao lưu, nên file sao lưu sẽ nặng hơn.','<b>Kỷ niệm</b>: trên Lịch bấm vào ngày → <b>＋ Thêm kỷ niệm</b>, đặt tên, viết mô tả và thêm tối đa 4 ảnh (chụp hoặc chọn). Kỷ niệm hiện trong mục Kỷ niệm của ngày đó; ô ngày trên Lịch ưu tiên hiện ảnh kỷ niệm (nếu không có thì ảnh thu chi), ngày có kỷ niệm mà không có ảnh nào thì hiện ✨. Bấm <b>🖼 Chọn hình nền cho ngày</b> để chọn 1 ảnh bất kỳ trong ngày làm hình trên Lịch; bấm <b>Sửa</b> để sửa hoặc xóa.'])
   +sec('Lịch cúp điện và Lãi kép (tab Cài đặt)',['<b>Lịch cúp điện</b>: bấm <b>＋ Thêm vị trí</b>, chọn tỉnh/thành, quận/huyện cũ trên lichcupdien.app, phường/xã, rồi số khu phố hoặc gõ tên khu phố/ấp (để trống thì báo cả phường/xã). Ngày có lịch hiện bóng đèn gạch chéo trên tab <b>Lịch</b>.','<b>Lãi kép</b>: nhập số tiền đầu tư, số tiền bổ sung và tiền rút định kỳ (nếu có, theo tháng hoặc năm), thời gian và lợi nhuận % (theo đơn vị thời gian đã chọn), bấm <b>Xem kết quả</b>. Chọn năm thì có dòng tổng mỗi năm, bấm vào để xem từng tháng. Mỗi lần tính được tự lưu, <b>Xem lịch sử</b> giữ 10 lần gần nhất trên máy này.'])
   +sec('Sao lưu dữ liệu là gì? (quan trọng)',['Là một file lưu <b>toàn bộ dữ liệu bạn đã nhập</b>: các khoản thu chi và ảnh, danh mục, ngân sách, sự kiện, kỷ niệm, danh mục đầu tư, lịch sử đầu tư, danh sách chờ đợi giá, cùng cài đặt (tên người dùng, ngôn ngữ, tiền tệ, Fox Premium…).','Không gồm mã PIN bảo mật, địa chỉ và mã bí mật đồng bộ (nhập lại khi cần).','Dữ liệu nằm trong máy này. Mất máy, xóa dữ liệu Safari hoặc <b>xóa biểu tượng trên màn hình chính</b> là mất dữ liệu nếu chưa sao lưu.','<b>Cài đặt → Sao lưu dữ liệu → Sao lưu ngay</b>: lưu file vào Tệp/iCloud hoặc gửi cho chính mình; trên máy tính file được tải về thư mục Tải xuống. Nên sao lưu ít nhất mỗi tuần; chọn Tự động sao lưu để ứng dụng nhắc.','<b>Khôi phục từ file sao lưu</b> sẽ <b>gộp</b> với dữ liệu hiện có, không xóa gì. Nếu file có kèm cài đặt, ứng dụng hỏi bạn có dùng cài đặt đó không. Đổi sang máy mới thì khôi phục từ file này.','<b>Xuất bảng tính Excel</b> chỉ để xem, lọc, tính toán trên máy tính; không dùng để khôi phục.'])
@@ -2411,8 +2468,8 @@ function bindPageInputs(p){
     if(invSt.cat==='saving'){[['ib','buy'],['ir','rate']].forEach(function(x){var el=$('#'+x[0]);el.oninput=function(ev){el.value=liveFmt(el.value,ev);invSt[x[1]]=el.value}});$('#ik').oninput=function(){this.value=this.value.replace(/\D/g,'').slice(0,3);invSt.term=this.value;$('#it').textContent=invPrev()}}
     else if(invSt.cat==='stock'){$('#ic').oninput=function(){this.value=this.value.toUpperCase().replace(/[^A-Z0-9._-]/g,'').slice(0,16);invSt.code=this.value};
     [['iq','qty'],['ib','buy'],['im','man']].forEach(function(x){var el=$('#'+x[0]);el.oninput=function(ev){el.value=liveFmt(el.value,ev);invSt[x[1]]=el.value;$('#it').textContent=invPrev()}})}
-    else{$('#iu').oninput=function(){invSt.unit=this.value};
-    [['iq','qty'],['ib','buy']].forEach(function(x){var el=$('#'+x[0]);el.oninput=function(ev){el.value=liveFmt(el.value,ev);invSt[x[1]]=el.value;$('#it').textContent=invPrev()}})}
+    else{$('#iu').oninput=function(){invSt.unit=this.value};if($('#ic'))$('#ic').oninput=function(){this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,10);invSt.code=this.value};
+    [['iq','qty'],['ib','buy'],['im','man']].forEach(function(x){var el=$('#'+x[0]);if(!el)return;el.oninput=function(ev){el.value=liveFmt(el.value,ev);invSt[x[1]]=el.value;$('#it').textContent=invPrev()}})}
   }else if(p.name==='fund'){
     $('#fc').oninput=function(){fundSt.code=this.value};
     [['fq','qty'],['fb','buy'],['fm','man']].forEach(function(x){var el=$('#'+x[0]);el.oninput=function(ev){el.value=liveFmt(el.value,ev);fundSt[x[1]]=el.value}});
@@ -2452,7 +2509,7 @@ function exportReport(){
   var H=110;lines.forEach(function(l){H+=l.k==='gap'?14:l.k==='h'?52:l.k==='sub'?44:40});H+=40;
   var cv=document.createElement('canvas');cv.width=W;cv.height=H;var x=cv.getContext('2d');
   x.fillStyle='#fff';x.fillRect(0,0,W,H);
-  x.fillStyle='#12306B';x.font='bold 34px -apple-system,Arial';x.textBaseline='alphabetic';x.fillText('Fox-finance'+(L.dev?' · '+L.dev:''),36,60);
+  x.fillStyle='#5B6B8C';x.font='bold 34px -apple-system,Arial';x.textBaseline='alphabetic';x.fillText('Fox-finance'+(L.dev?' · '+L.dev:''),36,60);
   var y=100;
   lines.forEach(function(l){
     if(l.k==='gap'){y+=14;return}
@@ -2518,7 +2575,7 @@ function exportCSV(v){
 }
 
 /* ---------- sao lưu ---------- */
-var LSKIP=['lock','lastBackup','remShown','askedAt','navAt','navErr','navOk','pxAt','pxErr','pxOk','pwAt','pwErr','pwOk'];
+var LSKIP=['lock','lastBackup','remShown','askedAt','navAt','navErr','navOk','pxAt','pxErr','pxOk','pwAt','pwErr','pwOk','mkAt','mkErr','mkOk'];
 function exportBackup(){
   var out={app:'chitieu',ver:2,exported:Date.now(),data:{},local:{}};
   Object.keys(L).forEach(function(k){if(LSKIP.indexOf(k)<0)out.local[k]=L[k]});
@@ -2760,14 +2817,15 @@ var ACT={
   termpick:function(t){invSt.term=t.dataset.v;renderPage()},
   invinc:function(t){var c=t.dataset.c,r=icRec(c);if(!r){r={id:'ic_'+c,kind:'icat',cat:c};D.assets.push(r)}r.deleted=false;r.inc=t.dataset.v==='1';touch(r);changed()},
   invsave:function(){
-    var sv=invSt.cat==='saving',st=invSt.cat==='stock',s=invSt,q=sv?1:parseNum(s.qty),b=parseNum(s.buy),nm=s.name.trim(),rt=sv?parseNum(s.rate):0,cd=st?s.code.trim().toUpperCase():'';
+    var sv=invSt.cat==='saving',st=invSt.cat==='stock',s=invSt,q=sv?1:parseNum(s.qty),b=parseNum(s.buy),nm=s.name.trim(),rt=sv?parseNum(s.rate):0,cd=(st||s.cat==='crypto')?s.code.trim().toUpperCase():'',mk2=s.cat==='gold'||s.cat==='crypto';
     if(st&&!nm)nm=cd;
     if(!nm){toast(sv?'Nhập tên ngân hàng':st?'Nhập mã hoặc tên':'Nhập tên tài sản');return}
     if(!q){toast('Nhập số lượng lớn hơn 0');return}
     if(!b){toast(sv?'Nhập số tiền lớn hơn 0':'Nhập giá mua lớn hơn 0');return}
-    var a=s.id&&D.assets.find(function(x){return x.id===s.id}),un=(sv||st)?'':s.unit.trim(),mn=st?parseNum(s.man):0;
-    if(a){var oq=sv?a.buy:a.qty,nq=sv?b:q;if(oq!==nq||a.buy!==b)flog('Sửa',st?(cd||nm):nm,0,0,'',s.cat,un,oq,nq);if(st){a.code=cd;a.man=mn}a.name=nm;a.qty=q;a.buy=b;a.unit=un;a.rate=rt;a.term=sv?(parseInt(s.term,10)||0):0;a.date=s.date;a.note=s.note.trim();touch(a)}
-    else{a={id:'i'+uid(),kind:'inv',cat:s.cat,name:nm,code:cd,man:mn,qty:q,unit:un,rate:rt,term:sv?(parseInt(s.term,10)||0):0,buy:b,date:s.date,note:s.note.trim()};touch(a);D.assets.push(a);flog(sv?'Gửi tiền':'Mua',st?(cd||nm):nm,sv?b:q,sv?0:b,'',s.cat,un)}
+    var a=s.id&&D.assets.find(function(x){return x.id===s.id}),un=(sv||st)?'':s.unit.trim(),mn=(st||mk2)?parseNum(s.man):0;
+    if(a){var oq=sv?a.buy:a.qty,nq=sv?b:q;if(oq!==nq||a.buy!==b)flog('Sửa',st?(cd||nm):nm,0,0,'',s.cat,un,oq,nq);if(st||mk2){a.code=cd;a.man=mn}if(s.cat==='gold')a.gk=s.gk||'bar';a.name=nm;a.qty=q;a.buy=b;a.unit=un;a.rate=rt;a.term=sv?(parseInt(s.term,10)||0):0;a.date=s.date;a.note=s.note.trim();touch(a)}
+    else{a={id:'i'+uid(),kind:'inv',cat:s.cat,name:nm,code:cd,man:mn,qty:q,unit:un,rate:rt,term:sv?(parseInt(s.term,10)||0):0,buy:b,date:s.date,note:s.note.trim()};if(s.cat==='gold')a.gk=s.gk||'bar';touch(a);D.assets.push(a);flog(sv?'Gửi tiền':'Mua',st?(cd||nm):nm,sv?b:q,sv?0:b,'',s.cat,un)}
+    if(mk2){L.mkAt=0;saveL()}
     V.inv.open=true;V.inv.cat=s.cat;V.inv.item=a.id;popPage();toast('Đã lưu tài sản');changed();
   },
   invdel:function(t){var a=D.assets.find(function(x){return x.id===t.dataset.id});if(!a)return;
@@ -2827,22 +2885,32 @@ var ACT={
   cdadd:function(){openPage('cd',null)},
   cdedit:function(t){openPage('cd',t.dataset.id)},
   cdsug:function(){openPage('cdsug',null)},
-  pxtest:function(){
-    var t=$('#xt').value.trim(),c=$('#xc').value.trim().toUpperCase(),r=$('#xr');if(!c)return;
-    if(t&&!(/^https:\/\//i.test(t)&&/\{ma\}/i.test(t))){r.textContent='Link phải bắt đầu bằng https:// và có {MA}';return}
-    r.textContent='Đang thử…';var u=priceUrl();
-    fetch(u+(u.indexOf('?')<0?'?':'&')+'stocks='+encodeURIComponent(c)+'&cc='+LOC.cc+'&nc=1'+(t?'&tpl='+encodeURIComponent(t):'')).then(function(x){return x.json()}).then(function(j){
-      var x=j.stocks&&j.stocks[c];
-      if(!(j.sv>=5))r.textContent='Cần cập nhật GiaQuy.gs lên bản mới (Triển khai > Phiên bản mới)';
-      else if(x&&x.p>0&&t&&x.linkErr)r.textContent='Không đọc được giá từ link này: '+x.linkErr+' · Yahoo: '+fmtP(x.p);
-      else if(x&&x.p>0)r.textContent='Giá đọc được: '+fmtP(x.p)+' · '+(x.src||'')+(x.date?' · '+dshort(x.date):'');
-      else r.textContent='Không đọc được giá từ link này'+(j.errs&&j.errs[c]?': '+j.errs[c]:'');
+  pxtest:function(t){
+    var k=t.dataset.src,tp=$('#xt_'+k).value.trim(),c=$('#xc_'+k).value.trim().toUpperCase(),r=$('#xr_'+k);if(!c)return;
+    if(tp&&!(/^https:\/\//i.test(tp)&&/\{ma\}/i.test(tp))){r.textContent='Link phải bắt đầu bằng https:// và có {MA}';return}
+    r.textContent='Đang thử…';var u=priceUrl(),q,cc=(isVN()?'':'&cc='+LOC.cc);
+    if(k==='fund')q='codes='+encodeURIComponent(c)+cc+(tp?'&tpl='+encodeURIComponent(tp):'');
+    else if(k==='stock')q='stocks='+encodeURIComponent(c)+cc+(tp?'&tpl='+encodeURIComponent(tp):'');
+    else if(k==='gold')q='mk=1&gold='+(isVN()?(c==='RING'?'ring':'bar'):'w')+'&cur='+LOC.cur+'&cc='+LOC.cc+(tp?'&gtpl='+encodeURIComponent(tp):'');
+    else q='mk=1&crypto='+encodeURIComponent(c)+'&cur='+LOC.cur+'&cc='+LOC.cc+(tp?'&ctpl='+encodeURIComponent(tp):'');
+    fetch(u+(u.indexOf('?')<0?'?':'&')+q+'&nc=1').then(function(x){return x.json()}).then(function(j){
+      var need=(k==='gold'||k==='crypto'||(isVN()&&tp))?6:5;
+      if(!(j.sv>=need)){r.textContent='Cần cập nhật GiaQuy.gs lên bản mới (Triển khai > Phiên bản mới)';return}
+      var x=k==='fund'?(j.navs&&j.navs[c]&&{p:j.navs[c].nav,src:j.navs[c].src,date:j.navs[c].date}):k==='stock'?(j.stocks&&j.stocks[c]):k==='gold'?(j.gold&&j.gold[Object.keys(j.gold)[0]]):(j.crypto&&j.crypto[c]);
+      var e=j.errs&&(j.errs[c]||j.errs['crypto:'+c]||j.errs['gold:bar']||j.errs['gold:ring']||j.errs['gold:w']);
+      if(x&&x.p>0)r.textContent='Giá đọc được: '+fmtP(x.p)+(k==='gold'?(isVN()?' / lượng':' / oz'):'')+' · '+(x.src||'')+(x.date?' · '+dshort(x.date):'')+(x.linkErr?' (link lỗi, đang dùng nguồn mặc định: '+x.linkErr+')':'');
+      else r.textContent='Không đọc được giá'+(e?': '+e:'');
     }).catch(function(){r.textContent='Không kết nối được máy chủ'});
   },
+  mkupd:function(){fetchMk(true)},
+  gkpick:function(t){invSt.gk=t.dataset.v;renderPage()},
+  unitpick:function(t){invSt.unit=t.dataset.v;renderPage()},
+  pxdef:function(t){var k=t.dataset.src,s2=Object.assign({},L.src||{});if(!L.src&&L.pxTpl){s2.fund=L.pxTpl;s2.stock=L.pxTpl}delete s2[k];L.src=s2;delete L.pxTpl;L.pxAt=0;L.navAt=0;L.mkAt=0;saveL();toast('Đã về nguồn mặc định');renderPage()},
   pxsave:function(){
-    var t=$('#xt').value.trim();
-    if(t&&!(/^https:\/\//i.test(t)&&/\{ma\}/i.test(t))){toast('Link phải bắt đầu bằng https:// và có {MA}');return}
-    if(t)L.pxTpl=t;else delete L.pxTpl;L.pxAt=0;L.navAt=0;saveL();toast(t?'Đã lưu nguồn giá':'Đã xóa link, dùng lại Yahoo');closePage();
+    var s2={},bad='';
+    SRCN.forEach(function(x){var v=$('#xt_'+x[0]).value.trim();if(v&&!(/^https:\/\//i.test(v)&&/\{ma\}/i.test(v)))bad=x[1];if(v)s2[x[0]]=v});
+    if(bad){toast(bad+': link phải bắt đầu bằng https:// và có {MA}');return}
+    L.src=s2;delete L.pxTpl;L.pxAt=0;L.navAt=0;L.mkAt=0;saveL();toast('Đã lưu nguồn giá');closePage();
   },
   cdyear:function(t){cdY=+t.dataset.y;renderPage()},
   cdrepk:function(t){cdSt.rep=t.dataset.r;renderPage()},
